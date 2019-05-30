@@ -12,53 +12,116 @@ public class RhoTest {
 
 	/** Test swimming to a fixed rho (cylinder) */
 	public static void rhoTest() {
+		
+		long seed = 5459363;
 		System.out.println("TEST swimming to a fixed rho (cylinder)");
 		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
 		
-		int charge = 1;
 		double xo = 0; // m
 		double yo = 0; // m
 		double zo = 0; // m
-		double p = 2; // GeV
-		double theta = 60; //deg
-		double phi = 0; //deg
-		double stepsize = 0.5e-03;  //m
+		double stepsize = 5e-04;  //m
 		
 		double maxPathLength = 2; //m
-		double accuracy = 5e-4; //m
-		double fixedRho = 0.30;  //m 
+		double accuracy = 5e-3; //m
+		double fixedRho = 0.26;  //m 
 		
-		int num = 100;
+		int num = 10000;
+	//	num = 5770;
 		
 		SwimResult uniform = new SwimResult(6);
 		SwimResult adaptive = new SwimResult(6);
 		
 		//generate some random initial conditions
-		Random rand = new Random();
+		Random rand = new Random(seed);
 		
-//		double p[] = new double[num];
-//		double theta[] = new double[num];
+		int charge[] = new int[num];
+		double p[] = new double[num];
+		double theta[] = new double[num];
+		double phi[] = new double[num];
+	//	int adaptStatus[] = new int[num];
+		
+		for (int i = 0; i < num; i++) {
+			charge[i] = (rand.nextDouble() < 0.5) ? -1 : 1;
+			p[i] = 1 + 8*rand.nextDouble();
+			theta[i] = 45 + 25*rand.nextDouble();
+			phi[i] = 360*rand.nextDouble();
+//			p[i] = 0.25 + 0.75*rand.nextDouble();
+//			theta[i] = 40 + 30*rand.nextDouble();
+//			phi[i] = 360*rand.nextDouble();
+		}
 		
 		
-
+		long time;
+        double rhof;
+		double sum;
+		double delMax;
 		Swimmer swimmer = new Swimmer();
-		int ns;
+		int badStatusCount;
 		
-		//adaptive step
+		// adaptive step
 		try {
-			swimmer.swimRho(charge, xo, yo, zo, p, theta, phi, fixedRho, accuracy, maxPathLength, stepsize, Swimmer.CLAS_Tolerance, adaptive);
-			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), p, adaptive.getUf(), null);
+			
+			sum = 0;
+			badStatusCount = 0;
+			delMax = Double.NEGATIVE_INFINITY;
+			time = System.currentTimeMillis();
+
+			for (int i = 0; i < num; i++) {
+				swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, maxPathLength,
+						stepsize, Swimmer.CLAS_Tolerance, adaptive);
+
+				rhof = Math.hypot(adaptive.getUf()[0], adaptive.getUf()[1]);
+				double dd = Math.abs(fixedRho - rhof);
+				delMax = Math.max(delMax, dd);
+				sum += dd;
+				
+	//			adaptStatus[i] = adaptive.getStatus();
+				
+				if (adaptive.getStatus() != 0) {
+					badStatusCount += 1;
+	//				num = i+1;
+				}
+			}
+			
+			time = System.currentTimeMillis() - time;
+			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), p[num - 1],
+					adaptive.getUf(), null);
+			System.out.println(String.format("Adaptive time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
 			System.out.println("Adaptive Path length = " + adaptive.getFinalS() + " m\n\n");
+
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
 
-		
-		//uniform step
-		swimmer.swimRho(charge, xo, yo, zo, p, theta, phi, fixedRho, accuracy, maxPathLength, stepsize, uniform);
-		
-		SwimTest.printSummary("Fixed Rho,  Fixed step size", uniform.getNStep(), p, uniform.getUf(), null);
+		// uniform step
+		time = System.currentTimeMillis();
+
+		sum = 0;
+		badStatusCount = 0;
+
+		delMax = Double.NEGATIVE_INFINITY;
+		for (int i = 0; i < num; i++) {
+			swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, maxPathLength, stepsize, uniform);			
+			rhof = Math.hypot(uniform.getUf()[0], uniform.getUf()[1]);
+			double dd = Math.abs(fixedRho - rhof);
+			delMax = Math.max(delMax, dd);
+			sum += dd;
+			
+//			if (uniform.getStatus() != adaptStatus[i]) {
+//				System.out.println("Status differes for i = " + i);
+//			}
+
+			if (uniform.getStatus() != 0) {
+				badStatusCount += 1;
+			}
+		}
+		time = System.currentTimeMillis() - time;
+		SwimTest.printSummary("Fixed Rho,  Uniform step size", uniform.getNStep(), p[num - 1],
+				uniform.getUf(), null);
+		System.out.println(String.format("Uniform time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
 		System.out.println("Uniform Path length = " + uniform.getFinalS() + " m\n\n");
+		
 		
 		
 		
