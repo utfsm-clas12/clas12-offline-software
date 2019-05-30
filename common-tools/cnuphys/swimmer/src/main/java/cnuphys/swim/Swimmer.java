@@ -365,7 +365,6 @@ public final class Swimmer {
 		double finalPathLength = 0;
 		int ns = 0;
 
-
 		while ((count < maxtry) && (del > accuracy)) {
 			
 			uf = result.getUf();

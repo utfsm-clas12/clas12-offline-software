@@ -22,12 +22,12 @@ public class RhoTest {
 		double zo = 0; // m
 		double stepsize = 5e-04;  //m
 		
-		double maxPathLength = 2; //m
+		double maxPathLength = 3; //m
 		double accuracy = 5e-3; //m
 		double fixedRho = 0.26;  //m 
 		
 		int num = 10000;
-	//	num = 5770;
+//		num = 4697;
 		
 		SwimResult uniform = new SwimResult(6);
 		SwimResult adaptive = new SwimResult(6);
@@ -39,16 +39,16 @@ public class RhoTest {
 		double p[] = new double[num];
 		double theta[] = new double[num];
 		double phi[] = new double[num];
-	//	int adaptStatus[] = new int[num];
+		int adaptStatus[] = new int[num];
 		
 		for (int i = 0; i < num; i++) {
 			charge[i] = (rand.nextDouble() < 0.5) ? -1 : 1;
-			p[i] = 1 + 8*rand.nextDouble();
-			theta[i] = 45 + 25*rand.nextDouble();
-			phi[i] = 360*rand.nextDouble();
-//			p[i] = 0.25 + 0.75*rand.nextDouble();
-//			theta[i] = 40 + 30*rand.nextDouble();
+//			p[i] = 1 + 8*rand.nextDouble();
+//			theta[i] = 45 + 25*rand.nextDouble();
 //			phi[i] = 360*rand.nextDouble();
+			p[i] = 0.25 + 0.75*rand.nextDouble();
+			theta[i] = 40 + 30*rand.nextDouble();
+			phi[i] = 360*rand.nextDouble();
 		}
 		
 		
@@ -76,7 +76,7 @@ public class RhoTest {
 				delMax = Math.max(delMax, dd);
 				sum += dd;
 				
-	//			adaptStatus[i] = adaptive.getStatus();
+				adaptStatus[i] = adaptive.getStatus();
 				
 				if (adaptive.getStatus() != 0) {
 					badStatusCount += 1;
@@ -108,9 +108,9 @@ public class RhoTest {
 			delMax = Math.max(delMax, dd);
 			sum += dd;
 			
-//			if (uniform.getStatus() != adaptStatus[i]) {
-//				System.out.println("Status differes for i = " + i);
-//			}
+			if (uniform.getStatus() != adaptStatus[i]) {
+				System.out.println("Status differs for i = " + i + "     adaptiveStat = " + adaptStatus[i] + "    uniform status = " + uniform.getStatus());
+			}
 
 			if (uniform.getStatus() != 0) {
 				badStatusCount += 1;
