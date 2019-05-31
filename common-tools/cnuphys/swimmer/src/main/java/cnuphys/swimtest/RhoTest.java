@@ -27,7 +27,7 @@ public class RhoTest {
 		double fixedRho = 0.26;  //m 
 		
 		int num = 10000;
-//		num = 4697;
+//		num = 516;
 		
 		SwimResult uniform = new SwimResult(6);
 		SwimResult adaptive = new SwimResult(6);
