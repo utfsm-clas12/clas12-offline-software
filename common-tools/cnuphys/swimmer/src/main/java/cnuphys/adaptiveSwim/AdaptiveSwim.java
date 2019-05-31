@@ -13,7 +13,7 @@ public class AdaptiveSwim {
 	private static final double _maxStepSize = 0.4;
 
 
-	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+	public static void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			final double targetRho, double accuracy, double s0, double sf, double h, double eps, SwimResult result)
 			throws RungeKuttaException {
 		
@@ -36,12 +36,12 @@ public class AdaptiveSwim {
 		double py = sinTheta*Math.sin(phiRad); //py/p
 		double pz = Math.cos(thetaRad); //pz/p
 		
-		uf[0] = xo;
-		uf[1] = yo;
-		uf[2] = xo;
-		uf[3] = px;
-		uf[4] = py;
-		uf[5] = pz;
+		uo[0] = xo;
+		uo[1] = yo;
+		uo[2] = xo;
+		uo[3] = px;
+		uo[4] = py;
+		uo[5] = pz;
 		
 		//swimmer with current field
 		FieldProbe probe = FieldProbe.factory();

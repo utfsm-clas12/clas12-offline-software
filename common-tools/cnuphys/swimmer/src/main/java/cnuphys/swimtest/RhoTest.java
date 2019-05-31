@@ -2,6 +2,7 @@ package cnuphys.swimtest;
 
 import java.util.Random;
 
+import cnuphys.adaptiveSwim.AdaptiveSwim;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -31,6 +32,7 @@ public class RhoTest {
 		
 		SwimResult uniform = new SwimResult(6);
 		SwimResult adaptive = new SwimResult(6);
+		SwimResult newadaptive = new SwimResult(6);
 		
 		//generate some random initial conditions
 		Random rand = new Random(seed);
@@ -93,6 +95,43 @@ public class RhoTest {
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
 		}
+		
+		// NEW adaptive step
+		try {
+			
+			sum = 0;
+			badStatusCount = 0;
+			delMax = Double.NEGATIVE_INFINITY;
+			time = System.currentTimeMillis();
+
+			for (int i = 0; i < num; i++) {
+				AdaptiveSwim.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, 0, maxPathLength, stepsize, 1.0e-6, newadaptive);
+				swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, maxPathLength,
+						stepsize, Swimmer.CLAS_Tolerance, adaptive);
+
+				rhof = Math.hypot(adaptive.getUf()[0], adaptive.getUf()[1]);
+				double dd = Math.abs(fixedRho - rhof);
+				delMax = Math.max(delMax, dd);
+				sum += dd;
+				
+				adaptStatus[i] = adaptive.getStatus();
+				
+				if (adaptive.getStatus() != 0) {
+					badStatusCount += 1;
+	//				num = i+1;
+				}
+			}
+			
+			time = System.currentTimeMillis() - time;
+			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), p[num - 1],
+					adaptive.getUf(), null);
+			System.out.println(String.format("Adaptive time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
+			System.out.println("Adaptive Path length = " + adaptive.getFinalS() + " m\n\n");
+
+		} catch (RungeKuttaException e) {
+			e.printStackTrace();
+		}
+
 
 		// uniform step
 		time = System.currentTimeMillis();
