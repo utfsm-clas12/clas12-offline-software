@@ -13,7 +13,7 @@ public class DefaultRhoStopper implements IStopper {
 	private double _targetRho;
 	private double _totS; //total path length
 	private double _prevS; //previous step path length
-	private double _maxS;
+	private double _sMax;
 	private double _accuracy;
 	private double[] _uf; //final state vector
 	private double _s0; //starting path length
@@ -45,7 +45,7 @@ public class DefaultRhoStopper implements IStopper {
 		_targetRho = targetRho;
 		_totS = 0;
 		_prevS = 0;
-		_maxS = sMax;
+		_sMax = sMax;
 		_accuracy = accuracy;
 		_startSign = sign(rho0);
 	}
@@ -75,7 +75,7 @@ public class DefaultRhoStopper implements IStopper {
 		}
 
 		//stop (and backup/reset to prev) if we crossed the boundary or exceeded smax
-		if ((getFinalT() > _maxS) || (sign(currentRho) != _startSign)) {
+		if ((getFinalT() > _sMax) || (sign(currentRho) != _startSign)) {
 			_totS = _prevS;
 			return true;
 		}

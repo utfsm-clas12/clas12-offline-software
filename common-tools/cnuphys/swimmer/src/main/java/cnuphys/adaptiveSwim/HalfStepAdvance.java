@@ -4,8 +4,8 @@ import cnuphys.rk4.IDerivative;
 
 public class HalfStepAdvance implements IAdaptiveAdvance {
 
-	private static final double _safety = 0.9;
-	private static final double _pgrow = 0.20;
+	private static final double _safety = 0.95;
+	private static final double _pgrow = -0.20;
 	private static final double _pshrink = -0.25;
 	private static final double _errControl = 1.0e-4;
 	private static final double _correctFifth = 1. / 15;
@@ -56,7 +56,14 @@ public class HalfStepAdvance implements IAdaptiveAdvance {
 
 			if (errMax > 1) {
 				//get smaller h, then try again since done = false
-				h = _safety * h * Math.pow(errMax, _pshrink);
+				
+				double shrinkFact = _safety * Math.pow(errMax, _pshrink);
+				
+				//no more than a factor of 4
+	//			shrinkFact = Math.max(shrinkFact, 0.25);
+				h = h * shrinkFact;
+				
+
 			} else { // can grow
 				double hnew;
 				if (errMax > _errControl) {
@@ -64,6 +71,7 @@ public class HalfStepAdvance implements IAdaptiveAdvance {
 				} else {
 					hnew = 4 * h;
 				}
+				
 				result.setHNew(hnew);
 				result.setHUsed(h);
 				result.setSNew(s + h);

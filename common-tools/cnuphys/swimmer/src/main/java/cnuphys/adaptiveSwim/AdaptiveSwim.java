@@ -1,5 +1,6 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.rk4.IDerivative;
 import cnuphys.rk4.IRkListener;
@@ -9,7 +10,14 @@ import cnuphys.swim.SwimResult;
 
 public class AdaptiveSwim {
 	
-	private static final double _minStepSize = 1.0e-6;
+	// Min momentum to swim in GeV/c
+	public static final double MINMOMENTUM = 5e-05;
+
+	//tolerance when swimmimg to a max path length
+	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
+
+	
+	private static final double _minStepSize = 1.0e-5;
 	private static final double _maxStepSize = 0.4;
 
 
@@ -17,16 +25,6 @@ public class AdaptiveSwim {
 			final double targetRho, double accuracy, double s0, double sf, double h, double eps, SwimResult result)
 			throws RungeKuttaException {
 		
-		//create a stopper
-		AdaptiveRhoStopper stopper = new AdaptiveRhoStopper(s0, targetRho, accuracy);
-		
-		//use a half-step advancer
-		HalfStepAdvance advance = new HalfStepAdvance();
-		
-		//create the initial state vector and space for final
-		double uo[] = new double[6];
-		double uf[] = new double[6];
-
 		// set u to the starting state vector
 		double thetaRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
@@ -36,21 +34,93 @@ public class AdaptiveSwim {
 		double py = sinTheta*Math.sin(phiRad); //py/p
 		double pz = Math.cos(thetaRad); //pz/p
 		
-		uo[0] = xo;
-		uo[1] = yo;
-		uo[2] = xo;
-		uo[3] = px;
-		uo[4] = py;
-		uo[5] = pz;
+		double uf[] = result.getUf();
+		uf[0] = xo;
+		uf[1] = yo;
+		uf[2] = xo;
+		uf[3] = px;
+		uf[4] = py;
+		uf[5] = pz;
+
+		if (momentum < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim (A)");
+			result.setNStep(0);
+			result.setFinalS(0);
+			result.setStatus(-2);
+			return;
+		}
 		
+		//cutoff value of s with tolerance 
+		double sCutoff = sf - SMAX_TOLERANCE;
+		
+		double del = Double.POSITIVE_INFINITY;
+		int maxtry = 11;
+		int count = 0;
+		double sCurrent = 0;
+		int ns = 0;
+
 		//swimmer with current field
 		FieldProbe probe = FieldProbe.factory();
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, probe);
 
-		
-		//call the driver
-		int ns = driver(uo, s0, sf, h, deriv, stopper, null, advance, eps, uf);
+		AdaptiveRhoStopper stopper = new AdaptiveRhoStopper(uf.length, targetRho, accuracy);
 
+		//use a half-step advancer
+		HalfStepAdvance advance = new HalfStepAdvance();
+
+		while ((count < maxtry) && (del > accuracy)) {
+			
+			uf = result.getUf();
+			if (count > 0) {
+				px = uf[3];
+				py = uf[4];
+				pz = uf[5];
+				theta = FastMath.acos2Deg(pz);
+				phi = FastMath.atan2Deg(py, px);
+			}
+			
+			double rhoCurr = FastMath.hypot(uf[0], uf[1]);
+			
+			stopper.set(sCurrent, sf, rhoCurr);
+			
+			if ((sCurrent + h) > sf) {
+				h = (sf-sCurrent)/4;
+				if (h < 0) {
+					break;
+				}
+			}
+
+			ns += driver(uf, 0, sf-sCurrent, h, deriv, stopper, null, advance, eps, uf);
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			
+			sCurrent = stopper.getFinalS();
+			
+			double rholast = FastMath.hypot(result.getUf()[0], result.getUf()[1]);
+			del = Math.abs(rholast - targetRho);
+			
+			if ((sCurrent) > sCutoff) {
+//				System.out.println(" s final   " + (finalPathLength + stepSize) +  "  rhoLast = " + rholast);
+				break;
+			}
+			
+			count++;
+			h = Math.min(h, (sf-sCurrent)/4);
+//			stepSize /= 2;
+
+
+		}
+		
+		
+		result.setFinalS(sCurrent);
+		result.setUf(uf);
+		result.setNStep(ns);
+
+		if (del < accuracy) {
+			result.setStatus(0);
+		} else {
+			result.setStatus(-1);
+		}
 	}
 	
 	
@@ -128,7 +198,8 @@ public class AdaptiveSwim {
 			s = result.getSNew();
 			
 			if (Math.abs(h) < _minStepSize) {
-				throw (new RungeKuttaException("Step size too small in AdaptiveSwim driver"));
+				h = _minStepSize;
+//				throw (new RungeKuttaException("Step size too small in AdaptiveSwim driver"));
 			}
 			else {
 				nstep++;

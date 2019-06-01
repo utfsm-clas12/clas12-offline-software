@@ -420,7 +420,7 @@ public final class Swimmer {
 			
 
 			if ((sFinal + stepSize) > sMax) {
-				stepSize = (sMax-sFinal)/2;
+				stepSize = (sMax-sFinal)/4;
 				if (stepSize < 0) {
 					break;
 				}
@@ -443,7 +443,9 @@ public final class Swimmer {
 			}
 			
 			count++;
-			stepSize /= 2;
+			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+//			stepSize /= 2;
+			
 		} // while
 
 		result.setNStep(ns);
@@ -565,7 +567,9 @@ public final class Swimmer {
 			}
 						
 			count++;
-			stepSize /= 2;
+			stepSize = Math.min(stepSize, (sMax-sFinal)/4);
+
+//			stepSize /= 2;
 
 		} // while
 

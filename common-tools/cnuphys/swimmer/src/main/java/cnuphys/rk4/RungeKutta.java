@@ -539,6 +539,7 @@ public class RungeKutta {
 		}
 
 		int nstep = 0;
+//		System.err.println("------   h = " + h + "   so = " + to + "   sf = " + tf);
 		while (t < tf) {
 			// use derivs at previous t
 			deriv.derivative(t, yt, dydt);
@@ -557,6 +558,8 @@ public class RungeKutta {
 
 			if (decreaseStep) {
 				h = h / 2;
+				
+//				System.err.println("ADAPT SHRINK h = " + h);
 				if (h < _minStepSize) {
 					throw (new RungeKuttaException("Step size too small in Runge Kutta driver (A)"));
 				}
@@ -598,6 +601,7 @@ public class RungeKutta {
 				// System.err.println("HEY MAN (A) h = " + h);
 				h *= HGROWTH;
 				h = Math.min(h, _maxStepSize);
+//				System.err.println("ADAPT GROW h = " + h);
 
 			} // max error < tolerance
 		}
