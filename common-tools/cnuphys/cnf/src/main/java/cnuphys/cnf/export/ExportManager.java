@@ -62,6 +62,10 @@ public class ExportManager implements IEventListener {
 
 			if (okToExport) {
 				EventManager.getInstance().rewindFile();
+				
+				//hack to get first
+				EventManager.getInstance().reloadCurrentEvent();
+				
 				EventManager.getInstance().streamToEndOfFile();
 			}
 			else {

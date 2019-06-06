@@ -56,7 +56,7 @@ public class ColumnsDialog extends JDialog implements ListSelectionListener {
 	}
 	
 	private void addCenter() {
-		_columnsPanel = new SelectColumnsPanel("Choose a single bank, then multiple columns");
+		_columnsPanel = new SelectColumnsPanel("Choose a single bank, then multiple columns. Drag to reorder columns.");
 		_columnsPanel.addBankColumnListener(this);
 		add(_columnsPanel, BorderLayout.CENTER);
 		

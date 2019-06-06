@@ -36,9 +36,12 @@ public class CSVExporter extends AExporter {
 	public String getMenuName() {
 		return "CSV";
 	}
+	
+	private int count;
 
 	@Override
 	public boolean prepareToExport() {
+		count = 0;
 		Log.getInstance().info("CSV export requested");
 		
 		//reset
@@ -111,6 +114,11 @@ public class CSVExporter extends AExporter {
 
 	@Override
 	public void nextEvent(DataEvent event) {
+		count++;
+		if ((count % 1000) == 0) {
+			System.err.println("Export count: " + count);
+		}
+		
 		if ((_columnData != null) && !_columnData.isEmpty()) {
 			
 			if (_first) {

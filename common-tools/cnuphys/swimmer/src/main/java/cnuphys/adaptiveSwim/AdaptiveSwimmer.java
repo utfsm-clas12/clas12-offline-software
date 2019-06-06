@@ -2,13 +2,24 @@ package cnuphys.adaptiveSwim;
 
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
+import cnuphys.magfield.IMagField;
+import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.IDerivative;
 import cnuphys.rk4.IRkListener;
-import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultDerivative;
 import cnuphys.swim.SwimResult;
 
-public class AdaptiveSwim {
+/**
+ * A swimmer for adaptive stepsize integrators. These swimmers are not thread safe. Every thread that needs an
+ * AdaptiveSwimmer should create its own.
+ * 
+ * @author heddle
+ *
+ */
+public class AdaptiveSwimmer {
+	
+	//result status values
+	
 	
 	// Min momentum to swim in GeV/c
 	public static final double MINMOMENTUM = 5e-05;
@@ -16,16 +27,73 @@ public class AdaptiveSwim {
 	//tolerance when swimmimg to a max path length
 	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
 
-	
+	//step size limits in meters
 	private static final double _minStepSize = 1.0e-5;
 	private static final double _maxStepSize = 0.4;
 
 
-	public static void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			final double targetRho, double accuracy, double s0, double sf, double h, double eps, SwimResult result)
-			throws RungeKuttaException {
+	// The magnetic field probe.
+	// NOTE: the method of interest in FieldProbe takes a position in cm
+	// and returns a field in kG.This swim package works in SI (meters and
+	// Tesla.) So care has to be taken when using the field object
+	
+	private FieldProbe _probe;
+
+	/**
+	 * Create a swimmer using the current active field
+	 */
+	public AdaptiveSwimmer() {
+		// make a probe using the current active field
+		_probe = FieldProbe.factory();
+	}
+
+	/**
+	 * Create a swimmer specific to a magnetic field
+	 * 
+	 * @param magneticField the magnetic field
+	 */
+	public AdaptiveSwimmer(MagneticField magneticField) {
+		_probe = FieldProbe.factory(magneticField);
+	}
+
+	/**
+	 * Create a swimmer specific to a magnetic field
+	 * 
+	 * @param magneticField the magnetic field
+	 */
+	public AdaptiveSwimmer(IMagField magneticField) {
+		_probe = FieldProbe.factory(magneticField);
+	}
+	
+
+	/**
+	 * Swim using the current active field
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param targetRho the target rho in meters
+	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param s0 the initial value of the independent variable (pathlength) in meters.
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimRho(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			final double targetRho, final double accuracy, final double s0, final double sf, final double h0, final double eps, SwimResult result)
+			throws AdaptiveSwimException {
 		
-		// set u to the starting state vector
+		//the dimension for this swimmer is 6
+		int nDim = 6;
+		
+		//running stepsize
+		double h = h0;
+		
 		double thetaRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
 		double sinTheta = Math.sin(thetaRad);
@@ -34,6 +102,7 @@ public class AdaptiveSwim {
 		double py = sinTheta*Math.sin(phiRad); //py/p
 		double pz = Math.cos(thetaRad); //pz/p
 		
+		// set uf (int the result container) to the starting state vector
 		double uf[] = result.getUf();
 		uf[0] = xo;
 		uf[1] = yo;
@@ -43,10 +112,12 @@ public class AdaptiveSwim {
 		uf[5] = pz;
 
 		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum fixed rho swim (A)");
+			System.err.println("Skipping low momentum fixed rho swim");
 			result.setNStep(0);
 			result.setFinalS(0);
-			result.setStatus(-2);
+			
+			//give this a result status of -2
+			result.setStatus(SwimResult.SWIM_BELOW_MIN_P);
 			return;
 		}
 		
@@ -59,14 +130,15 @@ public class AdaptiveSwim {
 		double sCurrent = 0;
 		int ns = 0;
 
-		//swimmer with current field
-		FieldProbe probe = FieldProbe.factory();
-		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, probe);
+		//create the derivative object
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
 
+		//the stopper will stop if we come within range of the target rho or if the
+		//pathlength reaches sf
 		AdaptiveRhoStopper stopper = new AdaptiveRhoStopper(uf.length, targetRho, accuracy);
 
 		//use a half-step advancer
-		HalfStepAdvance advance = new HalfStepAdvance();
+		RK4HalfStepAdvance advancer = new RK4HalfStepAdvance();
 
 		while ((count < maxtry) && (del > accuracy)) {
 			
@@ -78,7 +150,7 @@ public class AdaptiveSwim {
 				theta = FastMath.acos2Deg(pz);
 				phi = FastMath.atan2Deg(py, px);
 			}
-			
+
 			double rhoCurr = FastMath.hypot(uf[0], uf[1]);
 			
 			stopper.set(sCurrent, sf, rhoCurr);
@@ -90,9 +162,16 @@ public class AdaptiveSwim {
 				}
 			}
 
-			ns += driver(uf, 0, sf-sCurrent, h, deriv, stopper, null, advance, eps, uf);
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target rho
 			
-			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, result.getUf().length);
+			try {
+				ns += driver(uf, 0, sf - sCurrent, h, deriv, stopper, null, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+			
+			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, nDim);
 			
 			sCurrent = stopper.getFinalS();
 			
@@ -100,14 +179,11 @@ public class AdaptiveSwim {
 			del = Math.abs(rholast - targetRho);
 			
 			if ((sCurrent) > sCutoff) {
-//				System.out.println(" s final   " + (finalPathLength + stepSize) +  "  rhoLast = " + rholast);
 				break;
 			}
 			
 			count++;
 			h = Math.min(h, (sf-sCurrent)/4);
-//			stepSize /= 2;
-
 
 		}
 		
@@ -116,10 +192,12 @@ public class AdaptiveSwim {
 		result.setUf(uf);
 		result.setNStep(ns);
 
+		//if we are at the target rho, the status = 0
+		//if we have reached sf, the status = -1
 		if (del < accuracy) {
-			result.setStatus(0);
+			result.setStatus(SwimResult.SWIM_SUCCESS);
 		} else {
-			result.setStatus(-1);
+			result.setStatus(SwimResult.SWIM_TARGET_MISSED);
 		}
 	}
 	
@@ -139,7 +217,7 @@ public class AdaptiveSwim {
 	 * @param s0           the initial value of the independent variable, e.g.,
 	 *                     time.
 	 * @param sf           the maximum value of the independent variable.
-	 * @param h            the step size
+	 * @param h0           the step size at the start
 	 * @param deriv        the derivative computer (interface). This is where the
 	 *                     problem specificity resides.
 	 * @param stopper      if not <code>null</code> will be used to exit the
@@ -151,18 +229,17 @@ public class AdaptiveSwim {
 	 * @param uf           will hold final state vector
 	 *                     
 	 * @return the number of steps used.
-	 * @throw(new RungeKuttaException("Step size too small in Runge Kutta driver"
-	 *            ));
+	 * @throw AdaptiveSwimException
 	 */
-	public static int driver(double uo[], double s0, double sf, double h, IDerivative deriv, IAdaptiveStopper stopper,
-			IRkListener listener, IAdaptiveAdvance advancer, double eps, double uf[]) throws RungeKuttaException {
+	private int driver(double uo[], final double s0, final double sf, double h, IDerivative deriv, IAdaptiveStopper stopper,
+			IRkListener listener, IAdaptiveAdvance advancer, double eps, double uf[]) throws AdaptiveSwimException {
 
 		// the dimensionality of the problem. E.., 6 if (x, y, z, vx, vy, vz)
 		int nDim = uo.length;
 		
 		//running val of independent variable
 		double s = s0;
-		
+				
 		// ut is the running value of the state vector,
 		// typically [x, y, z, px/p, py/p, pz/p]
 		double ut[] = new double[nDim];
@@ -199,7 +276,8 @@ public class AdaptiveSwim {
 			
 			if (Math.abs(h) < _minStepSize) {
 				h = _minStepSize;
-//				throw (new RungeKuttaException("Step size too small in AdaptiveSwim driver"));
+//				System.out.println("Stepsize TOO SMALL: " + h);
+//				throw (new AdaptiveSwimException("Step size too small in AdaptiveSwim driver"));
 			}
 			else {
 				nstep++;
@@ -219,13 +297,11 @@ public class AdaptiveSwim {
 		}
 		
 		return nstep;
-		
-
 	}
 
 
 	//sign function
-	private static int sign(double v) {
+	private int sign(double v) {
 		if (v > 0) {
 			return 1;
 		}
@@ -235,5 +311,5 @@ public class AdaptiveSwim {
 		return 0;
 	}
 	
-   		
+
 }

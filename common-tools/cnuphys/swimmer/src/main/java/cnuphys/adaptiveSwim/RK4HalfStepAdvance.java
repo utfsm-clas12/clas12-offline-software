@@ -2,7 +2,12 @@ package cnuphys.adaptiveSwim;
 
 import cnuphys.rk4.IDerivative;
 
-public class HalfStepAdvance implements IAdaptiveAdvance {
+/**
+ * This is a 4th order RungeKutta advancer
+ * @author heddle
+ *
+ */
+public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 
 	private static final double _safety = 0.95;
 	private static final double _pgrow = -0.20;

@@ -161,7 +161,7 @@ public class SelectPanel extends JPanel implements ListSelectionListener {
 			_clist.setList(_blist.getSelectedValue());
 		}
 
-		String cname = _clist.getSelectedValue();
+		String cname = (String) _clist.getSelectedValue();
 
 		if ((bname == null) || (cname == null)) {
 			_columnName.setText(null);

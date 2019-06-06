@@ -13,7 +13,7 @@ import org.jlab.io.base.DataDescriptor;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.cnf.alldata.DataManager;
 
-public class ColumnList extends JList<String> {
+public class ColumnList extends DragDropList {
 
 	private static Dimension _size = new Dimension(220, 250);
 
@@ -49,7 +49,15 @@ public class ColumnList extends JList<String> {
 			if (dd != null) {
 				String columns[] = dd.getEntryList();
 				Arrays.sort(columns);
-				setListData(columns);
+				
+				DefaultListModel model = (DefaultListModel)(this.getModel());
+				model.clear();
+				for (String cn : columns) {
+					model.addElement(cn);
+				}
+				
+				
+	//			setListData(columns);
 			} else {
 				clear();
 			}

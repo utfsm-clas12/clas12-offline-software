@@ -2,7 +2,8 @@ package cnuphys.swimtest;
 
 import java.util.Random;
 
-import cnuphys.adaptiveSwim.AdaptiveSwim;
+import cnuphys.adaptiveSwim.AdaptiveSwimException;
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
@@ -26,7 +27,7 @@ public class RhoTest {
 		
 		double maxPathLength = 3; //m
 		double accuracy = 5e-3; //m
-		double fixedRho = 0.26;  //m 
+		double fixedRho = 0.30;  //m 
 		
 		int num = 10000;
 //		num = 10000;
@@ -61,6 +62,7 @@ public class RhoTest {
 		double sum;
 		double delMax;
 		Swimmer swimmer = new Swimmer();
+		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
 		int badStatusCount;
 		
 		long nStepTotal = 0;
@@ -116,7 +118,7 @@ public class RhoTest {
 
 			for (int i = n0; i < num; i++) {
 
-				AdaptiveSwim.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, 0, maxPathLength, stepsizeAdaptive, eps, newadaptive);
+				adaptiveSwimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, 0, maxPathLength, stepsizeAdaptive, eps, newadaptive);
 
 				rhof = Math.hypot(newadaptive.getUf()[0], newadaptive.getUf()[1]);
 				double dd = Math.abs(fixedRho - rhof);
@@ -142,40 +144,40 @@ public class RhoTest {
 			System.out.println("NEW Adaptive Avg NS = " +  (int)(((double)nStepTotal)/num));
 			System.out.println("NEW Adaptive Path length = " + newadaptive.getFinalS() + " m\n\n");
 
-		} catch (RungeKuttaException e) {
+		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
 
 
 		// uniform step
-		time = System.currentTimeMillis();
-
-		sum = 0;
-		badStatusCount = 0;
-		nStepTotal = 0;
-		delMax = Double.NEGATIVE_INFINITY;
-		for (int i = n0; i < num; i++) {
-			swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, maxPathLength, stepsizeUniform, uniform);			
-			rhof = Math.hypot(uniform.getUf()[0], uniform.getUf()[1]);
-			double dd = Math.abs(fixedRho - rhof);
-			delMax = Math.max(delMax, dd);
-			sum += dd;
-			
-			if (uniform.getStatus() != adaptStatus[i]) {
-				System.out.println("Status differs for i = " + i + "     adaptiveStat = " + adaptStatus[i] + "    uniform status = " + uniform.getStatus());
-			}
-
-			nStepTotal += uniform.getNStep();
-			if (uniform.getStatus() != 0) {
-				badStatusCount += 1;
-			}
-		}
-		time = System.currentTimeMillis() - time;
-		SwimTest.printSummary("Fixed Rho,  Uniform step size", uniform.getNStep(), p[num - 1],
-				uniform.getUf(), null);
-		System.out.println(String.format("Uniform time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
-		System.out.println("Uniform Avg NS = " +  (int)(((double)nStepTotal)/num));
-		System.out.println("Uniform Path length = " + uniform.getFinalS() + " m\n\n");
+//		time = System.currentTimeMillis();
+//
+//		sum = 0;
+//		badStatusCount = 0;
+//		nStepTotal = 0;
+//		delMax = Double.NEGATIVE_INFINITY;
+//		for (int i = n0; i < num; i++) {
+//			swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], fixedRho, accuracy, maxPathLength, stepsizeUniform, uniform);			
+//			rhof = Math.hypot(uniform.getUf()[0], uniform.getUf()[1]);
+//			double dd = Math.abs(fixedRho - rhof);
+//			delMax = Math.max(delMax, dd);
+//			sum += dd;
+//			
+//			if (uniform.getStatus() != adaptStatus[i]) {
+//				System.out.println("Status differs for i = " + i + "     adaptiveStat = " + adaptStatus[i] + "    uniform status = " + uniform.getStatus());
+//			}
+//
+//			nStepTotal += uniform.getNStep();
+//			if (uniform.getStatus() != 0) {
+//				badStatusCount += 1;
+//			}
+//		}
+//		time = System.currentTimeMillis() - time;
+//		SwimTest.printSummary("Fixed Rho,  Uniform step size", uniform.getNStep(), p[num - 1],
+//				uniform.getUf(), null);
+//		System.out.println(String.format("Uniform time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
+//		System.out.println("Uniform Avg NS = " +  (int)(((double)nStepTotal)/num));
+//		System.out.println("Uniform Path length = " + uniform.getFinalS() + " m\n\n");
 		
 		
 		
