@@ -2,6 +2,7 @@ package cnuphys.swim;
 
 import java.util.ArrayList;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
@@ -366,7 +367,7 @@ public final class Swimmer {
 	
 	
 	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			final double fixedRho, double accuracy, double sMax, double stepSize, double relTolerance[], SwimResult result)
+			final double fixedRho, double accuracy, double sMax, double stepSize, double relTolerance[], AdaptiveSwimResult result)
 			throws RungeKuttaException {
 
 		// set u to the starting state vector
@@ -486,7 +487,7 @@ public final class Swimmer {
 	 * @param result upon return, results from the swim including the final state vector [x, y, z, px/p, py/p, pz/p]
 	 */
 	public void swimRho(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
-			final double fixedRho, final double accuracy, double sMax, double stepSize, SwimResult result) {
+			final double fixedRho, final double accuracy, double sMax, double stepSize, AdaptiveSwimResult result) {
 
 		
 		// set u to the starting state vector

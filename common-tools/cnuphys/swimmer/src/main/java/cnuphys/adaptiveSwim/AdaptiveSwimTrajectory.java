@@ -1,4 +1,5 @@
-package cnuphys.swim;
+package cnuphys.adaptiveSwim;
+
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import cnuphys.lund.LundId;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.RotatedCompositeProbe;
+import cnuphys.swim.Bxdl;
 
 /**
  * Combines a generated particle record with a path (trajectory). A trajectory
@@ -19,7 +21,7 @@ import cnuphys.magfield.RotatedCompositeProbe;
  * 
  */
 @SuppressWarnings("serial")
-public class SwimTrajectory extends ArrayList<double[]> {
+public class AdaptiveSwimTrajectory extends ArrayList<double[]> {
 
 	// the particle that we swam
 	private GeneratedParticleRecord _genPartRec;
@@ -39,14 +41,14 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	/** index for the z component (m) */
 	public static final int Z_IDX = 2;
 
-	/** index for the px/p direction cosine */
-	public static final int DIRCOSX_IDX = 3;
+	/** index for the tx = px/p direction cosine */
+	public static final int TX_IDX = 3;
 
-	/** index for the py/p direction cosine */
-	public static final int DIRCOSY_IDX = 4;
+	/** index for the ty = py/p direction cosine */
+	public static final int TY_IDX = 4;
 
-	/** index for the pz/p direction cosine */
-	public static final int DIRCOSZ_IDX = 5;
+	/** index for the tz pz/p direction cosine */
+	public static final int TZ_IDX = 5;
 
 	/** index for the accumulated path length (m) */
 	public static final int PATHLEN_IDX = 6;
@@ -63,7 +65,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	/**
 	 * Create a swim trajectory with no initial content
 	 */
-	public SwimTrajectory() {
+	public AdaptiveSwimTrajectory() {
 		super();
 	}
 	
@@ -80,7 +82,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * @param theta    initial polar angle in degrees
 	 * @param phi      initial azimuthal angle in degrees
 	 */
-	public SwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi) {
+	public AdaptiveSwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi) {
 		this(charge, xo, yo, zo, momentum, theta, phi, 1);
 
 		double thetRad = Math.toRadians(theta);
@@ -111,7 +113,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * @param phi             initial azimuthal angle in degrees
 	 * @param initialCapacity the initial capacity of the trajectory list
 	 */
-	public SwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
+	public AdaptiveSwimTrajectory(int charge, double xo, double yo, double zo, double momentum, double theta, double phi,
 			int initialCapacity) {
 		this(new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi), initialCapacity);
 	}
@@ -120,7 +122,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * @param genPartRec      the generated particle record
 	 * @param initialCapacity the initial capacity of the trajectory list
 	 */
-	public SwimTrajectory(GeneratedParticleRecord genPartRec, int initialCapacity) {
+	public AdaptiveSwimTrajectory(GeneratedParticleRecord genPartRec, int initialCapacity) {
 		super(initialCapacity);
 		_genPartRec = genPartRec;
 	}
@@ -204,6 +206,19 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		int dim = u.length;
 		double ucopy[] = new double[dim];
 		System.arraycopy(u, 0, ucopy, 0, dim);
+		return super.add(ucopy);
+	}
+	
+	
+	public boolean add(double u[], double s) {
+		if (u == null) {
+			return false;
+		}
+		
+		int dim = u.length;
+		double ucopy[] = new double[dim+1];
+		System.arraycopy(u, 0, ucopy, 0, dim);
+		ucopy[dim] = s;
 		return super.add(ucopy);
 	}
 	
@@ -487,6 +502,19 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		return z;
 	}
 	
+	/**
+	 * Get the total path length in meters
+	 * @return the total path length
+	 */
+	public double getTotalS() {
+		if (isEmpty()) {
+			return 0;
+		}
+		else {
+			return this.lastElement()[PATHLEN_IDX];
+		}
+	}
+	
 	public void dumpInCylindrical(PrintStream ps) {
 		ps.println("Number of trajectory points: " + size());
 		
@@ -498,7 +526,8 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			double z = u[2];
 			double rho = FastMath.hypot(x, y);
 			double phi = FastMath.atan2Deg(y, x);
-			String str = String.format("[%d] phi (deg):  %-7.2f,  rho (m): %-8.3f,   z (m): %-8.3f", i,  phi, rho, z);
+			double s = u[6];
+			String str = String.format("[%d] phi (deg):  %-7.3f  rho (m): %-8.4f   z (m): %-8.4f   s (m): %-9.5f", i,  phi, rho, z, s);
 			ps.println(str);
 		}
 	}

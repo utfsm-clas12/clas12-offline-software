@@ -11,18 +11,21 @@ public class AdaptiveRhoStopper implements IAdaptiveStopper {
 
 	private int _dim;   //dimension of our system
 	private double _sMax; //max path length meters
+	private double[] _u0; //initial state vector
 	private double[] _uf; //final state vector
 
 	//is the starting rho bigger or smaller than the target
 	private int _startSign;
-	
+		
 	/**
 	 * Rho  stopper  (does check max path length)
+	 * @param u0              initial state vector
 	 * @param targetRho       stopping rho in meters
 	 * @param accuracy        the accuracy in meters
 	 */
-	public AdaptiveRhoStopper(int dim, double targetRho, double accuracy) {
-		_dim = dim;
+	public AdaptiveRhoStopper(final double[] u0, double targetRho, double accuracy) {
+		_u0 = u0;
+		_dim = _u0.length;
 		_targetRho = targetRho;
 		_accuracy = accuracy;
 		_uf = new double[_dim];
@@ -44,6 +47,7 @@ public class AdaptiveRhoStopper implements IAdaptiveStopper {
 		_startSign = sign(rho0);
 	}
 	
+	int count = 0;
 	@Override
 	public boolean stopIntegration(double s, double[] u) {
 		
@@ -89,7 +93,7 @@ public class AdaptiveRhoStopper implements IAdaptiveStopper {
 		}
 		return _uf;
 	}
-
+	
 	//get the sign based on the current rho
 	private int sign(double currentRho) {
 		return ((currentRho < _targetRho) ? -1 : 1);

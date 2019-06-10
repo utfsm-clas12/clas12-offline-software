@@ -7,7 +7,7 @@ import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.IDerivative;
 import cnuphys.rk4.IRkListener;
 import cnuphys.swim.DefaultDerivative;
-import cnuphys.swim.SwimResult;
+import cnuphys.swim.SwimTrajectory;
 
 /**
  * A swimmer for adaptive stepsize integrators. These swimmers are not thread safe. Every thread that needs an
@@ -19,6 +19,20 @@ import cnuphys.swim.SwimResult;
 public class AdaptiveSwimmer {
 	
 	//result status values
+	/** The swim was a success */
+	public static final int SWIM_SUCCESS = 0;
+	
+	/** A target, such as a target rho or z, was not reached
+	 * before the swim was stopped for some other reason
+	 */
+	public static final int SWIM_TARGET_MISSED = -1;
+	
+	/**
+	 * A swim was requested for a particle with extremely low
+	 * momentum
+	 */
+	public static final int SWIM_BELOW_MIN_P = -2;
+	
 	
 	
 	// Min momentum to swim in GeV/c
@@ -28,8 +42,8 @@ public class AdaptiveSwimmer {
 	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
 
 	//step size limits in meters
-	private static final double _minStepSize = 1.0e-5;
-	private static final double _maxStepSize = 0.4;
+	private static final double _minStepSize = 1.0e-5; // meters
+	private static final double _maxStepSize = 0.4; //meters
 
 
 	// The magnetic field probe.
@@ -85,7 +99,7 @@ public class AdaptiveSwimmer {
 	 * @throws AdaptiveSwimException
 	 */
 	public void swimRho(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
-			final double targetRho, final double accuracy, final double s0, final double sf, final double h0, final double eps, SwimResult result)
+			final double targetRho, final double accuracy, final double s0, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
 		
 		//the dimension for this swimmer is 6
@@ -93,6 +107,11 @@ public class AdaptiveSwimmer {
 		
 		//running stepsize
 		double h = h0;
+		
+		//clear old trajectory
+		if (result.getTrajectory() != null) {
+			result.getTrajectory().clear();
+		}
 		
 		double thetaRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
@@ -117,7 +136,7 @@ public class AdaptiveSwimmer {
 			result.setFinalS(0);
 			
 			//give this a result status of -2
-			result.setStatus(SwimResult.SWIM_BELOW_MIN_P);
+			result.setStatus(SWIM_BELOW_MIN_P);
 			return;
 		}
 		
@@ -135,21 +154,14 @@ public class AdaptiveSwimmer {
 
 		//the stopper will stop if we come within range of the target rho or if the
 		//pathlength reaches sf
-		AdaptiveRhoStopper stopper = new AdaptiveRhoStopper(uf.length, targetRho, accuracy);
+		AdaptiveRhoStopper stopper = new AdaptiveRhoStopper(uf, targetRho, accuracy);
 
 		//use a half-step advancer
-		RK4HalfStepAdvance advancer = new RK4HalfStepAdvance();
+		RK4HalfStepAdvance advancer = new RK4HalfStepAdvance(6);
 
 		while ((count < maxtry) && (del > accuracy)) {
 			
 			uf = result.getUf();
-			if (count > 0) {
-				px = uf[3];
-				py = uf[4];
-				pz = uf[5];
-				theta = FastMath.acos2Deg(pz);
-				phi = FastMath.atan2Deg(py, px);
-			}
 
 			double rhoCurr = FastMath.hypot(uf[0], uf[1]);
 			
@@ -166,7 +178,7 @@ public class AdaptiveSwimmer {
 			//we'll get stopped earlier because we reach the target rho
 			
 			try {
-				ns += driver(uf, 0, sf - sCurrent, h, deriv, stopper, null, advancer, eps, uf);
+				ns += driver(uf, sf - sCurrent, h, deriv, stopper, null, advancer, eps, uf, result.getTrajectory());
 			} catch (AdaptiveSwimException e) {
 				//put in a message that allows us to reproduce the track
 			}
@@ -174,17 +186,15 @@ public class AdaptiveSwimmer {
 			System.arraycopy(stopper.getFinalU(), 0, result.getUf(), 0, nDim);
 			
 			sCurrent = stopper.getFinalS();
-			
-			double rholast = FastMath.hypot(result.getUf()[0], result.getUf()[1]);
-			del = Math.abs(rholast - targetRho);
-			
 			if ((sCurrent) > sCutoff) {
 				break;
 			}
 			
+			double rholast = FastMath.hypot(result.getUf()[0], result.getUf()[1]);
+			del = Math.abs(rholast - targetRho);
+						
 			count++;
 			h = Math.min(h, (sf-sCurrent)/4);
-
 		}
 		
 		
@@ -195,9 +205,9 @@ public class AdaptiveSwimmer {
 		//if we are at the target rho, the status = 0
 		//if we have reached sf, the status = -1
 		if (del < accuracy) {
-			result.setStatus(SwimResult.SWIM_SUCCESS);
+			result.setStatus(SWIM_SUCCESS);
 		} else {
-			result.setStatus(SwimResult.SWIM_TARGET_MISSED);
+			result.setStatus(SWIM_TARGET_MISSED);
 		}
 	}
 	
@@ -214,8 +224,6 @@ public class AdaptiveSwimmer {
 	 * 
 	 * @param uo           initial values. Probably something like (xo, yo, zo, vxo,
 	 *                     vyo, vzo).
-	 * @param s0           the initial value of the independent variable, e.g.,
-	 *                     time.
 	 * @param sf           the maximum value of the independent variable.
 	 * @param h0           the step size at the start
 	 * @param deriv        the derivative computer (interface). This is where the
@@ -231,14 +239,21 @@ public class AdaptiveSwimmer {
 	 * @return the number of steps used.
 	 * @throw AdaptiveSwimException
 	 */
-	private int driver(double uo[], final double s0, final double sf, double h, IDerivative deriv, IAdaptiveStopper stopper,
-			IRkListener listener, IAdaptiveAdvance advancer, double eps, double uf[]) throws AdaptiveSwimException {
-
+	private int driver(double uo[], final double sf, double h, IDerivative deriv, IAdaptiveStopper stopper,
+			IRkListener listener, IAdaptiveAdvance advancer, double eps, double uf[], AdaptiveSwimTrajectory trajectory) throws AdaptiveSwimException {
+		
 		// the dimensionality of the problem. E.., 6 if (x, y, z, vx, vy, vz)
 		int nDim = uo.length;
 		
+		//if traj not null, add the first point
+		
+		double s0 = (trajectory == null) ? 0 : trajectory.getTotalS();
+		if ((trajectory != null) && trajectory.isEmpty()) {
+			trajectory.add(uo, 0);
+		}
+		
 		//running val of independent variable
-		double s = s0;
+		double s = 0;
 				
 		// ut is the running value of the state vector,
 		// typically [x, y, z, px/p, py/p, pz/p]
@@ -251,19 +266,10 @@ public class AdaptiveSwimmer {
 		System.arraycopy(uo, 0, uf, 0, nDim);
 		
 		int nstep = 0;
-		
-		//we are done when this sign changes (or if the stopper
-		//stops us first)
-		int startSign = sign(sf-s0);
-		
-		//no integration range??
-		if (startSign == 0) {
-			return 0;
-		}
-		
+				
 		AdaptiveStepResult result = new AdaptiveStepResult();
 		
-		while (sign(sf-s) == startSign) {
+		while (s < sf) {
 			
 			System.arraycopy(uf, 0, ut, 0, nDim);
 
@@ -274,13 +280,17 @@ public class AdaptiveSwimmer {
 			h = result.getHNew();
 			s = result.getSNew();
 			
+			
 			if (Math.abs(h) < _minStepSize) {
 				h = _minStepSize;
-//				System.out.println("Stepsize TOO SMALL: " + h);
+				System.err.println("Stepsize TOO SMALL: " + h);
 //				throw (new AdaptiveSwimException("Step size too small in AdaptiveSwim driver"));
 			}
 			else {
 				nstep++;
+				if (trajectory != null) {
+					trajectory.add(uf, s0 + s);
+				}
 				
 				// someone listening?
 				if (listener != null) {

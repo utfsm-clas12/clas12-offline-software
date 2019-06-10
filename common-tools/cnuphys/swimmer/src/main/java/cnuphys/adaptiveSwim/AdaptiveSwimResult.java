@@ -1,20 +1,8 @@
-package cnuphys.swim;
+package cnuphys.adaptiveSwim;
 
-public class SwimResult {
-	
-	/** The swim was a success */
-	public static final int SWIM_SUCCESS = 0;
-	
-	/** A target, such as a target rho or z, was not reached
-	 * before the swim was stopped for some other reason
-	 */
-	public static final int SWIM_TARGET_MISSED = -1;
-	
-	/**
-	 * A swim was requested for a particle with extremely low
-	 * momentum
-	 */
-	public static final int SWIM_BELOW_MIN_P = -2;
+import cnuphys.swim.SwimTrajectory;
+
+public class AdaptiveSwimResult {
 	
 	//the final state vector
 	private double[] _uf;
@@ -28,12 +16,28 @@ public class SwimResult {
 	//a status, one of the class constants
 	private int _status;
 	
+	//optionally holds a trajectory of [x, y, z, tx, ty, tz] (coords in meters)
+	private AdaptiveSwimTrajectory _trajectory;
+	
 	/**
 	 * Create a container for the swim results
 	 * @param dim the dimension of the system (probably 6)
+	 * @param saveTrajectory if true, we will save the trajectory
 	 */
-	public SwimResult(int dim) {
+	public AdaptiveSwimResult(int dim, boolean saveTrajectory) {
 		_uf = new double[dim];
+		
+		if (saveTrajectory) {
+			_trajectory = new AdaptiveSwimTrajectory();
+		}
+	}
+	
+	/**
+	 * Get the trajectory
+	 * @return the trajectory (might be <code>null</code>
+	 */
+	public AdaptiveSwimTrajectory getTrajectory() {
+		return _trajectory;
 	}
 	
 	/**
