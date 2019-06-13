@@ -1,5 +1,6 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.adaptiveSwim.geometry.Plane;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
@@ -34,6 +35,8 @@ public class AdaptiveSwimmer {
 	// Min momentum to swim in GeV/c
 	public static final double MINMOMENTUM = 5e-05;
 
+	//max tries to reset if swam passed a target
+	private static final int MAXTRIES = 11;
 
 
 	// The magnetic field probe.
@@ -115,7 +118,7 @@ public class AdaptiveSwimmer {
 	}
 	
 	/**
-	 * Swim using the current active field
+	 * Swim to a fixed z using the current active field
 	 * @param charge in integer units of e
 	 * @param xo the x vertex position in meters
 	 * @param yo the y vertex position in meters
@@ -138,25 +141,19 @@ public class AdaptiveSwimmer {
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
 				
-		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum fixed rho swim");
-			result.setNStep(0);
-			result.setFinalS(0);
-			
-			//give this a result status of -2
-			result.setStatus(SWIM_BELOW_MIN_P);
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
 			return;
 		}
 				
 		double del = Double.POSITIVE_INFINITY;
-		int maxtry = 11;
 		int count = 0;
 		int ns = 0;
 
 		//create the derivative object
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
 
-		//the stopper will stop if we come within range of the target rho or if the
+		//the stopper will stop if we come within range of the target z or if the
 		//pathlength reaches sf
 		AdaptiveZStopper stopper = new AdaptiveZStopper(uf, sf, targetZ, accuracy, result.getTrajectory());
 
@@ -164,7 +161,7 @@ public class AdaptiveSwimmer {
 	//	RK4HalfStepAdvance advancer = new RK4HalfStepAdvance(6);
 
 		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
-		while (count < maxtry) {
+		while (count < MAXTRIES) {
 			
 			if ((stopper.getS() + h) > stopper.getSmax()) {
 				h = stopper.getSmax()-stopper.getS();
@@ -174,7 +171,7 @@ public class AdaptiveSwimmer {
 			}
 
 			//this will try to swim us the rest of the way to sf, but hopefully
-			//we'll get stopped earlier because we reach the target rho
+			//we'll get stopped earlier because we reach the target z
 			
 			try {
 				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
@@ -213,7 +210,7 @@ public class AdaptiveSwimmer {
 	}
 
 	/**
-	 * Swim using the current active field
+	 * Swim to a fixed rho using the current active field
 	 * @param charge in integer units of e
 	 * @param xo the x vertex position in meters
 	 * @param yo the y vertex position in meters
@@ -236,18 +233,12 @@ public class AdaptiveSwimmer {
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
 				
-		if (momentum < MINMOMENTUM) {
-			System.err.println("Skipping low momentum fixed rho swim");
-			result.setNStep(0);
-			result.setFinalS(0);
-			
-			//give this a result status of -2
-			result.setStatus(SWIM_BELOW_MIN_P);
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
 			return;
 		}
 		
 		double del = Double.POSITIVE_INFINITY;
-		int maxtry = 11;
 		int count = 0;
 		int ns = 0;
 
@@ -262,7 +253,7 @@ public class AdaptiveSwimmer {
 	//	RK4HalfStepAdvance advancer = new RK4HalfStepAdvance(6);
 
 		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
-		while (count < maxtry) {
+		while (count < MAXTRIES) {
 			
 			if ((stopper.getS() + h) > stopper.getSmax()) {
 				h = (stopper.getSmax()-stopper.getS())/4;
@@ -286,6 +277,95 @@ public class AdaptiveSwimmer {
 			
 			double rholast = FastMath.hypot(stopper.getU()[0], stopper.getU()[1]);
 			del = Math.abs(rholast - targetRho);
+			
+			//succeed?
+			if (del < accuracy) {
+				break;
+			}
+						
+			count++;
+			
+			h /= 2;
+		}
+		
+		result.setFinalS(stopper.getS());
+		stopper.copy(stopper.getU(), uf);
+		result.setNStep(ns);
+
+		//if we are at the target rho, the status = 0
+		//if we have reached sf, the status = -1
+		if (del < accuracy) {
+			result.setStatus(SWIM_SUCCESS);
+		} else {
+			result.setStatus(SWIM_TARGET_MISSED);
+		}
+	}
+
+
+	/**
+	 * Swim to a plane using the current active field
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param targetPlane the target plane
+	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimPlane(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			Plane targetPlane, final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
+			throws AdaptiveSwimException {
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		double h = h0; //running stepsize
+				
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int count = 0;
+		int ns = 0;
+
+		//create the derivative object
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
+
+		//the stopper will stop if we come within range of the target plane or the
+		//pathlength reaches sf
+		AdaptivePlaneStopper stopper = new AdaptivePlaneStopper(uf, sf, targetPlane, accuracy, result.getTrajectory());
+
+		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
+		while (count < MAXTRIES) {
+			
+			if ((stopper.getS() + h) > stopper.getSmax()) {
+				h = (stopper.getSmax()-stopper.getS())/4;
+				if (h < 0) {
+					break;
+				}
+			}
+
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target plane
+			
+			try {
+				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+						
+			if ((stopper.getS()) > stopper.getSmax()) {
+				break;
+			}
+			
+			del = Math.abs(targetPlane.distance(stopper.getU()[0], stopper.getU()[1], stopper.getU()[2]));
 			
 			//succeed?
 			if (del < accuracy) {
@@ -346,6 +426,23 @@ public class AdaptiveSwimmer {
 		uf[5] = tz;
 
 		return uf;
+	}
+	
+	//allows us to bail if below min momentum
+	private boolean belowMinimumMomentum(double p, AdaptiveSwimResult result) {
+		if (p < MINMOMENTUM) {
+			System.err.println("Skipping low momentum fixed rho swim");
+			result.setNStep(0);
+			result.setFinalS(0);
+			
+			//give this a result status of -2
+			result.setStatus(SWIM_BELOW_MIN_P);
+			return true;
+		}
+		else {
+			return false;
+		}
+
 	}
 
 }

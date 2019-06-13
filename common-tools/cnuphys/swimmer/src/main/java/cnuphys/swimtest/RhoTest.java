@@ -4,6 +4,9 @@ import java.util.Random;
 
 import cnuphys.adaptiveSwim.AdaptiveSwimException;
 import cnuphys.adaptiveSwim.AdaptiveSwimmer;
+import cnuphys.adaptiveSwim.geometry.Plane;
+import cnuphys.adaptiveSwim.geometry.Point;
+import cnuphys.adaptiveSwim.geometry.Vector;
 import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
@@ -18,7 +21,7 @@ public class RhoTest {
 		
 		long seed = 9459363;
 		System.out.println("TEST swimming to a fixed rho (cylinder)");
-		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
+//		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
 		
 		double xo = 0; // m
 		double yo = 0; // m
@@ -75,87 +78,87 @@ public class RhoTest {
 		long nStepTotal = 0;
 		
 //		 adaptive step
-		try {
-			
-			sum = 0;
-			badStatusCount = 0;
-			delMax = Double.NEGATIVE_INFINITY;
-			time = System.currentTimeMillis();
-
-			
-			for (int i = n0; i < num; i++) {
-				swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], rhoTarg, accuracy, maxPathLength,
-						stepsizeAdaptive, Swimmer.CLAS_Tolerance, adaptive);
-
-				rhof = Math.hypot(adaptive.getUf()[0], adaptive.getUf()[1]);
-				double dd = Math.abs(rhoTarg - rhof);
-				delMax = Math.max(delMax, dd);
-				sum += dd;
-				
-				adaptStatus[i] = adaptive.getStatus();
-				nStepTotal += adaptive.getNStep();
-				
-				nsMax = Math.max(nsMax, adaptive.getNStep());
-				
-				if (adaptive.getStatus() != 0) {
-					badStatusCount += 1;
-	//				num = i+1;
-				}
-			}
-			
-			time = System.currentTimeMillis() - time;
-			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), p[num - 1],
-					adaptive.getUf(), null);
-			System.out.println(String.format("Adaptive time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
-			System.out.println("Adaptive Avg NS = " +  (int)(((double)nStepTotal)/num) + "   MAX NS: " + nsMax);
-			System.out.println("Adaptive Path length = " + adaptive.getFinalS() + " m\n\n");
-
-		} catch (RungeKuttaException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		// NEW adaptive step no traj
-		try {
-			nsMax = 0;
-			sum = 0;
-			badStatusCount = 0;
-			delMax = Double.NEGATIVE_INFINITY;
-			nStepTotal = 0;
-			
-			time = System.currentTimeMillis();
-			for (int i = n0; i < num; i++) {
-				
-				adaptiveSwimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], rhoTarg, accuracy, maxPathLength, stepsizeAdaptive, eps, newadaptive);
-
-				rhof = Math.hypot(newadaptive.getUf()[0], newadaptive.getUf()[1]);
-				double dd = Math.abs(rhoTarg - rhof);
-				delMax = Math.max(delMax, dd);
-				sum += dd;
-				
-				if (newadaptive.getStatus() != adaptStatus[i]) {
-					System.out.println("Adaptive v. NEW Adaptive Status differs for i = " + i + "     adaptiveStat = " + adaptStatus[i]
-							+ "    NEW adaptive status = " + newadaptive.getStatus());
-				}
-				
-				nStepTotal += newadaptive.getNStep();
-				nsMax = Math.max(nsMax, newadaptive.getNStep());
-				
-				if (newadaptive.getStatus() != 0) {
-					badStatusCount += 1;
-				}
-			}
-			
-			time = System.currentTimeMillis() - time;
-			SwimTest.printSummary("Fixed Rho,  NEW Adaptive step size (NO TRAJ)", newadaptive.getNStep(), p[num - 1],
-					newadaptive.getUf(), null);
-			System.out.println(String.format("NEW Adaptive time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
-			System.out.println("NEW Adaptive Avg NS = " +  (int)(((double)nStepTotal)/num) + "   MAX NS: " + nsMax);
-			System.out.println("NEW Adaptive Path length = " + newadaptive.getFinalS() + " m\n\n");
-
-		} catch (AdaptiveSwimException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			
+//			sum = 0;
+//			badStatusCount = 0;
+//			delMax = Double.NEGATIVE_INFINITY;
+//			time = System.currentTimeMillis();
+//
+//			
+//			for (int i = n0; i < num; i++) {
+//				swimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], rhoTarg, accuracy, maxPathLength,
+//						stepsizeAdaptive, Swimmer.CLAS_Tolerance, adaptive);
+//
+//				rhof = Math.hypot(adaptive.getUf()[0], adaptive.getUf()[1]);
+//				double dd = Math.abs(rhoTarg - rhof);
+//				delMax = Math.max(delMax, dd);
+//				sum += dd;
+//				
+//				adaptStatus[i] = adaptive.getStatus();
+//				nStepTotal += adaptive.getNStep();
+//				
+//				nsMax = Math.max(nsMax, adaptive.getNStep());
+//				
+//				if (adaptive.getStatus() != 0) {
+//					badStatusCount += 1;
+//	//				num = i+1;
+//				}
+//			}
+//			
+//			time = System.currentTimeMillis() - time;
+//			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), p[num - 1],
+//					adaptive.getUf(), null);
+//			System.out.println(String.format("Adaptive time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
+//			System.out.println("Adaptive Avg NS = " +  (int)(((double)nStepTotal)/num) + "   MAX NS: " + nsMax);
+//			System.out.println("Adaptive Path length = " + adaptive.getFinalS() + " m\n\n");
+//
+//		} catch (RungeKuttaException e) {
+//			e.printStackTrace();
+//			System.exit(1);
+//		}
+//		
+//		// NEW adaptive step no traj
+//		try {
+//			nsMax = 0;
+//			sum = 0;
+//			badStatusCount = 0;
+//			delMax = Double.NEGATIVE_INFINITY;
+//			nStepTotal = 0;
+//			
+//			time = System.currentTimeMillis();
+//			for (int i = n0; i < num; i++) {
+//				
+//				adaptiveSwimmer.swimRho(charge[i], xo, yo, zo, p[i], theta[i], phi[i], rhoTarg, accuracy, maxPathLength, stepsizeAdaptive, eps, newadaptive);
+//
+//				rhof = Math.hypot(newadaptive.getUf()[0], newadaptive.getUf()[1]);
+//				double dd = Math.abs(rhoTarg - rhof);
+//				delMax = Math.max(delMax, dd);
+//				sum += dd;
+//				
+//				if (newadaptive.getStatus() != adaptStatus[i]) {
+//					System.out.println("Adaptive v. NEW Adaptive Status differs for i = " + i + "     adaptiveStat = " + adaptStatus[i]
+//							+ "    NEW adaptive status = " + newadaptive.getStatus());
+//				}
+//				
+//				nStepTotal += newadaptive.getNStep();
+//				nsMax = Math.max(nsMax, newadaptive.getNStep());
+//				
+//				if (newadaptive.getStatus() != 0) {
+//					badStatusCount += 1;
+//				}
+//			}
+//			
+//			time = System.currentTimeMillis() - time;
+//			SwimTest.printSummary("Fixed Rho,  NEW Adaptive step size (NO TRAJ)", newadaptive.getNStep(), p[num - 1],
+//					newadaptive.getUf(), null);
+//			System.out.println(String.format("NEW Adaptive time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d", ((double)time)/1000., sum/num, delMax, badStatusCount));
+//			System.out.println("NEW Adaptive Avg NS = " +  (int)(((double)nStepTotal)/num) + "   MAX NS: " + nsMax);
+//			System.out.println("NEW Adaptive Path length = " + newadaptive.getFinalS() + " m\n\n");
+//
+//		} catch (AdaptiveSwimException e) {
+//			e.printStackTrace();
+//		}
 //		
 //		// NEW adaptive step with traj
 //		try {
@@ -233,16 +236,16 @@ public class RhoTest {
 		
 		
 //		System.out.println("\nSet up backwards swim test");
-//		xo = 0;
-//		yo = 0;
-//		zo = 0;
-//		double zTarg = 5.75; //m
-//		double thetV = 15;
-//		double phiV = 0;
-//		double pV = 2;
-//		int Q = 1;
-//		accuracy = 1.0e-5; //m
-//		maxPathLength = 8; //m
+		xo = 0;
+		yo = 0;
+		zo = 0;
+		double zTarg = 5.75; //m
+		double thetV = 15;
+		double phiV = 0;
+		double pV = 2;
+		int Q = 1;
+		accuracy = 1.0e-5; //m
+		maxPathLength = 8; //m
 //		
 //		try {
 //			adaptiveSwimmer.swimZ(Q, xo, yo, zo, pV, thetV, phiV, zTarg, accuracy, maxPathLength, stepsizeAdaptive, eps, newadaptiveplus);
@@ -305,25 +308,55 @@ public class RhoTest {
 //		}
 //
 //		
-//		//test basic pathlength swimmer to be used by ced
-//		
-//		xo = 0;
-//		yo = 0;
-//		zo = 0;
-//		maxPathLength = 6.190316459121694; 
-//		thetV = 15;
-//		phiV = 0;
-//		try {
-//			adaptiveSwimmer.swim(Q, xo, yo, zo, pV, thetV, phiV, maxPathLength, stepsizeAdaptive, eps, newadaptiveS);
-//			SwimTest.printSummary("Base S swimmer,  NEW Adaptive step size (WITH TRAJ)", newadaptiveS.getNStep(), pV,
-//					newadaptiveS.getUf(), null);
-//			System.out.println("Adaptive S Path length = " + newadaptiveS.getFinalS() + " m\n\n");
-//		} catch (AdaptiveSwimException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		
+		//test basic pathlength swimmer to be used by ced
+		
+		xo = 0;
+		yo = 0;
+		zo = 0;
+		Q = 1;
+		maxPathLength = 5.001537404349655; 
+		thetV = 15;
+		phiV = 0;
+		try {
+			adaptiveSwimmer.swim(Q, xo, yo, zo, pV, thetV, phiV, maxPathLength, stepsizeAdaptive, eps, newadaptiveS);
+			SwimTest.printSummary("Base S swimmer,  NEW Adaptive step size (WITH TRAJ)", newadaptiveS.getNStep(), pV,
+					newadaptiveS.getUf(), null);
+			System.out.println("Adaptive S Path length = " + newadaptiveS.getFinalS() + " m\n\n");
+		} catch (AdaptiveSwimException e) {
+			e.printStackTrace();
+		}
+
+		
+		
+		System.out.println("swim to a plane");
+		xo = 0;
+		yo = 0;
+		zo = 0;
+		thetV = 15;
+		phiV = 0;
+		pV = 2;
+		Q = 1;
+		accuracy = 1.0e-5; //m
+		maxPathLength = 8; //m
+
+		//create a plane like front of dc region 3
+		double r = 4.9014; //m
+		double x1 = r*Math.sin(Math.toRadians(25));
+		double y1 = 0;
+		double z1 = r*Math.cos(Math.toRadians(25));
+		Point p1 = new Point(x1, y1, z1);
+		Vector v = new Vector(-x1, 0, -z1);
+		Plane plane = new Plane(v, p1);
+		
+		try {
+			adaptiveSwimmer.swimPlane(Q, xo, yo, zo, pV, thetV, phiV, plane, accuracy, maxPathLength, stepsizeAdaptive, eps, newadaptiveS);
+			SwimTest.printSummary("Swim to plane,  NEW Adaptive step size (WITH TRAJ)", newadaptiveS.getNStep(), pV,
+					newadaptiveS.getUf(), null);
+			System.out.println("Swim to Plane S Path length = " + newadaptiveS.getFinalS() + " m\n\n");
+		} catch (AdaptiveSwimException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }

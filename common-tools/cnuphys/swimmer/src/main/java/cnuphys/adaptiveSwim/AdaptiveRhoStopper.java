@@ -18,9 +18,11 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 			
 	/**
 	 * Rho  stopper  (does check max path length)
-	 * @param u0              initial state vector
-	 * @param targetRho       stopping rho in meters
-	 * @param accuracy        the accuracy in meters
+	 * @param u0           initial state vector
+	 * @param sf           the maximum value of the path length in meters
+	 * @param targetRho    stopping rho in meters
+	 * @param accuracy     the accuracy in meters
+	 * @param trajectory   optional swim trajectory (can be null)
 	 */
 	public AdaptiveRhoStopper(final double[] u0, final double sf, final double targetRho, double accuracy, AdaptiveSwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);

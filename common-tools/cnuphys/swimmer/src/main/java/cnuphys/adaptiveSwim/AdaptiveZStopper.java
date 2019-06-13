@@ -10,9 +10,11 @@ public class AdaptiveZStopper extends AAdaptiveStopper {
 			
 	/**
 	 * Z  stopper  (does check max path length)
-	 * @param u0              initial state vector
-	 * @param targetRho       stopping rho in meters
-	 * @param accuracy        the accuracy in meters
+	 * @param u0           initial state vector
+	 * @param sf           the maximum value of the path length in meters
+	 * @param targetZ      stopping z in meters
+	 * @param accuracy     the accuracy in meters
+	 * @param trajectory   optional swim trajectory (can be null)
 	 */
 	public AdaptiveZStopper(final double[] u0, final double sf, final double targetZ, double accuracy, AdaptiveSwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
