@@ -1000,7 +1000,7 @@ public class RungeKutta {
 
 			// System.err.println("TABLEAU ADVANCE");
 			int nDim = y.length;
-			int numStage = tableau.getS();
+			int numStage = tableau.getNumStage();
 
 			double ytemp[] = new double[nDim];
 			double k[][] = new double[numStage + 1][];

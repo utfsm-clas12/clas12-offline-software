@@ -1,10 +1,7 @@
 package cnuphys.adaptiveSwim;
 
 public class AdaptiveStepResult {
-	
-	//the stepsize we actually used
-	private double _hUsed;
-	
+		
 	//new stepsize
 	private double _hNew;
 	
@@ -27,13 +24,5 @@ public class AdaptiveStepResult {
 		_sNew = sNew;
 	}
 	
-	public double getHUsed() {
-		return _hUsed;
-	}
-
-	public void setHUsed(double hUsed) {
-		_hUsed = hUsed;
-	}
-
 
 }

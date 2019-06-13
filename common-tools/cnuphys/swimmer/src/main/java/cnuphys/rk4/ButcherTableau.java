@@ -109,7 +109,7 @@ public class ButcherTableau {
 	 * 
 	 * @return the number of stages
 	 */
-	public int getS() {
+	public int getNumStage() {
 		return s;
 	}
 
@@ -162,9 +162,9 @@ public class ButcherTableau {
 		System.out.println("=============");
 		System.out.println(_name);
 		System.out.println("augmented: " + isAugmented());
-		System.out.println("s = " + getS());
+		System.out.println("s = " + getNumStage());
 
-		int s = getS();
+		int s = getNumStage();
 		for (int row = 2; row <= s; row++) {
 			for (int col = 1; col < row; col++) {
 				printVal(row, col);

@@ -1,109 +1,61 @@
 package cnuphys.adaptiveSwim;
 
-public class AdaptiveRhoStopper implements IAdaptiveStopper {
+import cnuphys.magfield.FastMath;
 
+/**
+ * Stopper for swimming to a fixed cylindrical cs radius (rho) value
+ * @author heddle
+ *
+ */
+public class AdaptiveRhoStopper extends AAdaptiveStopper {
+
+	//the rho you want to stop at in meters
 	private double _targetRho;
-	private double _accuracy;
-	private double _s0; //starting path length
-	
-	private double _totS; //total path length
-	private double _prevS; //previous step path length
 
-	private int _dim;   //dimension of our system
-	private double _sMax; //max path length meters
-	private double[] _u0; //initial state vector
-	private double[] _uf; //final state vector
 
 	//is the starting rho bigger or smaller than the target
 	private int _startSign;
-		
+			
 	/**
 	 * Rho  stopper  (does check max path length)
 	 * @param u0              initial state vector
 	 * @param targetRho       stopping rho in meters
 	 * @param accuracy        the accuracy in meters
 	 */
-	public AdaptiveRhoStopper(final double[] u0, double targetRho, double accuracy) {
-		_u0 = u0;
-		_dim = _u0.length;
+	public AdaptiveRhoStopper(final double[] u0, final double sf, final double targetRho, double accuracy, AdaptiveSwimTrajectory trajectory) {
+		super(u0, sf, accuracy, trajectory);
 		_targetRho = targetRho;
-		_accuracy = accuracy;
-		_uf = new double[_dim];
-	}
-
-		
-	/**
-	 * So that the stopper can be reused
-	 * @param s0              starting path length in meters
-	 * @param sMax            maximal path length in meters
-	 * @param rho0            starting rho
-	 */
-	public void set(double s0, double sMax, double rho0) {
-		_s0 = s0;		
-		_totS = 0;
-		_prevS = 0;
-
-		_sMax = sMax;
+		double rho0 = FastMath.hypot(u0[0], u0[1]);
 		_startSign = sign(rho0);
 	}
+
 	
-	int count = 0;
 	@Override
-	public boolean stopIntegration(double s, double[] u) {
+	public boolean stopIntegration(double snew, double[] unew) {
 		
-		double currentRho = Math.hypot(u[0], u[1]);
-		_totS = s;
+		double rho = Math.hypot(unew[0], unew[1]);
 
 		// within accuracy?
 		//note this could also result with s > smax
-		if (Math.abs(currentRho - _targetRho) < _accuracy) {
-            copy(u, _uf);
-			return true;
+		if (Math.abs(rho - _targetRho) < _accuracy) {
+			accept(snew, unew);
+  			return true;
 		}
 
-		//stop (and backup/reset to prev) if we crossed the boundary or exceeded smax
-		if ((getFinalS() > _sMax) || (sign(currentRho) != _startSign)) {
-			_totS = _prevS;
+		//stop and don't accept new data. We crossed the boundary or exceeded smax
+		if ((snew > _sf) || (sign(rho) != _startSign)) {
 			return true;
 		}
 				
-		//copy current to previous
-		_prevS = _totS;
-        copy(u, _uf);
+		//accept new data and continue
+		accept(snew, unew);
 		return false;
 	}
-
-	/**
-	 * Get the final path length in meters
-	 * 
-	 * @return the final path length in meters
-	 */
-	@Override
-	public double getFinalS() {
-		return _s0 + _totS;
-	}
 	
-	/**
-	 * Get the final value of the state vector
-	 * @return
-	 */
-	public double[] getFinalU() {
-		if (_uf == null) {
-			System.err.println("Returning null final u");
-		}
-		return _uf;
-	}
 	
 	//get the sign based on the current rho
 	private int sign(double currentRho) {
 		return ((currentRho < _targetRho) ? -1 : 1);
 	}
 	
-	//array copy for state vectors
-	private void copy(double src[], double[] dest) {
-		System.arraycopy(src, 0, dest, 0, _dim);
-	}
-
-
-
 }

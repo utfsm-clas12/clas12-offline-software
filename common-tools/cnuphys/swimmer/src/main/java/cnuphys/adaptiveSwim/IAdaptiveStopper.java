@@ -9,18 +9,35 @@ public interface IAdaptiveStopper {
 	 * precise, because the check may not happen on every step, but it should be
 	 * close.
 	 * 
-	 * @param s the current value of the independent variable (typically pathlength)
-	 * @param u the current state vector (typically [x, y, z, vx, vy, vz])
+	 * @param sNew the new value of the independent variable (typically pathlength)
+	 * @param uNew the new state vector (typically [x, y, z, vx, vy, vz])
 	 * @return <code>true</code> if we should stop now.
 	 */
-	public boolean stopIntegration(double s, double u[]);
+	public boolean stopIntegration(double snew, double unew[]);
+
 
 	/**
-	 * Get the final independent variable (typically path length in meters)
-	 * 
-	 * @return the final independent variable (typically path length in meters)
+	 * Get the current independent variable
+	 * @return the current independent variable
 	 */
-	public double getFinalS();
-
-
+	public double getS();
+	
+	/**
+	 * Get the current value of the state vector
+	 * @return the current value of the state vector
+	 */
+	public double[] getU();
+	
+	/**
+	 * Get the max or final value of the independent variable
+	 * @return the max or final value of the independent variable
+	 */
+	public double getSmax();
+	
+	/**
+	 * Convenience method to get the remaining range,
+	 * i.e. sMax - s
+	 * @return the remaining range in meters
+	 */
+	public double getRemainingRange();
 }

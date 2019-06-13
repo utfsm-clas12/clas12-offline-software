@@ -10,7 +10,7 @@ import cnuphys.rk4.IDerivative;
 public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 	
 	//a safety fudge factor
-	private static final double _safety = 0.95;
+	private static final double _safety = 0.9;
 	
 	//power used when the step should grow
 	private static final double _pgrow = -0.20;
@@ -19,13 +19,13 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 	private static final double _pshrink = -0.25;
 	
 	//for error control
-	private static final double _errControl = 1.0e-4;
+	private static final double _errControl = 1.89e-4;
 	
 	//to make a cirrection that gives us 5th order accuracy
 	private static final double _correctFifth = 1. / 15;
 	
 	//a tiny number
-	private static final double _tiny = 1.0e-30;
+	private static final double _tiny = 1.0e-14;
 	
 	//the dimension of the problem (length of state vector)
 	private int _nDim;
@@ -67,22 +67,27 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 			// which, if our steps size is acceptable, this will be our result
 			double h2 = h / 2;
 			double smid = s + h2;
-			SwimUtilities.singleRK4Step(s, u, du, h2, deriv, _utemp);
+			AdaptiveSwimUtilities.singleRK4Step(s, u, du, h2, deriv, _utemp);
 			deriv.derivative(smid, _utemp, _dutemp);
-			SwimUtilities.singleRK4Step(smid, _utemp, _dutemp, h2, deriv, uf);
+			AdaptiveSwimUtilities.singleRK4Step(smid, _utemp, _dutemp, h2, deriv, uf);
 
 			// take the full step
-			SwimUtilities.singleRK4Step(s, u, du, h, deriv, _utemp);
+			AdaptiveSwimUtilities.singleRK4Step(s, u, du, h, deriv, _utemp);
+			
+	//		System.out.print(String.format("[%7.4f, %7.4f, %7.4f, %7.4f, %7.4f, %7.4f]", _utemp[0], _utemp[1], _utemp[2], _utemp[3], _utemp[4], _utemp[5]));
 
 			// compute the maximum error
 			double errMax = 0;
 			for (int i = 0; i < _nDim; i++) {
+				//set utemp to be the difference between the two step solution and the one step
 				_utemp[i] = uf[i] - _utemp[i];
 				errMax = Math.max(errMax, Math.abs(_utemp[i] / _uscale[i]));
 			}
 
 			// scale based on tolerance in eps
 			errMax = errMax / eps;
+			
+	//		System.out.println(String.format("  err: %-6.3f", errMax));
 
 			if (errMax > 1) {
 				//get smaller h, then try again since done = false
@@ -99,12 +104,11 @@ public class RK4HalfStepAdvance implements IAdaptiveAdvance {
 					hnew = h * growFact;
 //					hnew = Math.max(h, _safety * h * growFact);
 				} else {
-					hnew = 4 * h;
+					hnew = 5 * h;
 				}
 				
 				result.setHNew(hnew);
-				result.setHUsed(h);
-				result.setSNew(s + h);
+				result.setSNew(s + h); //step we actually took
 				done = true;
 			}
 

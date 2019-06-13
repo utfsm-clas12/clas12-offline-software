@@ -492,17 +492,17 @@ public class SwimTest {
 			System.out.println("max stepsize: " + hdata[2]);
 		}
 		System.out.println(
-				String.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
+				String.format("R = [%9.7f, %9.7f, %9.7f] |R| = %9.7f m\nP = [%9.7e, %9.7e, %9.7e] |P| =  %9.7e GeV/c",
 						y[0], y[1], y[2], R, P * y[3], P * y[4], P * y[5], P));
 
 		
 		//now in cylindrical
-		double phi = Math.atan2(y[1], y[0]);
-		double rho = Math.hypot(y[0], y[1]);
+		double phi = FastMath.atan2(y[1], y[0]);
+		double rho = FastMath.hypot(y[0], y[1]);
 		System.out.println(String.format("[phi, rho, z] = [%9.6f, %9.6f, %9.6f]",
 				Math.toDegrees(phi), rho, y[2]));
 		
-		System.out.println("norm (should be 1): " + norm);
+		System.out.println(String.format("norm (should be 1): %9.7f", norm));
 		System.out.println("--------------------------------------\n");
 	}
 
@@ -526,9 +526,9 @@ public class SwimTest {
 			System.out.println("max stepsize: " + hdata[2]);
 		}
 		System.out.println(
-				String.format("R = [%9.6f, %9.6f, %9.6f] |R| = %9.6f m\nP = [%9.6e, %9.6e, %9.6e] |P| =  %9.6e GeV/c",
+				String.format("R = [%9.7f, %9.7f, %9.7f] |R| = %9.7f m\nP = [%9.7e, %9.7e, %9.7e] |P| =  %9.7e GeV/c",
 						sv.x / 100, sv.y / 100, sv.z / 100, R / 100, px, py, pz, P));
-		System.out.println("norm (should be 1): " + norm);
+		System.out.println(String.format("norm (should be 1): %9.7f", norm));
 		System.out.println("--------------------------------------\n");
 	}
 
