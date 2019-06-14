@@ -68,4 +68,5 @@ public class AdaptivePlaneStopper extends AAdaptiveStopper {
 		return ((dist < 0) ? -1 : 1);
 	}
 	
+
 }

@@ -1,6 +1,13 @@
 package cnuphys.adaptiveSwim;
 
 public abstract class AAdaptiveStopper implements IAdaptiveStopper {
+	
+	//the max step size
+	protected static final double _THEMAXSTEP = 0.5; // meters
+	// the current max step size, which varies with proximity
+	//to a target
+	private double _maxStep = _THEMAXSTEP; // meters
+
 
 	protected final double _accuracy;
 	protected double _s; //current path length meters
@@ -14,6 +21,13 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 	//optional trajectory
 	protected AdaptiveSwimTrajectory _trajectory;
 
+	/**
+	 * Create an stopper
+	 * @param u0 the initial state vector
+	 * @param sf the maximum value of the pathlength in meters
+	 * @param accuracy the required accuracy in meters
+	 * @param trajectory an optional trajectory
+	 */
 	public AAdaptiveStopper(double[] u0, final double sf, final double accuracy, AdaptiveSwimTrajectory trajectory) {
 		_dim = u0.length;
 		_s = 0;
@@ -26,9 +40,8 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
         if (_trajectory != null) {
         	_trajectory.add(_u, 0);
         }
-
 	}
-	
+		
 	/**
 	 * Get the current path length
 	 * @return the current path length in meters
@@ -61,7 +74,7 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
         	_trajectory.add(_u, _s);
         }
 	}
-
+	
 	/**
 	 * Get the max or final value of the path length in meters
 	 * @return the max or final value of the path length
@@ -91,6 +104,22 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 		System.arraycopy(uSrc, 0, uDest, 0, _dim);
 	}
 
+	/**
+	 * Get the max step size. This can vary with conditions, primarily
+	 * with the proximity to a target 
+	 * @return the current max step in meters
+	 */
+	@Override
+	public double getMaxStepSize() {
+		return _maxStep;
+	}
 
+	/**
+	 * Set the current max step
+	 * @param maxStep the current max step in meters
+	 */
+	protected void setMaxStep(double maxStep) {
+		_maxStep = Math.min(_THEMAXSTEP, Math.max(AdaptiveSwimUtilities.MIN_STEPSIZE, Math.abs(maxStep)));
+	}
 
 }

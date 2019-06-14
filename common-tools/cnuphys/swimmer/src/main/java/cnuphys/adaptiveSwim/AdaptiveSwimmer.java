@@ -1,6 +1,9 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.adaptiveSwim.geometry.Cylinder;
+import cnuphys.adaptiveSwim.geometry.Line;
 import cnuphys.adaptiveSwim.geometry.Plane;
+import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
@@ -74,7 +77,7 @@ public class AdaptiveSwimmer {
 
 	
 	/**
-	 * Swim using the current active field. This swimmer has no stopper
+	 * Swim using the current active field. This swimmer has no target.
 	 * @param charge in integer units of e
 	 * @param xo the x vertex position in meters
 	 * @param yo the y vertex position in meters
@@ -127,7 +130,7 @@ public class AdaptiveSwimmer {
 	 * @param theta the initial polar angle in degrees
 	 * @param phi the initial azimuthal angle in degrees
 	 * @param targetZ the target z in meters
-	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param accuracy the requested accuracy for the target z in meters
 	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
 	 * @param h0 the initial stepsize in meters
 	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
@@ -312,7 +315,7 @@ public class AdaptiveSwimmer {
 	 * @param theta the initial polar angle in degrees
 	 * @param phi the initial azimuthal angle in degrees
 	 * @param targetPlane the target plane
-	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param accuracy the requested accuracy for the final distance to the plane in meters
 	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
 	 * @param h0 the initial stepsize in meters
 	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
@@ -390,6 +393,184 @@ public class AdaptiveSwimmer {
 		}
 	}
 	
+
+	/**
+	 * Swim to an arbitrary infinitely long cylinder using the current active field
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param targetCylinder the target cylinder
+	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimCylinder(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			Cylinder targetCylinder, final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
+			throws AdaptiveSwimException {
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		double h = h0; //running stepsize
+				
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int count = 0;
+		int ns = 0;
+
+		//create the derivative object
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
+
+		//the stopper will stop if we come within range of the target cylinder or the
+		//pathlength reaches sf
+		AdaptiveCylinderStopper stopper = new AdaptiveCylinderStopper(uf, sf, targetCylinder, accuracy, result.getTrajectory());
+
+		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
+		while (count < MAXTRIES) {
+			
+			if ((stopper.getS() + h) > stopper.getSmax()) {
+				h = (stopper.getSmax()-stopper.getS())/4;
+				if (h < 0) {
+					break;
+				}
+			}
+
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target plane
+			
+			try {
+				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+						
+			if ((stopper.getS()) > stopper.getSmax()) {
+				break;
+			}
+			
+			del = Math.abs(targetCylinder.distance(stopper.getU()[0], stopper.getU()[1], stopper.getU()[2]));
+			
+			//succeed?
+			if (del < accuracy) {
+				break;
+			}
+						
+			count++;
+			
+			h /= 2;
+		}
+		
+		result.setFinalS(stopper.getS());
+		stopper.copy(stopper.getU(), uf);
+		result.setNStep(ns);
+
+		//if we are at the target rho, the status = 0
+		//if we have reached sf, the status = -1
+		if (del < accuracy) {
+			result.setStatus(SWIM_SUCCESS);
+		} else {
+			result.setStatus(SWIM_TARGET_MISSED);
+		}
+	}
+	
+
+	/**
+	 * Swim to an arbitrary infinitely long line using the current active field
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param targetLine the target line
+	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimLine(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			Line targetLine, final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
+			throws AdaptiveSwimException {
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		double h = h0; //running stepsize
+				
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int count = 0;
+		int ns = 0;
+
+		//create the derivative object
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
+
+		//the stopper will stop if we come within range of the target cylinder or the
+		//pathlength reaches sf
+		AdaptiveLineStopper stopper = new AdaptiveLineStopper(uf, sf, targetLine, accuracy, result.getTrajectory());
+
+		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
+		while (count < MAXTRIES) {
+			
+			if ((stopper.getS() + h) > stopper.getSmax()) {
+				h = (stopper.getSmax()-stopper.getS())/4;
+				if (h < 0) {
+					break;
+				}
+			}
+
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target plane
+			
+			try {
+				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+						
+			if ((stopper.getS()) > stopper.getSmax()) {
+				break;
+			}
+			
+			del = targetLine.distance(stopper.getU()[0], stopper.getU()[1], stopper.getU()[2]);
+			
+			//succeed?
+			if (del < accuracy) {
+				break;
+			}
+						
+			count++;
+			
+			h /= 2;
+		}
+		
+		result.setFinalS(stopper.getS());
+		stopper.copy(stopper.getU(), uf);
+		result.setNStep(ns);
+
+		//if we are at the target rho, the status = 0
+		//if we have reached sf, the status = -1
+		if (del < accuracy) {
+			result.setStatus(SWIM_SUCCESS);
+		} else {
+			result.setStatus(SWIM_TARGET_MISSED);
+		}
+	}
+	
 	//init common to many swimmers
 	private double[] init(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
 			AdaptiveSwimResult result) {
@@ -397,6 +578,8 @@ public class AdaptiveSwimmer {
 		//clear old trajectory
 		if (result.getTrajectory() != null) {
 			result.getTrajectory().clear();
+			
+			result.getTrajectory().setGeneratedParticleRecord(new GeneratedParticleRecord(charge, xo, yo, zo, momentum, theta, phi));
 		}
 		
 		//store initial values

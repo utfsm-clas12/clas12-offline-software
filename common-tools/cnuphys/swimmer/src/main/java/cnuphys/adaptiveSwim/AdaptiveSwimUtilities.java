@@ -14,8 +14,7 @@ public class AdaptiveSwimUtilities {
 	public static final double SMAX_TOLERANCE = 1.0e-4;  //meters
 
 	//step size limits in meters
-	public static final double MIN_STEPSIZE = 1.0e-5; // meters
-	public static final double MAX_STEPSIZE = 0.5; // meters
+	public static final double MIN_STEPSIZE = 1.0e-6; // meters
 	
 	//maximum number of integration steps
 	public static int MAX_NUMSTEP = 2000; 
@@ -83,7 +82,7 @@ public class AdaptiveSwimUtilities {
 					throw new AdaptiveSwimException("");
 				}
 			}
-			h = Math.max(MIN_STEPSIZE, Math.min(MAX_STEPSIZE, hnew));
+			h = Math.max(MIN_STEPSIZE, Math.min(stopper.getMaxStepSize(), hnew));
 			double snew = result.getSNew();
 			
 			nstep++;

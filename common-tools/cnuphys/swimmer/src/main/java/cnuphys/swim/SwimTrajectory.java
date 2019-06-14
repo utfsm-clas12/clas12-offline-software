@@ -126,6 +126,13 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	}
 
 	/**
+	 * Set the generated particle record
+	 * @param genPart the generated particle record
+	 */
+	public void setGeneratedParticleRecord(GeneratedParticleRecord genPart) {
+		_genPartRec = genPart;
+	}
+	/**
 	 * Set the lund id. This is not needed for swimming, but is useful for ced or
 	 * when MonteCarlo truth is known.
 	 * 
@@ -207,6 +214,19 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		return super.add(ucopy);
 	}
 	
+	
+	public boolean add(double u[], double s) {
+		if (u == null) {
+			return false;
+		}
+		
+		int dim = u.length;
+		double ucopy[] = new double[dim+1];
+		System.arraycopy(u, 0, ucopy, 0, dim);
+		ucopy[dim] = s;
+		return super.add(ucopy);
+	}
+
 	
 	/**
 	 * @param xo       the x vertex position in m

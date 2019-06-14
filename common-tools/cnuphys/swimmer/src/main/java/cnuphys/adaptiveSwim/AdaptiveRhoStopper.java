@@ -15,6 +15,9 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 
 	//is the starting rho bigger or smaller than the target
 	private int _startSign;
+	
+	//the current rho
+	private double _rho;
 			
 	/**
 	 * Rho  stopper  (does check max path length)
@@ -35,17 +38,17 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 	@Override
 	public boolean stopIntegration(double snew, double[] unew) {
 		
-		double rho = Math.hypot(unew[0], unew[1]);
+		_rho = Math.hypot(unew[0], unew[1]);
 
 		// within accuracy?
 		//note this could also result with s > smax
-		if (Math.abs(rho - _targetRho) < _accuracy) {
+		if (Math.abs(_rho - _targetRho) < _accuracy) {
 			accept(snew, unew);
   			return true;
 		}
 
 		//stop and don't accept new data. We crossed the boundary or exceeded smax
-		if ((snew > _sf) || (sign(rho) != _startSign)) {
+		if ((snew > _sf) || (sign(_rho) != _startSign)) {
 			return true;
 		}
 				

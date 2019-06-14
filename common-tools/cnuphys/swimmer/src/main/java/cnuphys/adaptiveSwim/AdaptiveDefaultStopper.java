@@ -26,7 +26,4 @@ public class AdaptiveDefaultStopper extends AAdaptiveStopper {
 		return (snew > _sCutoff);
 	}
 	
-	
-
-
 }

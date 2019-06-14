@@ -1,6 +1,10 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+
 import org.jlab.detector.base.GeometryFactory;
 import org.jlab.detector.geom.dc.DCGeantFactory;
 import org.jlab.geom.base.ConstantProvider;
@@ -15,7 +19,9 @@ import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Shape3D;
 import org.jlab.geom.prim.Triangle3D;
 
+import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.frame.Ced;
+import cnuphys.swim.SwimTrajectory;
 
 public class DCGeometry {
 
@@ -68,6 +74,7 @@ public class DCGeometry {
 		minWireZ = Double.POSITIVE_INFINITY;
 		maxWireZ = Double.NEGATIVE_INFINITY;
 
+	
 		wires = new DriftChamberWire[6][6][112];
 		for (int suplay = 0; suplay < 6; suplay++) {
 			DCSuperlayer sl = sector0.getSuperlayer(suplay);
@@ -629,6 +636,23 @@ public class DCGeometry {
 
 	}
 
+	//for csv output
+	private static void stringLn(DataOutputStream dos, String s) {
+		
+		s = s.replace("  ", "");		
+		s = s.replace(" ", "");		
+		s = s.replace(", ", ",");		
+		s = s.replace(", ", ",");		
+		s = s.replace(" ,", ",");		
+
+		
+		try {
+			dos.writeBytes(s);
+			dos.writeBytes("\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public static void main(String arg[]) {
 		initialize();
 
@@ -640,6 +664,43 @@ public class DCGeometry {
 //		for (int i = 0; i < dcw.getNumVolumeEdges(); i++) {
 //			System.out.println(dcw.getVolumeEdge(i));
 //		}
+		
+		
+		try {
+			
+			File file = new File(Environment.getInstance().getHomeDirectory(), "dcwires.csv");
+			DataOutputStream dos = new DataOutputStream(new FileOutputStream(file.getPath()));
+			
+			String header = "sector,superlayer,layer,wire,x1(m),y1(m),z1(m),x2(m),y2(m),z2(m)";
+			stringLn(dos, header);
+			
+			//public static Line3D getWire(int sector, int superlayer, int layer, int wire) {
+
+			for (int sector = 1; sector <= 6; sector++) {
+				for (int superlayer = 1; superlayer <= 6; superlayer++) {
+					for (int layer = 1; layer <= 6; layer++) {
+						for (int wire = 1; wire <= 112; wire++) {
+							Line3D line = getWire(sector, superlayer, layer, wire);
+							Point3D origin = line.origin();
+							Point3D end = line.end();
+							//print in meters
+							String s = String.format("%d,%d,%d,%d,%f,%f,%f,%f,%f,%f", sector, superlayer, layer, wire,
+									origin.x()/100, origin.y()/100, origin.z()/100, 
+									end.x()/100, end.y()/100, end.z()/100);
+							stringLn(dos, s);
+						}
+					}
+
+				}
+
+			}
+			
+			dos.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }

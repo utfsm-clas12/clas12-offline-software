@@ -21,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import cnuphys.adaptiveSwim.AdaptiveTests;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundSupport;
@@ -118,7 +119,6 @@ public class SwimTest {
 		final JMenuItem polyItem = new JMenuItem("SwimZ vs. Poly Approx Test");
 		final JMenuItem specialItem = new JMenuItem("Special Trouble Cases");
 
-		final JMenuItem rhoItem = new JMenuItem("Swim To Rho (cylinder) Test");
 		final JMenuItem csvItem = new JMenuItem("Output to CSV");
 		
 		
@@ -133,8 +133,6 @@ public class SwimTest {
 					SectorTest.testSectorSwim(100000);
 				} else if (e.getSource() == threadItem) {
 					ThreadTest.threadTest(100, 8);
-				} else if (e.getSource() == rhoItem) {
-					RhoTest.rhoTest();
 				} else if (e.getSource() == polyItem) {
 					SmallDZTest.smallDZTest(3344632211L, 10000, 100);
 				} else if (e.getSource() == reconfigItem) {
@@ -154,8 +152,9 @@ public class SwimTest {
 		testSectorItem.addActionListener(al);
 		reconfigItem.addActionListener(al);
 		specialItem.addActionListener(al);
-		rhoItem.addActionListener(al);
 		csvItem.addActionListener(al);
+		
+		menu.add(adaptiveTestMenu());
 		
 		menu.add(createTrajItem);
 		menu.add(oneVtwoItem);
@@ -165,9 +164,67 @@ public class SwimTest {
 		menu.add(threadItem);
 		menu.add(specialItem);
 
-		menu.add(rhoItem);
 		menu.add(csvItem);
 		return menu;
+	}
+	
+	private static JMenu adaptiveTestMenu() {
+		JMenu atmenu = new JMenu("Test AdaptiveSwim Package");
+		
+		final JMenuItem rhoItem = new JMenuItem("Rho Test");
+		final JMenuItem retraceItem = new JMenuItem("Retrace Test");
+		final JMenuItem planeItem = new JMenuItem("Plane Test");
+		final JMenuItem lineItem = new JMenuItem("Line Test");
+		final JMenuItem zItem = new JMenuItem("Z Test");
+		final JMenuItem cylinderItem = new JMenuItem("Cylinder Test");
+		final JMenuItem noStopperItem = new JMenuItem("No Stopper Test");
+		
+		
+		ActionListener al = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == rhoItem) {
+					AdaptiveTests.rhoTest();
+				}
+                else if (e.getSource() == retraceItem) {
+					AdaptiveTests.retraceTest();
+				}
+                else if (e.getSource() == planeItem) {
+					AdaptiveTests.planeTest();
+				}
+                else if (e.getSource() == lineItem) {
+					AdaptiveTests.lineTest();
+				}
+                else if (e.getSource() == zItem) {
+					AdaptiveTests.zTest();
+				}
+                else if (e.getSource() == cylinderItem) {
+					AdaptiveTests.cylinderTest();
+				}
+                else if (e.getSource() == noStopperItem) {
+					AdaptiveTests.noStopperTest();
+				}
+			}
+		};
+		
+		rhoItem.addActionListener(al);
+		retraceItem.addActionListener(al);
+		planeItem.addActionListener(al);
+		lineItem.addActionListener(al);
+		zItem.addActionListener(al);
+		cylinderItem.addActionListener(al);
+		noStopperItem.addActionListener(al);
+
+		atmenu.add(rhoItem);
+		atmenu.add(retraceItem);
+		atmenu.add(planeItem);
+		atmenu.add(lineItem);
+		atmenu.add(zItem);
+		atmenu.add(cylinderItem);
+		atmenu.add(noStopperItem);
+
+		return atmenu;
 	}
 	
 	//for Nicholas at VaTech

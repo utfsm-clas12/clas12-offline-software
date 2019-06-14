@@ -50,7 +50,6 @@ public class Plane {
 		return distance(p.x, p.y, p.z);
 	}
 
-
 	/**
 	 * Distance from a point to the plane
 	 * @param x the x coordinate 
@@ -173,6 +172,11 @@ public class Plane {
 		return pstr + "  p = " + p0 + " norm = " + norm;
 	}
 
+	/**
+	 * Obtain the line resulting from the intersection of this plane and another plane
+	 * @param plane the other plane
+	 * @return line formed by the intersection
+	 */
 	public Line planeIntersection(Plane plane) {
 		Vector s = Vector.cross(norm, plane.norm);
 

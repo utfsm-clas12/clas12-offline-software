@@ -27,6 +27,16 @@ public class Line {
 		_dp = new Vector(Point.difference(p1, po));
 		_dpLen = _dp.length();
 	}
+	
+	/**
+	 * Copy constructor
+	 * @param line the line to copy
+	 */
+	public Line(Line line) {
+		_po = new Point(line._po);
+		_dp = new Vector(line._dp);
+		_dpLen = line._dpLen;
+	}
 
 	/**
 	 * Get the po "start" point. This is just an arbitrary point on an infinite
@@ -104,7 +114,7 @@ public class Line {
 	}
 
 	/**
-	 * Get the shortest distance between two points
+	 * Get the shortest distance between this line (as an infinite line) and a point
 	 * 
 	 * @param p a point
 	 * @return the perpendicular distance
@@ -114,6 +124,20 @@ public class Line {
 		Vector c = Vector.cross(ap, _dp);
 		return c.length() / _dpLen;
 	}
+	
+	/**
+	 * Get the shortest distance between this line (as an infinite line) and a point
+	 * 
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 * @param z the z coordinate
+	 * @return the perpendicular distance
+	 */
+	public double distance(double x, double y, double z) {
+		Point p = new Point(x, y, z);
+		return distance(p);
+	}
+
 
 	/**
 	 * Decide whether a point is on the line
@@ -172,6 +196,19 @@ public class Line {
 		p.set(999., 999., 0.001);
 		System.out.println(
 				p.toString() + "     distance = " + line.distance(p) + " on line: " + line.pointOnLine(p, 0.01));
+		
+		
+		Point p3 = new Point(0, 0, 0);
+		Point p4 = new Point(0, 0, 1);
+
+		Line zaxis = new Line(p3, p4);
+
+		System.out.println("Created a line corresponding to the z axis");
+		System.out.println("Should be 0: " + zaxis.distance(0, 0, 99));
+		System.out.println("Should be 100: " + zaxis.distance(-100, 0, 99));
+		
+		double d = zaxis.distance(-10, 10, -999);
+		System.out.println("Should be 200: " + (d*d));
 
 	}
 
