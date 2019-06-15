@@ -1,5 +1,7 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.swim.SwimTrajectory;
+
 public class AdaptiveZStopper extends AAdaptiveStopper {
 
 	private double _targetZ;
@@ -16,7 +18,7 @@ public class AdaptiveZStopper extends AAdaptiveStopper {
 	 * @param accuracy     the accuracy in meters
 	 * @param trajectory   optional swim trajectory (can be null)
 	 */
-	public AdaptiveZStopper(final double[] u0, final double sf, final double targetZ, double accuracy, AdaptiveSwimTrajectory trajectory) {
+	public AdaptiveZStopper(final double[] u0, final double sf, final double targetZ, double accuracy, SwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
 		_targetZ = targetZ;
 		_startSign = sign(u0[2]);

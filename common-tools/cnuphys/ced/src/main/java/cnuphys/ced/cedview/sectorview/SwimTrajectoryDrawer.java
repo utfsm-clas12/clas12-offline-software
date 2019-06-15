@@ -46,11 +46,12 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 		// if (true) return false;
 
 		if ((trajectory.userObject != null) && (trajectory.userObject instanceof SectorView)) {
+//			System.err.println("Vetoed wrong userobject");
 			return (trajectory.userObject != _view);
 		}
 
 		boolean onThisView = _view.inThisView(getMostCommonSector(trajectory));
-		// System.err.println("On this view " + _view.getTitle() + " " + onThisView);
+//		System.err.println("On this view " + _view.getTitle() + " " + onThisView + "  size " + trajectory.size());
 		return !onThisView;
 	}
 

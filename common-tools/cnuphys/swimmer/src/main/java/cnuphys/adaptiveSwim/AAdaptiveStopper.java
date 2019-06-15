@@ -1,5 +1,7 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.swim.SwimTrajectory;
+
 public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 	
 	//the max step size
@@ -19,7 +21,7 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 	protected double _hLast = Double.NaN;
 
 	//optional trajectory
-	protected AdaptiveSwimTrajectory _trajectory;
+	protected SwimTrajectory _trajectory;
 
 	/**
 	 * Create an stopper
@@ -28,7 +30,7 @@ public abstract class AAdaptiveStopper implements IAdaptiveStopper {
 	 * @param accuracy the required accuracy in meters
 	 * @param trajectory an optional trajectory
 	 */
-	public AAdaptiveStopper(double[] u0, final double sf, final double accuracy, AdaptiveSwimTrajectory trajectory) {
+	public AAdaptiveStopper(double[] u0, final double sf, final double accuracy, SwimTrajectory trajectory) {
 		_dim = u0.length;
 		_s = 0;
 		_sf = sf;

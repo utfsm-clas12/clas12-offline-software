@@ -1,6 +1,7 @@
 package cnuphys.adaptiveSwim;
 
 import cnuphys.magfield.FastMath;
+import cnuphys.swim.SwimTrajectory;
 
 /**
  * Stopper for swimming to a fixed cylindrical cs radius (rho) value
@@ -27,7 +28,7 @@ public class AdaptiveRhoStopper extends AAdaptiveStopper {
 	 * @param accuracy     the accuracy in meters
 	 * @param trajectory   optional swim trajectory (can be null)
 	 */
-	public AdaptiveRhoStopper(final double[] u0, final double sf, final double targetRho, double accuracy, AdaptiveSwimTrajectory trajectory) {
+	public AdaptiveRhoStopper(final double[] u0, final double sf, final double targetRho, double accuracy, SwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
 		_targetRho = targetRho;
 		double rho0 = FastMath.hypot(u0[0], u0[1]);

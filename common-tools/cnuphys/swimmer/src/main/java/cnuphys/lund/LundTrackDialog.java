@@ -27,18 +27,11 @@ import javax.swing.border.TitledBorder;
 
 import cnuphys.adaptiveSwim.AdaptiveSwimException;
 import cnuphys.adaptiveSwim.AdaptiveSwimResult;
-import cnuphys.adaptiveSwim.AdaptiveSwimTrajectory;
 import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 import cnuphys.magfield.FastMath;
-import cnuphys.rk4.RungeKuttaException;
-import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
-import cnuphys.swimZ.SwimZ;
-import cnuphys.swimZ.SwimZException;
 import cnuphys.swimZ.SwimZResult;
-import cnuphys.swimZ.SwimZStateVector;
 
 @SuppressWarnings("serial")
 public class LundTrackDialog extends JDialog {
@@ -232,24 +225,22 @@ public class LundTrackDialog extends JDialog {
 			double xo = Double.parseDouble(_vertexX.getText()) / 100.;
 			double yo = Double.parseDouble(_vertexY.getText()) / 100.;
 			double zo = Double.parseDouble(_vertexZ.getText()) / 100.;
+			double momentum = Double.parseDouble(_momentumTextField.getText());
 			double theta = Double.parseDouble(_theta.getText());
 			double phi = Double.parseDouble(_phi.getText());
-			double momentum = Double.parseDouble(_momentumTextField.getText());
 			
 			double stepSize = 5e-3; // m
 			double maxPathLen = 8.0; // m
 			
 			double eps = 1.0e-6;
 			
-			AdaptiveSwimResult result = new AdaptiveSwimResult(6, true);
+			AdaptiveSwimResult result = new AdaptiveSwimResult(true);
 			
 			if (_standardCutoff.isSelected()) {
 				swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, maxPathLen, stepSize, eps, result);
-				AdaptiveSwimTrajectory traj = result.getTrajectory();
+				SwimTrajectory traj = result.getTrajectory();
 				traj.setLundId(lid);
-				double lastY[] = traj.lastElement();
-				printSummary("\nRESULT from base swim ", traj.size(),
-						momentum, lastY, null);
+				result.printOut(System.out, "RESULT from base swim");
 
 				Swimming.addMCTrajectory(traj);
 			}
@@ -258,11 +249,9 @@ public class LundTrackDialog extends JDialog {
 				double accuracy = Double.parseDouble(_accuracy.getText()) / 1.0e6;
 				double ztarget = Double.parseDouble(_fixedZ.getText())/100; // meters
 				swimmer.swimZ(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,  maxPathLen, stepSize, eps, result);
-				AdaptiveSwimTrajectory traj = result.getTrajectory();
+				SwimTrajectory traj = result.getTrajectory();
 				traj.setLundId(lid);
-				double lastY[] = traj.lastElement();
-				printSummary("\nRESULT from fixed Z swim ", traj.size(),
-						momentum, lastY, null);
+				result.printOut(System.out, "RESULT from fixed Z swim");
 
 				Swimming.addMCTrajectory(traj);
 			}
@@ -273,83 +262,6 @@ public class LundTrackDialog extends JDialog {
 		}
 		
 
-//		Swimmer swimmer = new Swimmer();
-//
-//		swimmer.getProbe().getField().printConfiguration(System.out);
-//
-//		try {
-//			LundId lid = _lundComboBox.getSelectedId();
-//
-//			// note xo, yo, zo converted to meters
-//			double xo = Double.parseDouble(_vertexX.getText()) / 100.;
-//			double yo = Double.parseDouble(_vertexY.getText()) / 100.;
-//			double zo = Double.parseDouble(_vertexZ.getText()) / 100.;
-//			double theta = Double.parseDouble(_theta.getText());
-//			double phi = Double.parseDouble(_phi.getText());
-//			double rMax = Double.parseDouble(_maxR.getText());
-//			double momentum = Double.parseDouble(_momentumTextField.getText());
-//
-//			// create a stopper
-//			DefaultSwimStopper stopper = new DefaultSwimStopper(rMax);
-//
-//			double stepSize = 5e-3; // m
-//			double maxPathLen = 8.0; // m
-//			double hdata[] = new double[3];
-//
-//			try {
-//				if (_standardCutoff.isSelected()) {
-//					SwimTrajectory traj = swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, stopper, 0,
-//							maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
-//					traj.setLundId(lid);
-//
-//					double lastY[] = traj.lastElement();
-//					printSummary("\nRESULT from adaptive stepsize method with storage and err vector", traj.size(),
-//							momentum, lastY, hdata);
-//
-//					Swimming.addMCTrajectory(traj);
-//				} else {
-//
-//					System.err.println("Fixed Z cutoff");
-//
-//					// which algorithm
-//
-//					double ztarget = Double.parseDouble(_fixedZ.getText()); // meters
-//
-//					SwimTrajectory traj = null;
-//					if (_swimZ.isSelected()) {
-//						System.err.println("SwimZ swimmer");
-//						SwimZStateVector start = new SwimZStateVector(xo * 100, yo * 100, zo * 100, momentum, theta,
-//								phi);
-//						SwimZ sz = new SwimZ();
-//
-//						double adaptiveInitStepSize = 0.5;
-//
-//						SwimZResult result = sz.adaptiveRK(lid.getCharge(), momentum, start, ztarget,
-//								adaptiveInitStepSize, hdata);
-//						partialReport(result, "Z ADAPTIVE");
-//						traj = result.toSwimTrajectory();
-//
-//					} else {
-//						System.err.println("Traditional swimmer");
-//						ztarget /= 100; // meters
-//						traj = swimmer.swim(lid.getCharge(), xo, yo, zo, momentum, theta, phi, ztarget, accuracy,
-//								maxPathLen, stepSize, Swimmer.CLAS_Tolerance, hdata);
-//						traj.setLundId(lid);
-//						double lastY[] = traj.lastElement();
-//						printSummary("\nresult from adaptive stepsize method with storage and Z cutoff at " + ztarget,
-//								traj.size(), momentum, lastY, hdata);
-//					}
-//					if (traj != null) {
-//						Swimming.addMCTrajectory(traj);
-//					}
-//				}
-//
-//			} catch (RungeKuttaException e) {
-//				e.printStackTrace();
-//			}
-//		} catch (SwimZException e) {
-//			System.err.println("Swimming failed. See the log for more details.");
-//		}
 	}
 
 	private static void partialReport(SwimZResult result, String name) {

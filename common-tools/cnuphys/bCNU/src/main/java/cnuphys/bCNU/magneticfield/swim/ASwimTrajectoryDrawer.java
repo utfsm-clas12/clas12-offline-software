@@ -105,6 +105,9 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 					if (!veto(trajectory)) {
 						_trajectories2D.add(new SwimTrajectory2D(trajectory, this));
 					}
+//					else {
+//						System.err.println("Trajectory VETOED");
+//					}
 				}
 
 				for (SwimTrajectory2D trajectory2D : _trajectories2D) {

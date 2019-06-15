@@ -1,5 +1,7 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.swim.SwimTrajectory;
+
 public class AdaptiveDefaultStopper extends AAdaptiveStopper {
 
 	private static final double TOL = 1.0e-5; //meters
@@ -8,10 +10,11 @@ public class AdaptiveDefaultStopper extends AAdaptiveStopper {
 			
 	/**
 	 * Rho  stopper  (does check max path length)
-	 * @param u0              initial state vector
-	 * @param targetRho       stopping rho in meters
+	 * @param u0          initial state vector
+	 * @param sf          final path length meters
+	 * @param trajectory  optional trajectory
 	 */
-	public AdaptiveDefaultStopper(final double[] u0, final double sf, AdaptiveSwimTrajectory trajectory) {
+	public AdaptiveDefaultStopper(final double[] u0, final double sf, SwimTrajectory trajectory) {
 		super(u0, sf, Double.NaN, trajectory);
 		_sCutoff = sf - TOL;
 	}

@@ -1,6 +1,7 @@
 package cnuphys.adaptiveSwim;
 
 import cnuphys.adaptiveSwim.geometry.Cylinder;
+import cnuphys.swim.SwimTrajectory;
 
 public class AdaptiveCylinderStopper extends AAdaptiveStopper {
 	
@@ -19,7 +20,7 @@ public class AdaptiveCylinderStopper extends AAdaptiveStopper {
 	 * @param accuracy          the accuracy in meters
 	 * @param trajectory        optional swim trajectory (can be null)
 	 */
-	public AdaptiveCylinderStopper(final double[] u0, final double sf, Cylinder targetCylinder, double accuracy, AdaptiveSwimTrajectory trajectory) {
+	public AdaptiveCylinderStopper(final double[] u0, final double sf, Cylinder targetCylinder, double accuracy, SwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
 		_targetCylinder = targetCylinder;
 		

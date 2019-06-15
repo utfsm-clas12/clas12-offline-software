@@ -1,5 +1,6 @@
 package cnuphys.adaptiveSwim;
 
+import cnuphys.magfield.FastMath;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IDerivative;
 
@@ -251,5 +252,42 @@ public class AdaptiveSwimUtilities {
 	public static void setMaxNumberSteps(int maxSteps) {
 		MAX_NUMSTEP = maxSteps;
 	}
+	
+
+
+	/**
+	 * Get the sector [1..6] from the phi value
+	 * 
+	 * @param phi the value of phi in degrees
+	 * @return the sector [1..6]
+	 */
+	public static int getSector(double phi) {
+		// convert phi to [0..360]
+
+		while (phi < 0) {
+			phi += 360.0;
+		}
+		while (phi > 360.0) {
+			phi -= 360.0;
+		}
+
+		if ((phi > 30.0) && (phi <= 90.0)) {
+			return 2;
+		}
+		if ((phi > 90.0) && (phi <= 150.0)) {
+			return 3;
+		}
+		if ((phi > 150.0) && (phi <= 210.0)) {
+			return 4;
+		}
+		if ((phi > 210.0) && (phi <= 270.0)) {
+			return 5;
+		}
+		if ((phi > 270.0) && (phi <= 330.0)) {
+			return 6;
+		}
+		return 1;
+	}
+
 
 }

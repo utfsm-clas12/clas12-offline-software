@@ -16,17 +16,13 @@ import cnuphys.swimtest.SwimTest;
 
 public class AdaptiveTests {
 	
-	private static AdaptiveTests _instance;
-
-	private static final double SMALL = 1.0e-8;
-
+	/** Test the basic swim to a final pathlength */
 	public static void noStopperTest() {
 
 		// test basic pathlength swimmer to be used by ced
 
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
-		AdaptiveSwimResult result = new AdaptiveSwimResult(6, true);
 
 		double stepsizeAdaptive = 0.01; // starting
 		double xo = 0;
@@ -39,11 +35,11 @@ public class AdaptiveTests {
 		double p = 2;
 		double eps = 1.0e-6;
 
+		AdaptiveSwimResult result = new AdaptiveSwimResult(true);
+
 		try {
 			adaptiveSwimmer.swim(Q, xo, yo, zo, p, theta, phi, maxPathLength, stepsizeAdaptive, eps, result);
-			SwimTest.printSummary("Base S swimmer,  NEW Adaptive step size (WITH TRAJ)", result.getNStep(), p,
-					result.getUf(), null);
-			System.out.println("Adaptive S Path length = " + result.getFinalS() + " m\n\n");
+			result.printOut(System.out, "Base S Swimmer");
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
@@ -51,12 +47,12 @@ public class AdaptiveTests {
 	}
 	
 
+	/** Test the swim to a line */
 	public static void lineTest() {
 		Line targetLine = new Line(new Point(1, 0, 0), new Point(1, 0, 1));
 		
 		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
-		AdaptiveSwimResult result = new AdaptiveSwimResult(6, true);
 
 		double stepsizeAdaptive = 0.01; // starting
 		double xo = 0;
@@ -70,12 +66,11 @@ public class AdaptiveTests {
 		double eps = 1.0e-6;
 		double accuracy = 1.0e-5; //m
 
+		AdaptiveSwimResult result = new AdaptiveSwimResult(true);
 
 		try {
 			adaptiveSwimmer.swimLine(Q, xo, yo, zo, p, theta, phi, targetLine, accuracy, maxPathLength, stepsizeAdaptive, eps, result);
-			SwimTest.printSummary("Base S swimmer,  NEW Adaptive step size (WITH TRAJ)", result.getNStep(), p,
-					result.getUf(), null);
-			System.out.println("Adaptive S Path length = " + result.getFinalS() + " m\n\n");
+			result.printOut(System.out, "Line Test");
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
@@ -83,29 +78,27 @@ public class AdaptiveTests {
 	}
 
 
-	//RETRACE
+	/** Test retracing a swim */
 	public static void retraceTest() {
-		
-		
 		
 		long seed = 9459363;
 		Random rand = new Random(seed);
-		int num = 1000;
+		int num = 10000;
 //		num = 1;
 		int n0 = 0;
 
 		int status[] = new int[num];
 
-		InitVal[] ivals = getInitVals(rand, num, -1, false, 0., 0., 0., 0., 0., 0., 0.5, 5.0, 10., 25., -30., 30.);
+		InitialValues[] ivals = InitialValues.getInitialValues(rand, num, -1, false, 0., 0., 0., 0., 0., 0., 0.5, 5.0, 10., 25., -30., 30.);
 
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
-		AdaptiveSwimResult result = new AdaptiveSwimResult(6, true);
+		AdaptiveSwimResult result = new AdaptiveSwimResult(true);
 
 		double stepsizeAdaptive = 0.01; // starting
 
 		double maxPathLength = 8; // m
-		double accuracy = 1e-4; // m
+		double accuracy = 1e-5; // m
 		double eps = 1.0e-6;
 
 
@@ -122,9 +115,9 @@ public class AdaptiveTests {
 
 		try {
 			
-			InitVal revIv = createInitVal();
+			InitialValues revIv = new InitialValues();
 			
-			InitVal iv = null;
+			InitialValues iv = null;
 			double[] uf = null;
 			
 			double sum = 0;
@@ -133,7 +126,6 @@ public class AdaptiveTests {
 			
 			for (int i = n0; i < num; i++) {
 				iv = ivals[i];
-
 				
 				adaptiveSwimmer.swimPlane(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, plane, accuracy,
 						maxPathLength, stepsizeAdaptive, eps, result);
@@ -162,26 +154,23 @@ public class AdaptiveTests {
 					revIv.theta = FastMath.acos2Deg(tzf);
 					revIv.phi = FastMath.atan2Deg(tyf, txf);
 					
-					double zTarg = 0;
+	//				double zTarg = 0;
 
 					if (i == 711) {
-						System.out.println("FORWARD " + iv);
-						SwimTest.printSummary("FORWARD", result.getNStep(), iv.p,
-								result.getUf(), null);
-						System.out.println("FORWARD Path length = " + result.getFinalS() + " m\n\n");
+						System.out.println("FORWARD init conditions\n" + iv);
+						result.printOut(System.out, "Forward result", true);
 					}
 					
-					
-					adaptiveSwimmer.swimZ(revIv.charge, revIv.xo, revIv.yo, revIv.zo, revIv.p, revIv.theta, revIv.phi, zTarg, accuracy, maxPathLength, stepsizeAdaptive, eps, result);
+//					adaptiveSwimmer.swimZ(revIv.charge, revIv.xo, revIv.yo, revIv.zo, revIv.p, revIv.theta, revIv.phi, zTarg, accuracy, maxPathLength, stepsizeAdaptive, eps, result);
+//					adaptiveSwimmer.swim(revIv.charge, revIv.xo, revIv.yo, revIv.zo, revIv.p, revIv.theta, revIv.phi, result.getFinalS(), stepsizeAdaptive, eps, result);
+					adaptiveSwimmer.swimS(revIv.charge, revIv.xo, revIv.yo, revIv.zo, revIv.p, revIv.theta, revIv.phi, accuracy, result.getFinalS(), stepsizeAdaptive, eps, result);
 
 					double dr = FastMath.sqrt(uf[0]*uf[0] + uf[1]*uf[1] + uf[2]*uf[2]);
 					
 					if (i == 711) {
 						System.out.println("BACKWARD " + revIv);
-						SwimTest.printSummary("BACKWARD", result.getNStep(), revIv.p,
-								result.getUf(), null);
+						result.printOut(System.out, "Retrace swim", true);
 						System.out.println("dr = " + dr);
-						System.out.println("BACKWARD Path length = " + result.getFinalS() + " m\n\n");
 					}
 
 					sum += dr;
@@ -211,6 +200,7 @@ public class AdaptiveTests {
 
 	}
 
+	/** Test swimming to a fixed rho */
 	public static void rhoTest() {
 
 		long seed = 9459363;
@@ -219,7 +209,7 @@ public class AdaptiveTests {
 //		num = 1;
 		int n0 = 0;
 
-		InitVal[] ivals = getInitVals(rand, num, 1, true, 0., 0., 0., 0., 0., 0., 0.25, 1.0, 40., 70., 0., 360.);
+		InitialValues[] ivals = InitialValues.getInitialValues(rand, num, 1, true, 0., 0., 0., 0., 0., 0., 0.25, 1.0, 40., 70., 0., 360.);
 
 		System.out.println("TEST swimming to a fixed rho");
 		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
@@ -231,8 +221,8 @@ public class AdaptiveTests {
 		double rhoTarg = 0.30; // m
 		double eps = 1.0e-6;
 
-		AdaptiveSwimResult adaptive = new AdaptiveSwimResult(6, false);
-		AdaptiveSwimResult newadaptive = new AdaptiveSwimResult(6, false);
+		AdaptiveSwimResult oldResult = new AdaptiveSwimResult(false);
+		AdaptiveSwimResult newResult = new AdaptiveSwimResult(false);
 
 		// generate some random initial conditions
 
@@ -258,23 +248,27 @@ public class AdaptiveTests {
 			delMax = Double.NEGATIVE_INFINITY;
 			time = System.currentTimeMillis();
 
-			InitVal iv = null;
+			InitialValues iv = null;
 			for (int i = n0; i < num; i++) {
 				iv = ivals[i];
+                
 				swimmer.swimRho(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, rhoTarg, accuracy,
-						maxPathLength, stepsizeAdaptive, Swimmer.CLAS_Tolerance, adaptive);
+						maxPathLength, stepsizeAdaptive, Swimmer.CLAS_Tolerance, oldResult);
+				
+				//cause this old swimmer does not call init
+				oldResult.setInitialValues(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi);
 
-				rhof = Math.hypot(adaptive.getUf()[0], adaptive.getUf()[1]);
+				rhof = Math.hypot(oldResult.getUf()[0], oldResult.getUf()[1]);
 				double dd = Math.abs(rhoTarg - rhof);
 				delMax = Math.max(delMax, dd);
 
-				adaptStatus[i] = adaptive.getStatus();
-				nStepTotal += adaptive.getNStep();
+				adaptStatus[i] = oldResult.getStatus();
+				nStepTotal += oldResult.getNStep();
 				
 
-				nsMax = Math.max(nsMax, adaptive.getNStep());
+				nsMax = Math.max(nsMax, oldResult.getNStep());
 
-				if (adaptive.getStatus() != AdaptiveSwimmer.SWIM_SUCCESS) {
+				if (oldResult.getStatus() != AdaptiveSwimmer.SWIM_SUCCESS) {
 					badStatusCount += 1;
 				}
 				else {
@@ -283,12 +277,11 @@ public class AdaptiveTests {
 			}
 
 			time = System.currentTimeMillis() - time;
-			SwimTest.printSummary("Fixed Rho,  Adaptive step size", adaptive.getNStep(), iv.p, adaptive.getUf(), null);
+			oldResult.printOut(System.out, "Rho test (old)");
 			System.out.println(
 					String.format("Adaptive time: %-7.3f   avg good delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
 							((double) time) / 1000., sum / (num - badStatusCount), delMax, badStatusCount));
-			System.out.println("Adaptive Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax);
-			System.out.println("Adaptive Path length = " + adaptive.getFinalS() + " m\n\n");
+			System.out.println("Adaptive Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (RungeKuttaException e) {
 			e.printStackTrace();
@@ -305,27 +298,27 @@ public class AdaptiveTests {
 
 			time = System.currentTimeMillis();
 
-			InitVal iv = null;
+			InitialValues iv = null;
 			for (int i = n0; i < num; i++) {
 				iv = ivals[i];
 
 				adaptiveSwimmer.swimRho(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, rhoTarg, accuracy,
-						maxPathLength, stepsizeAdaptive, eps, newadaptive);
+						maxPathLength, stepsizeAdaptive, eps, newResult);
 
-				rhof = Math.hypot(newadaptive.getUf()[0], newadaptive.getUf()[1]);
+				rhof = Math.hypot(newResult.getUf()[0], newResult.getUf()[1]);
 				double dd = Math.abs(rhoTarg - rhof);
 				delMax = Math.max(delMax, dd);
 				
 
-//				if (newadaptive.getStatus() != adaptStatus[i]) {
-//					System.out.println("Adaptive v. NEW Adaptive Status differs for i = " + i + "     adaptiveStat = "
-//							+ adaptStatus[i] + "    NEW adaptive status = " + newadaptive.getStatus());
-//				}
+				if (newResult.getStatus() != adaptStatus[i]) {
+					System.out.println("Adaptive v. NEW Adaptive Status differs for i = " + i + "     adaptiveStat = "
+							+ adaptStatus[i] + "    NEW adaptive status = " + newResult.getStatus());
+				}
 
-				nStepTotal += newadaptive.getNStep();
-				nsMax = Math.max(nsMax, newadaptive.getNStep());
+				nStepTotal += newResult.getNStep();
+				nsMax = Math.max(nsMax, newResult.getNStep());
 
-				if (newadaptive.getStatus() != AdaptiveSwimmer.SWIM_SUCCESS) {
+				if (newResult.getStatus() != AdaptiveSwimmer.SWIM_SUCCESS) {
 					badStatusCount += 1;
 				}
 				else {
@@ -334,20 +327,20 @@ public class AdaptiveTests {
 			}
 
 			time = System.currentTimeMillis() - time;
-			SwimTest.printSummary("Fixed Rho,  NEW Adaptive step size (NO TRAJ)", newadaptive.getNStep(), iv.p,
-					newadaptive.getUf(), null);
+			newResult.printOut(System.out, "Rho test (new)");
 			System.out.println(
 					String.format("NEW Adaptive time: %-7.3f   avg good delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
 							((double) time) / 1000., sum / (num - badStatusCount), delMax, badStatusCount));
-			System.out.println("NEW Adaptive Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax);
-			System.out.println("NEW Adaptive Path length = " + newadaptive.getFinalS() + " m\n\n");
+			System.out.println("NEW Adaptive Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
 	}
 
-	//SWIM TO A PLANE
+	/**
+	 * Test swim to a plane
+	 */
 	public static void planeTest() {
 
 		System.out.println("swim to a plane");
@@ -359,11 +352,11 @@ public class AdaptiveTests {
 		int n0 = 0;
 
 		int status[] = new int[num];
-		InitVal[] ivals = getInitVals(rand, num, -1, false, 0., 0., 0., 0., 0., 0., 0.5, 5.0, 10., 25., -30., 30.);
+		InitialValues[] ivals = InitialValues.getInitialValues(rand, num, -1, false, 0., 0., 0., 0., 0., 0., 0.5, 5.0, 10., 25., -30., 30.);
 
 		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
-		AdaptiveSwimResult result = new AdaptiveSwimResult(6, true);
+		AdaptiveSwimResult result = new AdaptiveSwimResult(true);
 
 		double stepsizeAdaptive = 0.01; // starting
 
@@ -384,7 +377,7 @@ public class AdaptiveTests {
 
 		try {
 			
-			InitVal iv = null;
+			InitialValues iv = null;
 			double[] uf = null;
 			
 			for (int i = n0; i < num; i++) {
@@ -410,17 +403,14 @@ public class AdaptiveTests {
 
 			}
 
-			SwimTest.printSummary("Swim to plane,  NEW Adaptive step size (WITH TRAJ)", result.getNStep(), iv.p,
-					result.getUf(), null);
-			
-
+			result.printOut(System.out, "Swim to plane");
 			System.out.println(String.format("Distance to plane: %-8.6f m" , Math.abs(plane.distance(uf[0], uf[1], uf[2]))));
-			System.out.println("Swim to Plane S Path length = " + result.getFinalS() + " m\n\n");
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
 		}
 	}
 
+	/** Test swimming to a cylinder */
 	public static void cylinderTest() {
 
 		System.out.println("Cylinder around z axis should give us same result as rho swim.");
@@ -432,7 +422,7 @@ public class AdaptiveTests {
 	//	num = 1;
 		int n0 = 0;
 
-		InitVal[] ivals = getInitVals(rand, num, 1, true, 0., 0., 0., 0., 0., 0., 0.25, 1.0, 40., 70., 0., 360.);
+		InitialValues[] ivals = InitialValues.getInitialValues(rand, num, 1, true, 0., 0., 0., 0., 0., 0., 0.25, 1.0, 40., 70., 0., 360.);
 
 		System.out.println("TEST swimming to a fixed rho");
 		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
@@ -446,8 +436,8 @@ public class AdaptiveTests {
 		
 		Cylinder targCyl = new Cylinder(new Line(new Point(0, 0, 0), new Point(0, 0, 1)), rhoTarg);
 
-		AdaptiveSwimResult rResult = new AdaptiveSwimResult(6, true);
-		AdaptiveSwimResult cResult = new AdaptiveSwimResult(6, true);
+		AdaptiveSwimResult rResult = new AdaptiveSwimResult(true);
+		AdaptiveSwimResult cResult = new AdaptiveSwimResult(true);
 
 		// generate some random initial conditions
 
@@ -475,7 +465,7 @@ public class AdaptiveTests {
 
 			time = System.currentTimeMillis();
 
-			InitVal iv = null;
+			InitialValues iv = null;
 			for (int i = n0; i < num; i++) {
 				iv = ivals[i];
 
@@ -498,15 +488,14 @@ public class AdaptiveTests {
 			}
 
 			time = System.currentTimeMillis() - time;
-			SwimTest.printSummary("Fixed Rho", rResult.getNStep(), iv.p,
-					rResult.getUf(), null);
 			
-			rResult.getTrajectory().dumpInCylindrical(System.out);
+			rResult.printOut(System.out, "Fixed rho in cylinder test");
+			
+			rResult.getTrajectory().print(System.out);
 			System.out.println(
 					String.format("Rho time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
 							((double) time) / 1000., sum / num, delMax, badStatusCount));
-			System.out.println("Rho Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax);
-			System.out.println("Rho Path length = " + rResult.getFinalS() + " m\n\n");
+			System.out.println("Rho Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
@@ -523,7 +512,7 @@ public class AdaptiveTests {
 
 			time = System.currentTimeMillis();
 
-			InitVal iv = null;
+			InitialValues iv = null;
 			for (int i = n0; i < num; i++) {
 				iv = ivals[i];
 
@@ -549,15 +538,14 @@ public class AdaptiveTests {
 			}
 
 			time = System.currentTimeMillis() - time;
-			SwimTest.printSummary("Cylinder", cResult.getNStep(), iv.p,
-					cResult.getUf(), null);
-			cResult.getTrajectory().dumpInCylindrical(System.out);
+			
+			cResult.printOut(System.out, "Fixed rho in cylinder test");
+			cResult.getTrajectory().print(System.out);
 
 			System.out.println(
 					String.format("Cylinder time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
 							((double) time) / 1000., sum / num, delMax, badStatusCount));
-			System.out.println("Cylinder Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax);
-			System.out.println("Cylinder Path length = " + cResult.getFinalS() + " m\n\n");
+			System.out.println("Cylinder Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (AdaptiveSwimException e) {
 			e.printStackTrace();
@@ -565,76 +553,4 @@ public class AdaptiveTests {
 
 	}
 
-	private static InitVal[] getInitVals(Random rand, int num, int charge, boolean randCharge, double xmin, double xmax,
-			double ymin, double ymax, double zmin, double zmax, double pmin, double pmax, double thetamin,
-			double thetamax, double phimin, double phimax) {
-
-		InitVal[] initVals = new InitVal[num];
-
-		for (int i = 0; i < num; i++) {
-			initVals[i] = createInitVal();
-			randomInitVal(rand, initVals[i], charge, randCharge, xmin, xmax, ymin, ymax, zmin, zmax, pmin, pmax,
-					thetamin, thetamax, phimin, phimax);
-		}
-
-		return initVals;
-	}
-
-	private static void randomInitVal(Random rand, InitVal initVal, int charge, boolean randCharge, double xmin,
-			double xmax, double ymin, double ymax, double zmin, double zmax, double pmin, double pmax, double thetamin,
-			double thetamax, double phimin, double phimax) {
-
-		if (randCharge) {
-			initVal.charge = (rand.nextBoolean() ? -1 : 1);
-		} else {
-			initVal.charge = charge;
-		}
-
-		initVal.xo = randVal(rand, xmin, xmax);
-		initVal.yo = randVal(rand, ymin, ymax);
-		initVal.zo = randVal(rand, zmin, zmax);
-		initVal.p = randVal(rand, pmin, pmax);
-		initVal.theta = randVal(rand, thetamin, thetamax);
-		initVal.phi = randVal(rand, phimin, phimax);
-	}
-
-	private static double randVal(Random rand, double vmin, double vmax) {
-		double del = vmax - vmin;
-
-		if (Math.abs(del) < SMALL) {
-			return vmin;
-		} else {
-			return vmin + del * rand.nextDouble();
-		}
-	}
-	
-	private static InitVal createInitVal() {
-		if (_instance == null) {
-			_instance = new AdaptiveTests();
-		}
-		return _instance.new InitVal();
-	}
-
-	class InitVal {
-		public int charge;
-		public double xo;
-		public double yo;
-		public double zo;
-		public double p;
-		public double theta;
-		public double phi;
-		
-		
-		public String toString() {
-			String s1 = "Q: " + charge + "\n";
-			String s2 = "xo: " + xo*100 + " cm \n";
-			String s3 = "yo: " + yo*100 + " cm \n";
-			String s4 = "zo: " + zo*100 + " cm \n";
-			String s5 = "p: " + p + "\n";
-			String s6 = "theta: " + theta + "\n";
-			String s7 = "phi: " + phi + "\n";
-			
-			return s1 + s2 + s3 + s4 + s5 + s6 + s7;
-		}
-	}
 }

@@ -103,4 +103,27 @@ public class Point {
 	public String toString() {
 		return String.format("(%10.6G, %10.6G, %10.6G)", x, y, z);
 	}
+	
+	/**
+	 * Compute the distance to another point
+	 * @param x the x coordinate of the other point
+	 * @param y the y coordinate of the other point
+	 * @param z the z coordinate of the other point
+	 * @return the distance between the points
+	 */
+	public double distance(double x, double y, double z) {
+		double dx = x - this.x;
+		double dy = y - this.y;
+		double dz = z - this.z;
+		return Math.sqrt(dx*dx + dy*dy + dz*dz);
+	}
+	
+	/**
+	 * Compute the distance to another point
+	 * @param p the other point
+	 * @return the distance between the points
+	 */
+	public double distance(Point p) {
+		return distance(p.x, p.y, p.z);
+	}
 }

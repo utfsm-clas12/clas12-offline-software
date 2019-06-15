@@ -117,7 +117,6 @@ public class SwimTest {
 		final JMenuItem threadItem = new JMenuItem("Thread Test");
 		final JMenuItem oneVtwoItem = new JMenuItem("Swimmer vs. SwimZ Test");
 		final JMenuItem polyItem = new JMenuItem("SwimZ vs. Poly Approx Test");
-		final JMenuItem specialItem = new JMenuItem("Special Trouble Cases");
 
 		final JMenuItem csvItem = new JMenuItem("Output to CSV");
 		
@@ -151,7 +150,6 @@ public class SwimTest {
 		polyItem.addActionListener(al);
 		testSectorItem.addActionListener(al);
 		reconfigItem.addActionListener(al);
-		specialItem.addActionListener(al);
 		csvItem.addActionListener(al);
 		
 		menu.add(adaptiveTestMenu());
@@ -162,7 +160,6 @@ public class SwimTest {
 		menu.add(testSectorItem);
 		menu.add(reconfigItem);
 		menu.add(threadItem);
-		menu.add(specialItem);
 
 		menu.add(csvItem);
 		return menu;

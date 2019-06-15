@@ -3,6 +3,7 @@ package cnuphys.adaptiveSwim;
 import cnuphys.adaptiveSwim.geometry.Cylinder;
 import cnuphys.adaptiveSwim.geometry.Line;
 import cnuphys.adaptiveSwim.geometry.Plane;
+import cnuphys.adaptiveSwim.geometry.Point;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
@@ -77,7 +78,9 @@ public class AdaptiveSwimmer {
 
 	
 	/**
-	 * Swim using the current active field. This swimmer has no target.
+	 * Swim using the current active field. This swimmer has no target. It will
+	 * stop when the pathlength exceeds the maximum. For a more precise 
+	 * pathlength swim, use swimS.
 	 * @param charge in integer units of e
 	 * @param xo the x vertex position in meters
 	 * @param yo the y vertex position in meters
@@ -119,6 +122,98 @@ public class AdaptiveSwimmer {
 		result.setNStep(ns);
 		result.setStatus(SWIM_SUCCESS);
 	}
+	
+	
+	/**
+	 * Swim to a definite pathlength. If extreme accuracy is not needed, use swim instead.
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param accuracy the requested accuracy for the target pathlength in meters
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimS(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
+			throws AdaptiveSwimException {
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		double h = h0; //running stepsize
+				
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int count = 0;
+		int ns = 0;
+
+		//create the derivative object
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
+
+		//the stopper will stop if we come within range of the target z or if the
+		//pathlength reaches sf
+		AdaptiveSStopper stopper = new AdaptiveSStopper(uf, sf, accuracy, result.getTrajectory());
+
+		//use a half-step advancer
+	//	RK4HalfStepAdvance advancer = new RK4HalfStepAdvance(6);
+
+		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
+		while (count < MAXTRIES) {
+			
+			if ((stopper.getS() + h) > stopper.getSmax()) {
+				h = stopper.getSmax()-stopper.getS();
+				if (h < 0) {
+					break;
+				}
+			}
+
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target z
+			
+			try {
+				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+						
+			if ((stopper.getS()) > stopper.getSmax()) {
+				break;
+			}
+			
+			del = Math.abs((stopper.getS()) - stopper.getSmax());
+			
+			//succeed?
+			if (del < accuracy) {
+				break;
+			}
+						
+			count++;
+			
+			h /= 2;
+		}
+		
+		result.setFinalS(stopper.getS());
+		stopper.copy(stopper.getU(), uf);
+		result.setNStep(ns);
+
+		//if we are at the target s, the status = 0
+		//if we have reached sf, the status = -1
+		if (del < accuracy) {
+			result.setStatus(SWIM_SUCCESS);
+		} else {
+			result.setStatus(SWIM_TARGET_MISSED);
+		}
+	}
+
 	
 	/**
 	 * Swim to a fixed z using the current active field
@@ -203,7 +298,7 @@ public class AdaptiveSwimmer {
 		stopper.copy(stopper.getU(), uf);
 		result.setNStep(ns);
 
-		//if we are at the target rho, the status = 0
+		//if we are at the target z, the status = 0
 		//if we have reached sf, the status = -1
 		if (del < accuracy) {
 			result.setStatus(SWIM_SUCCESS);
@@ -571,6 +666,7 @@ public class AdaptiveSwimmer {
 		}
 	}
 	
+	
 	//init common to many swimmers
 	private double[] init(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
 			AdaptiveSwimResult result) {
@@ -583,13 +679,7 @@ public class AdaptiveSwimmer {
 		}
 		
 		//store initial values
-		result.q = charge;
-		result.xo = xo;
-		result.yo = yo;
-		result.zo = zo;
-		result.p = momentum;
-		result.theta = theta;
-		result.phi = phi;
+		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
 		
 		double thetaRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);

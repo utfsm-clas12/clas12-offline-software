@@ -2,6 +2,7 @@ package cnuphys.adaptiveSwim;
 
 import cnuphys.adaptiveSwim.geometry.Plane;
 import cnuphys.magfield.FastMath;
+import cnuphys.swim.SwimTrajectory;
 
 /**
  * Stopper for swimming to a plane
@@ -25,7 +26,7 @@ public class AdaptivePlaneStopper extends AAdaptiveStopper {
 	 * @param accuracy     the accuracy in meters
 	 * @param trajectory   optional swim trajectory (can be null)
 	 */
-	public AdaptivePlaneStopper(final double[] u0, final double sf, Plane targetPlane, double accuracy, AdaptiveSwimTrajectory trajectory) {
+	public AdaptivePlaneStopper(final double[] u0, final double sf, Plane targetPlane, double accuracy, SwimTrajectory trajectory) {
 		super(u0, sf, accuracy, trajectory);
 		_targetPlane = targetPlane;
 		_startSign = sign(signedDistance(u0));

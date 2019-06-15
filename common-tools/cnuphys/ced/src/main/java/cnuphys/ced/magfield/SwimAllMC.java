@@ -4,6 +4,9 @@ import java.util.Vector;
 
 import org.jlab.io.base.DataEvent;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimException;
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.alldata.DataManager;
@@ -27,7 +30,7 @@ public class SwimAllMC implements ISwimAll {
 
 	// integration cutoff
 	private static final double RMAX = 10.0;
-	private static final double PATHMAX = 10.0;
+	private static final double PATHMAX = 11.0;
 
 	/**
 	 * Get all the row data so the trajectory dialog can be updated.
@@ -209,25 +212,41 @@ public class SwimAllMC implements ISwimAll {
 	 * @param z   z vertex coordinate in meters
 	 */
 	private void swim(LundId lid, double px, double py, double pz, double x, double y, double z) {
+		
+		
 		double p = Math.sqrt(px * px + py * py + pz * pz);
 		double theta = Math.toDegrees(Math.acos(pz / p));
 		double phi = Math.toDegrees(Math.atan2(py, px));
 
-		Swimmer swimmer = new Swimmer();
-		double stepSize = 5e-4; // m
-		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
-
-		// System.err.println("swim vertex: (" + x + ", " + y + ", "
-		// + z + ")");
-		SwimTrajectory traj;
+		AdaptiveSwimmer swimmer = new AdaptiveSwimmer();
+		double stepSize = 1.0e-3;
+		AdaptiveSwimResult result = new AdaptiveSwimResult(true);
+		double eps = 1.0e-6;
 		try {
-			traj = swimmer.swim(lid.getCharge(), x, y, z, p, theta, phi, stopper, 0, PATHMAX, stepSize,
-					Swimmer.CLAS_Tolerance, null);
-			traj.setLundId(lid);
-			Swimming.addMCTrajectory(traj);
-		} catch (RungeKuttaException e) {
-			Log.getInstance().error("Exception while swimming all MC particles");
-			Log.getInstance().exception(e);
+			swimmer.swim(lid.getCharge(), x, y, z, p, theta, phi, PATHMAX, stepSize, eps, result);
+			result.getTrajectory().setLundId(lid);
+			Swimming.addMCTrajectory(result.getTrajectory());
+		} catch (AdaptiveSwimException e) {
+			e.printStackTrace();
 		}
+		
+		
+		
+//		Swimmer swimmer = new Swimmer();
+//		double stepSize = 5e-4; // m
+//		DefaultSwimStopper stopper = new DefaultSwimStopper(RMAX);
+//
+//		// System.err.println("swim vertex: (" + x + ", " + y + ", "
+//		// + z + ")");
+//		SwimTrajectory traj;
+//		try {
+//			traj = swimmer.swim(lid.getCharge(), x, y, z, p, theta, phi, stopper, 0, PATHMAX, stepSize,
+//					Swimmer.CLAS_Tolerance, null);
+//			traj.setLundId(lid);
+//			Swimming.addMCTrajectory(traj);
+//		} catch (RungeKuttaException e) {
+//			Log.getInstance().error("Exception while swimming all MC particles");
+//			Log.getInstance().exception(e);
+//		}
 	}
 }

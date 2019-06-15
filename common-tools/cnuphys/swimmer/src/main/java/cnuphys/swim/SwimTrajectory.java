@@ -3,6 +3,7 @@ package cnuphys.swim;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimUtilities;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
 import cnuphys.magfield.FastMath;
@@ -507,7 +508,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 		return z;
 	}
 	
-	public void dumpInCylindrical(PrintStream ps) {
+	public void print(PrintStream ps) {
 		ps.println("Number of trajectory points: " + size());
 		
 		int i = 0;
@@ -518,7 +519,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 			double z = u[2];
 			double rho = FastMath.hypot(x, y);
 			double phi = FastMath.atan2Deg(y, x);
-			String str = String.format("[%d] phi (deg):  %-7.2f,  rho (m): %-8.3f,   z (m): %-8.3f", i,  phi, rho, z);
+			String str = String.format("[%d]    x (m): %-8.4f  y (m): %-8.4f  z (m): %-8.4f  phi (deg):  %-7.3f,  rho (m): %-8.4f,   sector: %d", i,  x, y, z, phi, rho,  AdaptiveSwimUtilities.getSector(phi));
 			ps.println(str);
 		}
 	}
