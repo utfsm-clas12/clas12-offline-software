@@ -21,6 +21,9 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+
+import com.jogamp.newt.util.MainThread;
+
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.MagnifyWindow;
@@ -52,6 +55,7 @@ import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.BMTCrosses;
 import cnuphys.ced.event.data.CTOF;
+import cnuphys.ced.event.data.CVT;
 import cnuphys.ced.event.data.Cosmics;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.FMTCrosses;
@@ -115,7 +119,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private static String _geoVariation = "default";
 	
 	//ced release 
-	private static final String _release = "build 1.hipo4.02";
+	private static final String _release = "build 1.4.04.H4";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -127,7 +131,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private static boolean _useOldDCGeo = false;
 
 	// using 3D?
-	private static boolean _use3D = false;
+	private static boolean _use3D = true;
 
 	// experimental mode
 	private static boolean _experimental = false;
@@ -381,9 +385,10 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 		// 3D view?
 		if (_use3D) {
+//			MainThread.getSingleton().useMainThread = true;
 			ViewManager.getInstance().getViewMenu().addSeparator();
-//			_forward3DView = new ForwardView3D();
-//			_central3DView = new CentralView3D();
+			_forward3DView = new ForwardView3D();
+			_central3DView = new CentralView3D();
 			_ftCal3DView = new FTCalView3D();
 		}
 
@@ -1161,6 +1166,29 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 		return _geoVariation;
 	}
 
+	//data collectors need to be initialized before 
+	//any events come through
+	private static void initDataCollectors() {
+		DC.getInstance();
+		FTOF.getInstance();
+		BMTCrosses.getInstance();
+		FMTCrosses.getInstance();
+		BSTCrosses.getInstance();
+		TBCrosses.getInstance();
+		HBCrosses.getInstance();
+		TBSegments.getInstance();
+		HBSegments.getInstance();
+		AllEC.getInstance();
+		HTCC2.getInstance();
+		FTCAL.getInstance();
+		CTOF.getInstance();
+		CVT.getInstance();
+		BST.getInstance();
+		BMT.getInstance();
+		CND.getInstance();
+		Cosmics.getInstance();
+		DataManager.getInstance();
+	}
 
 	/**
 	 * Main program launches the ced gui.
@@ -1228,21 +1256,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 						FileUtilities.setDefaultDir(arg[i]);
 					}
 				}
-//				else if (arg[i].equalsIgnoreCase("-torus")) {
-//					i++;
-//					MagneticFields.getInstance().setTorusFullPath(arg[i]);
-//					Log.getInstance().config("Torus Path: " + arg[i]);
-//					System.out.println("Torus Path: " + arg[i]);
-//				}
-//				else if (arg[i].equalsIgnoreCase("-solenoid")) {
-//					i++;
-//					MagneticFields.getInstance().setSolenoidFullPath(arg[i]);
-//					Log.getInstance().config("Solenoid Path: " + arg[i]);
-//					System.out.println("Solenoid Path: " + arg[i]);
-//				}
-				else if (arg[i].contains("USE3D") || arg[i].contains("TAKETHATGAGIKANDVERONIQUE")) {
-					_use3D = true;
-					System.err.println("Using 3D");
+				else if (arg[i].contains("NO3D") || arg[i].contains("TAKETHATGAGIKANDVERONIQUE")) {
+					_use3D = false;
+					System.err.println("Not using 3D");
 				} else if (arg[i].contains("OLDDCGEO")) {
 					_useOldDCGeo = true;
 					System.err.println("Using Old DC Geometry");
@@ -1263,24 +1279,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 		GeometryManager.getInstance();
 
 		// Initialize data collectors
-		DC.getInstance();
-		FTOF.getInstance();
-		BMTCrosses.getInstance();
-		FMTCrosses.getInstance();
-		BSTCrosses.getInstance();
-		TBCrosses.getInstance();
-		HBCrosses.getInstance();
-		TBSegments.getInstance();
-		HBSegments.getInstance();
-		AllEC.getInstance();
-		HTCC2.getInstance();
-		FTCAL.getInstance();
-		CTOF.getInstance();
-		BST.getInstance();
-		BMT.getInstance();
-		CND.getInstance();
-		Cosmics.getInstance();
-		DataManager.getInstance();
+		initDataCollectors();
 
 //	    getInstance();  //creates ced frame
 

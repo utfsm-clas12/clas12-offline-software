@@ -52,6 +52,12 @@ public class DisplayBits {
 
 	/** A flag for trkDoca v. doca */
 	public static final int DOCA = 0200000;
+	
+	/** cvt recon traj */
+	public static final int CVTTRAJ = 0400000;
+	
+	/** sector change diamonds */
+    public static final int SECTORCHANGE = 01000000;
 
 	/** Distance scale */
 	// public static final int SCALE = 04;

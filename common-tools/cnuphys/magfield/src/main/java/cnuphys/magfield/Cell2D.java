@@ -109,11 +109,11 @@ public class Cell2D {
 	}
 
 	/**
-	 * Calculate the field in kG
+	 * Calculate the field in kG in cylindrical components
 	 * 
-	 * @param rho
-	 * @param z
-	 * @param result
+	 * @param rho rho coordinate in cm
+	 * @param z z coordinate in cm
+	 * @param result field in kG in cylindrical components
 	 */
 	public void calculate(double rho, double z, float[] result) {
 		// if (_probe.containsCylindrical(0, rho, z)) {

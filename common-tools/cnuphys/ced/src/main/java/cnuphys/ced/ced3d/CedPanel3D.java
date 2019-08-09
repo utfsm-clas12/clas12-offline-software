@@ -111,9 +111,9 @@ public class CedPanel3D extends Panel3D {
 	 * 
 	 * @param zdist the initial viewer z distance should be negative
 	 */
-	public CedPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist,
+	public CedPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist, float bgRed, float bgGreen, float bgBlue, 
 			String... cbaLabels) {
-		super(angleX, angleY, angleZ, xDist, yDist, zDist);
+		super(angleX, angleY, angleZ, xDist, yDist, zDist, bgRed, bgGreen, bgBlue);
 
 		_view = view;
 		_cbaLabels = cbaLabels;

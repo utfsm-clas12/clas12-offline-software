@@ -91,7 +91,9 @@ public class SolenoidProbe extends FieldProbe {
 		double rphi = Math.toRadians(phi);
 		double cos = Math.cos(rphi);
 		double sin = Math.sin(rphi);
-		double bphi = result[0];
+		
+		//The solenoid map has cylindrical field components
+		double bphi = result[0]; //0 if symmetric
 		double brho = result[1];
 		result[X] = (float) (brho * cos - bphi * sin);
 		result[Y] = (float) (brho * sin + bphi * cos);

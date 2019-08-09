@@ -34,7 +34,7 @@ public class ToAscii {
 			if (!_csv) {
 				writeAsciiHeader(dos, torus);
 			}
-			writeData(dos, torus);
+			writeTorusData(dos, torus);
 			dos.close();
 		}
 		catch (Exception e) {
@@ -43,8 +43,35 @@ public class ToAscii {
 		System.out.println("done");
 	}
 	
-	private static void writeData(DataOutputStream dos, Torus torus) {
+
+	/**
+	 * Write the Solenoid to Ascii
+	 */
+	public static void solenoidToAscii(SolenoidProbe solenoid, String path) {
 		
+		_csv = true;
+		
+		System.out.println("Converting Solenoid To CSV");
+		
+		MINVAL = (float)(1.0e-4);
+		
+		File asciiFile = new File(path);
+
+		try {
+			DataOutputStream dos = new DataOutputStream(new FileOutputStream(asciiFile));
+
+			writeSolenoidData(dos, solenoid);
+			dos.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("done");
+	}
+
+	
+	private static void writeTorusData(DataOutputStream dos, Torus torus) {
+				
 		//needed from torus
 		GridCoordinate pCoord = torus.getPhiCoordinate();
 		GridCoordinate rCoord = torus.getRCoordinate();
@@ -97,6 +124,73 @@ public class ToAscii {
 		}
 		
 	}
+	
+	private static void writeSolenoidData(DataOutputStream dos, SolenoidProbe solenoid) {
+		
+		//needed from torus
+		GridCoordinate pCoord = solenoid.getPhiCoordinate();
+		GridCoordinate rCoord = solenoid.getRCoordinate();
+		GridCoordinate zCoord = solenoid.getZCoordinate();
+
+		
+		for (int ip = 0;  ip <= 360; ip += 2) {			
+			double p = (double)ip;
+
+			System.out.println("phi = " + p);
+
+			double rphi = Math.toRadians(p);
+			double cos = Math.cos(rphi);
+			double sin = Math.sin(rphi);
+
+			for (int ridx = 0; ridx < rCoord.getNumPoints(); ridx++) {
+
+				if ((ridx % 2) == 0) {
+					double r = rCoord.getValue(ridx);
+
+					if (r < 150.1) {
+
+						for (int zidx = 0; zidx < zCoord.getNumPoints(); zidx++) {
+
+							if ((zidx % 2) == 0) {
+
+								double z = zCoord.getValue(zidx);
+								if ((z > -200.1) && (z < 200.1)) {
+
+									int compositeIndex = solenoid.getCompositeIndex(0, ridx, zidx);
+
+									// the solenoid map is in cylindrical coordinates
+									float bphi = solenoid.getB1(compositeIndex);
+									float brho = solenoid.getB2(compositeIndex);
+									float bz = solenoid.getB3(compositeIndex);
+
+									float bx = (float) (brho * cos - bphi * sin);
+									float by = (float) (brho * sin + bphi * cos);
+
+									String s = null;
+
+									s = String.format("%-3.0f,%-3.0f,%-3.0f,%s,%s,%s", p, r, z, vStr(bx), vStr(by),
+											vStr(bz));
+
+									s = s.replace("   ", " ");
+									s = s.replace("  ", " ");
+									s = s.replace("0E", "E");
+									s = s.replace("0E", "E");
+									s = s.replace("0E", "E");
+									s = s.replace("0E", "E");
+									s = s.replace("E+00", "");
+
+									s = s.replace(", ", ",");
+									stringLn(dos, 0, s);
+								} // z in range
+							} // even z index
+						} // z loop
+					} // rho < 150.1
+				} // even rho index
+			} // rho loop
+		}
+
+	}
+
 	
 	private static String vStr(float val) {
 		if (Math.abs(val) < MINVAL) {

@@ -44,6 +44,15 @@ import com.jogamp.opengl.util.Animator;
 
 @SuppressWarnings("serial")
 public class Panel3D extends JPanel implements GLEventListener {
+	
+	//background default color used for r, g and b
+	public static final float BGFEFAULT = 0.9804f;
+	
+	//the actual components of the background
+	private float _bgRed = BGFEFAULT;
+	private float _bgGreen = BGFEFAULT;
+	private float _bgBlue = BGFEFAULT;
+
 
 	// different modes of operation
 	public static enum DrawMode {
@@ -93,6 +102,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 
 	private Animator animator;
 
+
 	/*
 	 * The panel that holds the 3D objects
 	 * 
@@ -109,17 +119,41 @@ public class Panel3D extends JPanel implements GLEventListener {
 	 * @param zdist the initial viewer z distance should be negative
 	 */
 	public Panel3D(float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist) {
+		this(angleX, angleY, angleZ, xDist, yDist, zDist, BGFEFAULT, BGFEFAULT, BGFEFAULT);
+	}
+	
+	/*
+	 * The panel that holds the 3D objects
+	 * 
+	 * @param angleX the initial x rotation angle in degrees
+	 * 
+	 * @param angleY the initial y rotation angle in degrees
+	 * 
+	 * @param angleZ the initial z rotation angle in degrees
+	 * 
+	 * @param xdist move viewpoint left/right
+	 * 
+	 * @param ydist move viewpoint up/down
+	 * 
+	 * @param zdist the initial viewer z distance should be negative
+	 */
+	public Panel3D(float angleX, float angleY, float angleZ, float xDist, float yDist, float zDist, float bgRed,
+			float bgGreen, float bgBlue) {
 		_view_rotx = angleX;
 		_view_roty = angleY;
 		_view_rotz = angleZ;
 		_xdist = xDist;
 		_ydist = yDist;
 		_zdist = zDist;
+		
+		_bgRed = bgRed;
+		_bgGreen = bgGreen;
+		_bgBlue = bgBlue;
 
 		setLayout(new BorderLayout(0, 0));
+		
+//		System.err.println(Thread.currentThread().getName());
 		glprofile = GLProfile.getDefault();
-
-		System.err.println("Panel3D constructor P1 thread: " + Thread.currentThread().getName());
 
 		// glprofile = GLProfile.getMaxFixedFunc(true);
 
@@ -312,7 +346,7 @@ public class Panel3D extends JPanel implements GLEventListener {
 //		gl.glClearColor(1f, 1f, 1f, 1f); // set background (clear) color
 //		gl.glClearColor(.9804f, .9216f, .8431f, 1f); // set background (clear) color
 //		gl.glClearColor(0.9412f, 1f, 1f, 1f); // set background (clear) color
-		gl.glClearColor(0.9804f, 0.9804f, 0.9804f, 1f); // set background (clear) color
+		gl.glClearColor(_bgRed, _bgGreen, _bgBlue, 1f); // set background (clear) color
 		gl.glClearDepth(1.0f); // set clear depth value to farthest
 		gl.glEnable(GL.GL_DEPTH_TEST); // enables depth testing
 		gl.glDepthFunc(GL.GL_LEQUAL); // the type of depth test to do

@@ -51,6 +51,29 @@ public class DragDropList extends JList {
     model.addElement("b");
     model.addElement("c");
   }
+  
+  protected void swap(int index, int dropIndex) {
+	  
+
+		int count = model.size();
+		
+		if ((index < 0) || (dropIndex < 0)) {
+			return;
+		}
+		
+		if ((index >= count) || (dropIndex >= count)) {
+			return;
+		}
+
+		
+		
+		Object o1 = model.elementAt(index);
+//		System.err.println("object type: " + o1.getClass().getName());
+//		String s1 = (String) model.elementAt(index);
+		model.removeElementAt(index);
+		model.insertElementAt(o1, dropIndex);
+	  
+}
 
   public static void main(String[] a){
     JFrame f = new JFrame();
@@ -154,4 +177,6 @@ class MyListDropHandler extends TransferHandler {
     
     return true;
   }
+  
+
 }

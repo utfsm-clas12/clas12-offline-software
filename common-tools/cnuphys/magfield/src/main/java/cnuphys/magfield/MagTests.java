@@ -527,12 +527,18 @@ public class MagTests {
 		}
 	}
 	
-	//convert the torus to ASCII for GEMC
+	//convert the torus to ASCII
 	private static void convertTorusToAscii() {		
 //		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
 //				"/Users/heddle/magfield/FullTorus.txt", false);
 		ToAscii.torusToAscii(MagneticFields.getInstance().getTorus(), 
 				"/Users/heddle/magfield/FullTorus.csv", true);
+	}
+	
+	//convert the solenoid to ASCII
+	private static void convertSolenoidToAscii() {		
+		ToAscii.solenoidToAscii((SolenoidProbe) FieldProbe.factory(MagneticFields.getInstance().getSolenoid()), 
+				"/Users/heddle/magfield/Solenoid.csv");
 	}
 
 	public static JMenu getTestMenu() {
@@ -544,7 +550,8 @@ public class MagTests {
 		final JMenuItem test4Item = new JMenuItem("Sameness Test");
 		final JMenuItem test5Item = new JMenuItem("MathLib Test");
 		final JMenuItem threadItem = new JMenuItem("Thread Test");
-		final JMenuItem asciiItem = new JMenuItem("Convert Torus to ASCII");
+		final JMenuItem asciiTorusItem = new JMenuItem("Convert Torus to ASCII");
+		final JMenuItem asciiSolenoidItem = new JMenuItem("Convert Solenoid to ASCII");
 		final JMenuItem scanItem = new JMenuItem("Scan csv file");
 		final JMenuItem loadItem = new JMenuItem("Load ASCII Torus");
 
@@ -563,8 +570,10 @@ public class MagTests {
 					mathTest();
 				} else if (e.getSource() == threadItem) {
 					threadTest(10000000, 8);
-				} else if (e.getSource() == asciiItem) {
+				} else if (e.getSource() == asciiTorusItem) {
 					convertTorusToAscii();
+				} else if (e.getSource() == asciiSolenoidItem) {
+					convertSolenoidToAscii();
 				} else if (e.getSource() == scanItem) {
 					scanCSVFile();
 				} else if (e.getSource() == loadItem) {
@@ -579,7 +588,8 @@ public class MagTests {
 		test4Item.addActionListener(al1);
 		test5Item.addActionListener(al1);
 		threadItem.addActionListener(al1);
-		asciiItem.addActionListener(al1);
+		asciiTorusItem.addActionListener(al1);
+		asciiSolenoidItem.addActionListener(al1);
 		scanItem.addActionListener(al1);
 		loadItem.addActionListener(al1);
 		
@@ -589,7 +599,8 @@ public class MagTests {
 		testMenu.add(test5Item);
 		testMenu.add(threadItem);
 		testMenu.addSeparator();
-		testMenu.add(asciiItem);
+		testMenu.add(asciiTorusItem);
+		testMenu.add(asciiSolenoidItem);
 		testMenu.add(scanItem);
 		testMenu.add(loadItem);
 		testMenu.addSeparator();

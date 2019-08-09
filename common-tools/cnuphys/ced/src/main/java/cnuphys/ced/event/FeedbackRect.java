@@ -1,5 +1,7 @@
 package cnuphys.ced.event;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
 public class FeedbackRect extends Rectangle {
 
 	public enum Dtype {
-		BMT, BST, CND, DC, EC, FMT, FTOF, PCAL, HTCC
+		BMT, CVT, CND, DC, EC, FMT, FTOF, PCAL, HTCC
 	};
 
 	/** the hit index associated with this feedback rect */
@@ -85,5 +87,4 @@ public class FeedbackRect extends Rectangle {
 		}
 		return inside;
 	}
-
 }

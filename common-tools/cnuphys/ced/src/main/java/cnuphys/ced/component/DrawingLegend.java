@@ -89,19 +89,29 @@ public class DrawingLegend extends JComponent {
 		}
 
 	}
+	
+	private static final int TRAJSIZE = 10;
+	private int paintTrajPoint(Graphics g, int x, int y) {
+		int s2 = TRAJSIZE/2;
+		SymbolDraw.drawStar(g, x, y, s2, Color.black);
 
-	// paint the legent for the central 2D views
+		x += (TRAJSIZE + 4);
+		return quickString(g, x, y, "Recon Traj Pnt");
+	}
+
+	// paint the legend for the central 2D views
 	private void paintCentralViewLegend(Graphics g, int x, int yc) {
 		int xo = x;
 		Graphics2D g2 = (Graphics2D) g;
 		x = drawCross(g, x, yc, DataDrawSupport.BST_CROSS);
 		x = drawCross(g, x, yc, DataDrawSupport.BMT_CROSS);
+		x = paintTrajPoint(g, x, yc);
 
 		yc += 18;
 		SymbolDraw.drawUpTriangle(g, xo, yc, 3, X11Colors.getX11Color("Dark Green"),
 				X11Colors.getX11Color("Aquamarine"));
 
-		quickString(g, xo + 16, yc, "hit strip midpoint");
+		quickString(g, xo + 16, yc, "Hit Strip Midpoint");
 
 		// tracks
 		yc += 18;

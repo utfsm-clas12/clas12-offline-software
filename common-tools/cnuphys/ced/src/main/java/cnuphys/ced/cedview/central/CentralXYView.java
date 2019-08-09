@@ -34,6 +34,7 @@ import cnuphys.bCNU.util.PropertySupport;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.cedview.CedXYView;
+import cnuphys.ced.cedview.ILabCoordinates;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.AdcHit;
@@ -58,7 +59,7 @@ import cnuphys.lund.X11Colors;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
-public class CentralXYView extends CedXYView {
+public class CentralXYView extends CedXYView implements ILabCoordinates {
 
 	// for naming clones
 	private static int CLONE_COUNT = 0;
@@ -163,7 +164,7 @@ public class CentralXYView extends CedXYView {
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
 				DisplayBits.ACCUMULATION + DisplayBits.CROSSES + DisplayBits.MCTRUTH + DisplayBits.RECONHITS
-						+ DisplayBits.ADC_HITS + DisplayBits.CVTTRACKS + DisplayBits.COSMICS + DisplayBits.GLOBAL_HB
+						+ DisplayBits.ADC_HITS + DisplayBits.CVTTRACKS + DisplayBits.CVTTRAJ + DisplayBits.COSMICS + DisplayBits.GLOBAL_HB
 						+ DisplayBits.GLOBAL_TB,
 				3, 5);
 
@@ -697,19 +698,6 @@ public class CentralXYView extends CedXYView {
 	}
 
 	/**
-	 * Get world point from lab coordinates
-	 * 
-	 * @param x  lab x in mm
-	 * @param y  lab y in mm
-	 * @param z  lab z in mm
-	 * @param wp the world point
-	 */
-	public void getWorldFromLabXYZ(double x, double y, double z, Point2D.Double wp) {
-		wp.x = x;
-		wp.y = y;
-	}
-
-	/**
 	 * Clone the view.
 	 * 
 	 * @return the cloned view
@@ -732,5 +720,18 @@ public class CentralXYView extends CedXYView {
 		view.setBounds(vr);
 		return view;
 
+	}
+
+	/**
+	 * Convert lab coordinates (CLAS x,y,z) to world coordinates (2D world system of the view)
+	 * @param x the CLAS12 x coordinate
+	 * @param y the CLAS12 y coordinate
+	 * @param z the CLAS12 z coordinate
+	 * @param wp holds the world point
+	 */
+	@Override
+	public void labToWorld(double x, double y, double z, Point2D.Double wp) {
+		wp.x = x;
+		wp.y = y;
 	}
 }

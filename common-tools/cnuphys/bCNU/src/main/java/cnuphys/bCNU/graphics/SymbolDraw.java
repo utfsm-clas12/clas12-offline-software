@@ -100,6 +100,9 @@ public class SymbolDraw {
 		case X:
 			drawX(g, x, y, s2, lineColor);
 			break;
+			
+		case STAR:
+			drawStar(g, x, y, s2, lineColor);
 
 		case NOSYMBOL:
 			break;
@@ -108,6 +111,23 @@ public class SymbolDraw {
 
 		g2.setStroke(oldStroke);
 
+	}
+	
+	/**
+	 * Draw a simple star
+	 * 
+	 * @param g  the graphics context
+	 * @param x  the horizontal center
+	 * @param y  the vertical center
+	 * @param s2 the half size
+	 * @param lc tThe line color
+	 */
+	public static void drawStar(Graphics g, int x, int y, int s2, Color lc) {
+		g.setColor(lc);
+		g.drawLine(x-s2, y, x+s2, y);
+		g.drawLine(x, y-s2, x, y+s2);
+		g.drawLine(x-s2, y-s2, x+s2, y+s2);
+		g.drawLine(x-s2, y+s2, x+s2, y-s2);
 	}
 
 	/**

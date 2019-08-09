@@ -50,8 +50,6 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 
 	protected SwimTrajectory2D _closestTrajectory;
 
-	/** mark sector changes? */
-	protected boolean _markSectChanges = false;
 	protected double _minMarkR = 25; // cm
 
 	/**
@@ -81,13 +79,8 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 						_trajectories2D.add(new SwimTrajectory2D(trajectory, this));
 					}
 				}
-
-				for (SwimTrajectory2D trajectory2D : _trajectories2D) {
-					drawSwimTrajectory(g, container, trajectory2D);
-					if (_markSectChanges) {
-						markSectorChanges(g, container, trajectory2D);
-					}
-				}
+				
+				drawTrajectories(g, container);
 			}
 		}
 
@@ -105,18 +98,16 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 					if (!veto(trajectory)) {
 						_trajectories2D.add(new SwimTrajectory2D(trajectory, this));
 					}
-//					else {
-//						System.err.println("Trajectory VETOED");
-//					}
 				}
 
-				for (SwimTrajectory2D trajectory2D : _trajectories2D) {
-					drawSwimTrajectory(g, container, trajectory2D);
-					if (_markSectChanges) {
-						markSectorChanges(g, container, trajectory2D);
-					}
-				}
+				drawTrajectories(g, container);
 			}
+		}
+	}
+	
+	protected void drawTrajectories(Graphics g, IContainer container) {
+		for (SwimTrajectory2D trajectory2D : _trajectories2D) {
+			drawSwimTrajectory(g, container, trajectory2D);
 		}
 	}
 
@@ -133,7 +124,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 	}
 
 	// denote sector changes
-	private void markSectorChanges(Graphics g, IContainer container, SwimTrajectory2D trajectory) {
+	protected void markSectorChanges(Graphics g, IContainer container, SwimTrajectory2D trajectory) {
 
 		int[] indices = trajectory.sectChangeIndices();
 		if (indices == null) {
@@ -160,7 +151,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 	 * @param container  the rendering container
 	 * @param trajectory the 2D (already projected) trajectory to draw
 	 */
-	private void drawSwimTrajectory(Graphics g, IContainer container, SwimTrajectory2D trajectory) {
+	protected void drawSwimTrajectory(Graphics g, IContainer container, SwimTrajectory2D trajectory) {
 
 		if (!acceptSimpleTrack(trajectory)) {
 			return;

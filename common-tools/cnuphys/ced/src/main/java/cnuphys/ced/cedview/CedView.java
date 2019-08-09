@@ -457,6 +457,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showFMTCrosses();
 	}
+	
+	/**
+	 * Convenience method to see if we show the sector change diamonds.
+	 * 
+	 * @return <code>true</code> if we are to show  sector change diamonds
+	 */
+	public boolean showSectorChange() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showSectorChange();
+	}
+
 
 	/**
 	 * Convenience method to see it we show the the reconstructed hits.
@@ -483,10 +496,9 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	}
 
 	/**
-	 * Convenience method to see if we show CVT reconstructed tracks. These are ADC
-	 * hits except
+	 * Convenience method to see if we show CVT reconstructed tracks. 
 	 * 
-	 * @return <code>true</code> if we are to show ADC hits.
+	 * @return <code>true</code> if we are to show CVT reconstructed tracks.
 	 */
 	public boolean showCVTTracks() {
 		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
@@ -494,6 +506,19 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showCVTTracks();
 	}
+	
+	/**
+	 * Convenience method to see if we show CVT reconstructed tracks. CVT reconstructed trajectory data.
+	 * 
+	 * @return <code>true</code> if we are to show CVT reconstructed trajectory data.
+	 */
+	public boolean showCVTTraj() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showCVTTraj();
+	}
+
 
 	/**
 	 * Convenience method to see if we show the trkDoca column.

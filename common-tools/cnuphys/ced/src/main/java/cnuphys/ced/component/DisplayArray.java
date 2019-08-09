@@ -98,6 +98,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** Label for reconstructed fmt crosses button */
 	public static final String FMTCROSS_LABEL = "FMT Crosses";
+	
+	/** Label for sector change diamonds */
+	public static final String SECTORCHANGE_LABEL = "Sector Change";
 
 	/** Global show HB */
 	private static final String GLOBAL_HB_LABEL = "HB Data";
@@ -110,6 +113,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** Label for reconstructed CVT Tracks */
 	private static final String CVT_TRACK_LABEL = "CVT Tracks";
+
+	/** Label for reconstructed CVT Trajectory */
+	private static final String CVT_TRAJ_LABEL = "CVT Traj";
 
 	// controls whether any HB data displayed
 	private AbstractButton _showHBButton;
@@ -132,14 +138,20 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	// controls whether ADC hits
 	private AbstractButton _adcHitButton;
 
-	// controls display od cvt reconstructed tracks
+	// controls display of cvt reconstructed tracks
 	private AbstractButton _cvtTrackButton;
+	
+	// controls display od cvt reconstructed trajectory bank data
+	private AbstractButton _cvtTrajButton;
 
 	// controls whether reconstructed clusters are displayed
 	private AbstractButton _clusterButton;
 
 	// controls whether reconstructed fmt crosses are displayed
 	private AbstractButton _fmtCrossButton;
+
+	// controls whether sector change diamonds
+	private AbstractButton _sectorChangeButton;
 
 	// controls mc truth is displayed (when available)
 	private AbstractButton _mcTruthButton;
@@ -286,21 +298,31 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		if (Bits.checkBit(bits, DisplayBits.CVTTRACKS)) {
 			_cvtTrackButton = add(CVT_TRACK_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
+		
+		if (Bits.checkBit(bits, DisplayBits.CVTTRAJ)) {
+			_cvtTrajButton = add(CVT_TRAJ_LABEL, true, true, this, _buttonColor).getCheckBox();
+		}
 
 		// ADC hits
 		if (Bits.checkBit(bits, DisplayBits.ADC_HITS)) {
 			_adcHitButton = add(GLOBAL_ADC_HIT_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
+		//sector change markers
+		if (Bits.checkBit(bits, DisplayBits.SECTORCHANGE)) {
+			_sectorChangeButton = add(SECTORCHANGE_LABEL, false, true, this, _buttonColor).getCheckBox();
+		}
+
+		// fmt crosses
+		if (Bits.checkBit(bits, DisplayBits.FMTCROSSES)) {
+			_fmtCrossButton = add(FMTCROSS_LABEL, true, true, this, _buttonColor).getCheckBox();
+		}
+		
 		// reconstructed clusters
 		if (Bits.checkBit(bits, DisplayBits.CLUSTERS)) {
 			_clusterButton = add(CLUSTER_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
-		// reconstructed clusters
-		if (Bits.checkBit(bits, DisplayBits.FMTCROSSES)) {
-			_fmtCrossButton = add(FMTCROSS_LABEL, true, true, this, _buttonColor).getCheckBox();
-		}
 
 	}
 
@@ -402,6 +424,16 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showFMTCrosses() {
 		return (_fmtCrossButton != null) && _fmtCrossButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method to see if we show the sector change diamonds.
+	 * 
+	 * @return <code>true</code> if we are to show  sector change diamonds
+	 */
+	public boolean showSectorChange() {
+		return (_sectorChangeButton != null) && _sectorChangeButton.isSelected();
+	}
+
 
 	/**
 	 * Convenience method to see if we show the reconstructed hits. These are
@@ -423,14 +455,24 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	}
 
 	/**
-	 * Convenience method to see if we show CVT reconstructed tracks. These are ADC
-	 * hits except
+	 * Convenience method to see if we show CVT reconstructed tracks. 
 	 * 
-	 * @return <code>true</code> if we are to show ADC hits.
+	 * @return <code>true</code> if we are to show CVT reconstructed tracks.
 	 */
 	public boolean showCVTTracks() {
 		return (_cvtTrackButton != null) && _cvtTrackButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method to see if we show CVT reconstructed trajectory data. 
+	 * hits except
+	 * 
+	 * @return <code>true</code> if we are to show CVT reconstructed trajectory data.
+	 */
+	public boolean showCVTTraj() {
+		return (_cvtTrajButton != null) && _cvtTrajButton.isSelected();
+	}
+
 
 	/**
 	 * Convenience method global hit based display

@@ -17,7 +17,6 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	public SwimTrajectoryDrawer(SectorView view) {
 		_view = view;
-		_markSectChanges = true;
 	}
 
 	/**
@@ -32,6 +31,17 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 			super.draw(g, container);
 		}
 	}
+	
+	@Override
+	public void drawTrajectories(Graphics g, IContainer container) {
+		for (SwimTrajectory2D trajectory2D : _trajectories2D) {
+			drawSwimTrajectory(g, container, trajectory2D);
+			if (_view.showSectorChange()) {
+				markSectorChanges(g, container, trajectory2D);
+			}
+		}
+	}
+
 
 	/**
 	 * Here we have a chance to veto a trajectory. For example, we may decide that

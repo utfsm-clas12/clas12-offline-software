@@ -34,6 +34,7 @@ import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.BaseView;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.cedview.ILabCoordinates;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
@@ -53,7 +54,7 @@ import cnuphys.magfield.MagneticFields;
 import cnuphys.swim.SwimTrajectory2D;
 
 @SuppressWarnings("serial")
-public class CentralZView extends CedView implements ChangeListener {
+public class CentralZView extends CedView implements ChangeListener, ILabCoordinates {
 
 	// for naming clones
 	private static int CLONE_COUNT = 0;
@@ -142,7 +143,7 @@ public class CentralZView extends CedView implements ChangeListener {
 						+ ControlPanel.PHISLIDER + ControlPanel.TARGETSLIDER + ControlPanel.PHI_SLIDER_BIG
 						+ ControlPanel.FIELDLEGEND + ControlPanel.DRAWLEGEND,
 				DisplayBits.MAGFIELD | DisplayBits.ACCUMULATION | DisplayBits.CROSSES | DisplayBits.MCTRUTH
-						| DisplayBits.COSMICS | DisplayBits.CVTTRACKS | DisplayBits.GLOBAL_HB | DisplayBits.GLOBAL_TB,
+						| DisplayBits.COSMICS | DisplayBits.CVTTRACKS | DisplayBits.CVTTRAJ | DisplayBits.GLOBAL_HB | DisplayBits.GLOBAL_TB,
 				3, 5);
 
 		view.add(view._controlPanel, BorderLayout.EAST);
@@ -331,8 +332,8 @@ public class CentralZView extends CedView implements ChangeListener {
 			y2 *= 10;
 			z1 *= 10;
 			z2 *= 10;
-			labToLocal(x1, y1, z1, p1);
-			labToLocal(x2, y2, z2, p2);
+			labToLocalWithAlpha(x1, y1, z1, p1);
+			labToLocalWithAlpha(x2, y2, z2, p2);
 
 			g.setColor(Color.red);
 			g.drawLine(p1.x, p1.y, p2.x, p2.y);
@@ -722,6 +723,9 @@ public class CentralZView extends CedView implements ChangeListener {
 		// reconstructed feedback?
 		_crossDrawer.feedback(container, screenPoint, worldPoint, feedbackStrings);
 
+		// hit feedback
+		_hitDrawer.feedback(container, screenPoint, worldPoint, feedbackStrings);
+
 	}
 
 	/**
@@ -768,7 +772,7 @@ public class CentralZView extends CedView implements ChangeListener {
 	private float[] _sCoords = new float[6];
 	private Point _sP1 = new Point();
 	private Point _sP2 = new Point();
-	private Point2D.Double _sWp = new Point2D.Double();
+
 	private static final double _viewerD = 200; // mm
 	private static final double _minViewerDist = 77.2;
 	private static final double _maxViewerDist = 379.;
@@ -782,9 +786,8 @@ public class CentralZView extends CedView implements ChangeListener {
 	 * @param pp the coordinate will hold the screen coordinates
 	 * @return the alpha value that can be used to simulate depth
 	 */
-	public double labToLocal(double x, double y, double z, Point pp) {
-		labToWorld(x, y, z, _sWp);
-		getContainer().worldToLocal(pp, _sWp);
+	public double labToLocalWithAlpha(double x, double y, double z, Point pp) {
+		labToLocal(getContainer(), x, y, z, pp);
 
 		// viewer location
 		double vX = _viewerD * _sinphi;
@@ -797,7 +800,6 @@ public class CentralZView extends CedView implements ChangeListener {
 
 		double alpha = 1. - ((distance - _minViewerDist) / (_maxViewerDist - _minViewerDist));
 		return alpha;
-//		System.err.println("distance  = " + distance + "  aplha = " + alpha);
 	}
 
 	/**
@@ -841,8 +843,8 @@ public class CentralZView extends CedView implements ChangeListener {
 			double z2 = _sCoords[2] + t2 * dZ;
 
 			// cm to mm
-			double alpha1 = labToLocal(10 * x1, 10 * y1, 10 * z1, _sP1);
-			double alpha2 = labToLocal(10 * x2, 10 * y2, 10 * z2, _sP2);
+			double alpha1 = labToLocalWithAlpha(10 * x1, 10 * y1, 10 * z1, _sP1);
+			double alpha2 = labToLocalWithAlpha(10 * x2, 10 * y2, 10 * z2, _sP2);
 
 			drawAlphaLine(g2, _sP1.x, _sP1.y, _sP2.x, _sP2.y, alpha1, alpha2);
 

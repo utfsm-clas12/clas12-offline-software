@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import cnuphys.bCNU.component.EnumComboBox;
 
 public enum SymbolType {
-	NOSYMBOL, SQUARE, CIRCLE, CROSS, UPTRIANGLE, DOWNTRIANGLE, X, DAVID, DIAMOND;
+	NOSYMBOL, SQUARE, CIRCLE, CROSS, UPTRIANGLE, DOWNTRIANGLE, X, DAVID, DIAMOND, STAR;
 
 	/**
 	 * A map for the names of the symbols

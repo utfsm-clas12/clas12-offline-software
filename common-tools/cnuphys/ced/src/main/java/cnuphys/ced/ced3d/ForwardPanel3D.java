@@ -25,7 +25,7 @@ public class ForwardPanel3D extends CedPanel3D {
 
 	public ForwardPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist, float yDist,
 			float zDist) {
-		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
+		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, 0.92f, 0.92f, 0.92f, _cbaLabels);
 	}
 
 	@Override

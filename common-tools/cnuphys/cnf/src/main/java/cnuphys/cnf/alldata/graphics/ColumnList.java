@@ -1,6 +1,8 @@
 package cnuphys.cnf.alldata.graphics;
 
 import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
@@ -13,7 +15,7 @@ import org.jlab.io.base.DataDescriptor;
 import cnuphys.bCNU.graphics.component.CommonBorder;
 import cnuphys.cnf.alldata.DataManager;
 
-public class ColumnList extends DragDropList {
+public class ColumnList extends DragDropList implements KeyListener {
 
 	private static Dimension _size = new Dimension(220, 250);
 
@@ -30,6 +32,7 @@ public class ColumnList extends DragDropList {
 		_scrollPane = new JScrollPane(this);
 		_scrollPane.setPreferredSize(_size);
 		_scrollPane.setBorder(new CommonBorder("Column Name"));
+		addKeyListener(this);
 	}
 
 
@@ -73,6 +76,40 @@ public class ColumnList extends DragDropList {
 	 */
 	public JScrollPane getScrollPane() {
 		return _scrollPane;
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+//		System.out.println("key typed");
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		int selected[] = getSelectedIndices();
+		
+		if ((selected == null) || (selected.length != 1)) {
+			return;
+		}
+		
+		int index = selected[0];
+		int dropIndex = -1;
+		
+		System.out.println("key pressed");
+		int keyCode = e.getKeyCode();
+		if (keyCode == KeyEvent.VK_DOWN) {
+			dropIndex = index+1;
+			System.out.println(" down arrow on index: " + index);
+		}
+		if (keyCode == KeyEvent.VK_UP) {
+			dropIndex = index-1;
+			System.out.println(" up arrow on index: " + index);
+		}
+		
+		swap(index, dropIndex);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
 	}
 
 }

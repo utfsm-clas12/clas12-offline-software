@@ -5,6 +5,7 @@ import item3D.Axes3D;
 import java.awt.Color;
 import java.awt.Font;
 
+import bCNU3D.Panel3D;
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.lund.X11Colors;
@@ -35,7 +36,7 @@ public class CentralPanel3D extends CedPanel3D {
 	 */
 	public CentralPanel3D(CedView3D view, float angleX, float angleY, float angleZ, float xDist, float yDist,
 			float zDist) {
-		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, _cbaLabels);
+		super(view, angleX, angleY, angleZ, xDist, yDist, zDist, BGFEFAULT, BGFEFAULT, BGFEFAULT, _cbaLabels);
 	}
 
 	@Override

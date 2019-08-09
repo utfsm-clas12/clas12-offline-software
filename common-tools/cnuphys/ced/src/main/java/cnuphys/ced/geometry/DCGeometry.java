@@ -126,34 +126,49 @@ public class DCGeometry {
 	 */
 	public static void superLayerVertices(int sector, int superlayer, float[] coords) {
 
-		DCSuperlayer sl = sector0.getSuperlayer(superlayer - 1);
-		DCLayer dcLayer1 = sl.getLayer(0);
-		DCLayer dcLayer6 = sl.getLayer(5);
-		Shape3D shape1 = dcLayer1.getBoundary();
-		Shape3D shape6 = dcLayer6.getBoundary();
+		Line3D wire1 = getWire(sector, superlayer, 1, 1);
+		Line3D wire2 = getWire(sector, superlayer, 1, 112);
+		
+		Line3D wire3 = getWire(sector, superlayer, 6, 1);
+		Line3D wire4 = getWire(sector, superlayer, 6, 112);
 
-		Triangle3D triangle1 = (Triangle3D) shape1.face(1);
-		Triangle3D triangle6 = (Triangle3D) shape6.face(1);
+		
+		Triangle3D triangle1 = new Triangle3D(wire1.midpoint(), wire2.origin(), wire2.end());
+		Triangle3D triangle6 = new Triangle3D(wire3.midpoint(), wire4.origin(), wire4.end());
 
-		for (int i = 0; i < 3; i++) {
-			Point3D v1 = new Point3D(triangle1.point(i));
-			Point3D v6 = new Point3D(triangle6.point(i));
+		
+		
+//		DCSuperlayer sl = sector0.getSuperlayer(superlayer - 1);
+//		DCLayer dcLayer1 = sl.getLayer(0);
+//		DCLayer dcLayer6 = sl.getLayer(5);
+//		Shape3D shape1 = dcLayer1.getBoundary();
+//		Shape3D shape6 = dcLayer6.getBoundary();
+//
+//		Triangle3D triangle1 = (Triangle3D) shape1.face(1);
+//
+		if (triangle1 != null) {
+//			Triangle3D triangle6 = (Triangle3D) shape6.face(1);
 
-			if (sector > 1) {
-				v1.rotateZ(Math.toRadians(60 * (sector - 1)));
-				v6.rotateZ(Math.toRadians(60 * (sector - 1)));
+			for (int i = 0; i < 3; i++) {
+				Point3D v1 = new Point3D(triangle1.point(i));
+				Point3D v6 = new Point3D(triangle6.point(i));
+
+//				if (sector > 1) {
+//					v1.rotateZ(Math.toRadians(60 * (sector - 1)));
+//					v6.rotateZ(Math.toRadians(60 * (sector - 1)));
+//				}
+
+				int j = 3 * i;
+				int k = j + 9;
+
+				coords[j] = (float) v1.x();
+				coords[j + 1] = (float) v1.y();
+				coords[j + 2] = (float) v1.z();
+
+				coords[k] = (float) v6.x();
+				coords[k + 1] = (float) v6.y();
+				coords[k + 2] = (float) v6.z();
 			}
-
-			int j = 3 * i;
-			int k = j + 9;
-
-			coords[j] = (float) v1.x();
-			coords[j + 1] = (float) v1.y();
-			coords[j + 2] = (float) v1.z();
-
-			coords[k] = (float) v6.x();
-			coords[k + 1] = (float) v6.y();
-			coords[k + 2] = (float) v6.z();
 		}
 
 	}

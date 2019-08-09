@@ -153,7 +153,11 @@ public class CSVExporter extends AExporter {
 					if (i > 0) {
 						sb.append(",");
 					}
-					sb.append(data[index]);
+					
+					String s = String.format("%7g", data[index]);
+					sb.append(s);
+					
+					//sb.append(data[index]);
 				}
 				stringLn(_dos, sb.toString());
 			}
