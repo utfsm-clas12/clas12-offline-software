@@ -14,6 +14,7 @@ import java.util.Date;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.detector.helicity.HelicityBit;
 import org.jlab.detector.helicity.HelicityState;
+import org.jlab.detector.scalers.DaqScalers;
 
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.evio.EvioDataEvent;
@@ -564,10 +565,6 @@ public class CLASDecoder4 {
         event.read(rawScalerBank);
         if (configBank.getRows()<1 || rawScalerBank.getRows()<1) return null;
 
-        // retrieve fcup calibrations from CCDB:
-        IndexedTable fcupTable = this.detectorDecoder.scalerManager.
-                getConstants(this.detectorDecoder.getRunNumber(),"/runcontrol/fcup");
-
         // get unix event time (in seconds), and convert to Java's date (via milliseconds):
         Date uet=new Date(configBank.getInt("unixtime",0)*1000L);
 
@@ -592,7 +589,7 @@ public class CLASDecoder4 {
         final double seconds = s2<s1 ? s2+60*60*24-s1 : s2-s1;
 
         // interpret/calibrate RAW::scaler into RUN::scaler:
-        DaqScalers r = DaqScalers.create(rawScalerBank,fcupTable,seconds);
+        DaqScalers r = DaqScalers.create(rawScalerBank,this.detectorDecoder.scalerManager,this.detectorDecoder.getRunNumber(),seconds);
         if (r==null) return null;
 
         Bank scalerBank = new Bank(schemaFactory.getSchema("RUN::scaler"),1);

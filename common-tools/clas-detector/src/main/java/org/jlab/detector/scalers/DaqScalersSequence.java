@@ -1,4 +1,4 @@
-package org.jlab.detector.decode;
+package org.jlab.detector.scalers;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -33,8 +33,7 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
     private int findIndex(long timestamp) {
         if (this.scalers.isEmpty()) return -1;
         if (timestamp < this.scalers.get(0).getTimestamp()) return -1;
-        // assume late timestamps are ok and go with last readout, so comment this out:
-        //if (timestamp > this.scalers.get(this.scalers.size()-1).getTimestamp()) return -1;
+        if (timestamp > this.scalers.get(this.scalers.size()-1).getTimestamp()) return -1;
         // make a fake state for timestamp search:
         DaqScalers ds=new DaqScalers();
         ds.setTimestamp(timestamp);
@@ -172,7 +171,6 @@ public class DaqScalersSequence implements Comparator<DaqScalers> {
                 else {
                     good++;
                     // do something useful with beam charge here:
-                    System.out.println(timestamp+" "+ds.getBeamCharge()+" "+ds.getBeamChargeGated());
                 }
             }
 
