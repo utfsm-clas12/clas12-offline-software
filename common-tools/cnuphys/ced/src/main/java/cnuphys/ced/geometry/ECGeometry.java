@@ -1,6 +1,8 @@
 package cnuphys.ced.geometry;
 
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.PrintStream;
 
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ec.ECLayer;
@@ -9,6 +11,8 @@ import org.jlab.geom.detector.ec.ECSuperlayer;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
 import org.jlab.geom.prim.Triangle3D;
+
+import cnuphys.splot.plot.Environment;
 
 /**
  * Holds the EC geometry from the geometry packages
@@ -765,7 +769,34 @@ public class ECGeometry {
 
 			System.err.println(String.format("%8.1f, %8.1f, %8.1f", coords[j], coords[j + 1], coords[j + 2]));
 		}
+		
+		
+		//VMRL
+		
+		int[][] indices = {{1, 2, 3, 4}, {5, 6, 7, 8}, {2, 3, 6, 7}, {1, 2, 7, 8}, {1, 4, 5, 8}, {4, 3, 6, 5}};
+		
+		
+		String dir = Environment.getInstance().getHomeDirectory();
+		File file = new File(dir, "ec.wrl");
+		if (file.exists()) {
+			file.delete();
+		}
 
+		PrintStream ps = VRMLSupport.openForWriting(file.getPath());
+
+		for (int isect = 1; isect <= 1; isect++) {
+			for (int istack = 1; istack <= 1; istack++) {
+				for (int iview = 1; iview <= 1; iview++) {
+					for (int istrip = 1; istrip <= 36; istrip++) {
+						getStrip(isect, istack, iview, istrip, coords);
+						VRMLSupport.indexedFaceSet(ps, 1, 0, 0, coords, indices);
+					}
+				}
+			}
+		}
+		
+		
+		VRMLSupport.close(ps);
 	}
 
 }
