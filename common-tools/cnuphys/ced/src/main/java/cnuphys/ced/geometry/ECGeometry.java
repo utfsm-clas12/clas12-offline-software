@@ -22,19 +22,19 @@ import cnuphys.splot.plot.Environment;
  */
 public class ECGeometry {
 
-	/** constant for the inner EC */
+	/** constant for the inner stack EC */
 	public static final int EC_INNER = 0;
 
-	/** constant for the outer EC */
+	/** constant for the outer stack EC */
 	public static final int EC_OUTER = 1;
 
-	/** constant for the u strip index */
+	/** constant for the u view index */
 	public static final int EC_U = 0;
 
-	/** constant for the u strip index */
+	/** constant for the u view  index */
 	public static final int EC_V = 1;
 
-	/** constant for the u strip index */
+	/** constant for the u view index */
 	public static final int EC_W = 2;
 
 	// ** stack names names */
@@ -748,7 +748,7 @@ public class ECGeometry {
 		int sector = 1;
 		int stack = 1;
 		int view = 1;
-		int strip = 36;
+		int strip = 1;
 
 		float coords[] = new float[24];
 
@@ -773,7 +773,8 @@ public class ECGeometry {
 		
 		//VMRL
 		
-		int[][] indices = {{1, 2, 3, 4}, {5, 6, 7, 8}, {2, 3, 6, 7}, {1, 2, 7, 8}, {1, 4, 5, 8}, {4, 3, 6, 5}};
+	//	int[][] indices = {{1, 2, 3, 4}, {5, 6, 7, 8}, {2, 3, 6, 7}, {1, 2, 7, 8}, {1, 4, 5, 8}, {4, 3, 6, 5}};
+		int[][] indices = {{0, 1, 2, 3}, {4, 5, 6, 7}, {1, 2, 5, 6}, {0, 1, 6, 7}, {0, 3, 4, 7}, {3, 2, 5, 4}};
 		
 		
 		String dir = Environment.getInstance().getHomeDirectory();
@@ -784,12 +785,15 @@ public class ECGeometry {
 
 		PrintStream ps = VRMLSupport.openForWriting(file.getPath());
 
-		for (int isect = 1; isect <= 1; isect++) {
-			for (int istack = 1; istack <= 1; istack++) {
-				for (int iview = 1; iview <= 1; iview++) {
-					for (int istrip = 1; istrip <= 36; istrip++) {
+		for (int isect = 1; isect <= 6; isect++) {
+			for (int istack = 2; istack <= 2; istack++) {  //inner, outer
+				for (int iview = 1; iview <= 3; iview++) {
+					for (int istrip = 1; istrip <= 36; istrip += 2) {
 						getStrip(isect, istack, iview, istrip, coords);
-						VRMLSupport.indexedFaceSet(ps, 1, 0, 0, coords, indices);
+						int red = ((iview + 0) % 3) == 0 ? 1 : 0;
+						int blue = ((iview + 1) % 3) == 0 ? 1 : 0;
+						int green = ((iview + 2) % 3) == 0 ? 1 : 0;
+						VRMLSupport.indexedFaceSet(ps, red, green, blue, coords, indices);
 					}
 				}
 			}
