@@ -1,5 +1,7 @@
 package cnuphys.ced.event;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
 public class FeedbackRect extends Rectangle {
 
 	public enum Dtype {
-		BMT, BST, CND, DC, EC, FMT, FTOF, PCAL, HTCC
+		BMT, CVT, CND, DC, EC, FMT, FTOF, PCAL, HTCC
 	};
 
 	/** the hit index associated with this feedback rect */
@@ -24,18 +26,17 @@ public class FeedbackRect extends Rectangle {
 	public Dtype type;
 
 	/**
-	 * @param dtype specifies what detector
-	 * @param x left
-	 * @param y top
-	 * @param w width
-	 * @param h height
-	 * @param index the hit index associated with this feedback rect
-	 * @param data the Data container associated with this feedback rect
-	 * @param opt a user option
+	 * @param dtype    specifies what detector
+	 * @param x        left
+	 * @param y        top
+	 * @param w        width
+	 * @param h        height
+	 * @param index    the hit index associated with this feedback rect
+	 * @param data     the Data container associated with this feedback rect
+	 * @param opt      a user option
 	 * @param fbString optional cached feedback strings
 	 */
-	public FeedbackRect(Dtype dtype, int x, int y, int w, int h, int index,
-			int opt, String... fbString) {
+	public FeedbackRect(Dtype dtype, int x, int y, int w, int h, int index, int opt, String... fbString) {
 		super(x, y, w, h);
 		type = dtype;
 		hitIndex = index;
@@ -44,18 +45,17 @@ public class FeedbackRect extends Rectangle {
 	}
 
 	/**
-	 * @param dtype specifies what detector
-	 * @param x left
-	 * @param y top
-	 * @param w width
-	 * @param h height
-	 * @param index the hit index associated with this feedback rect
-	 * @param data the Data container associated with this feedback rect
-	 * @param opt a user option
+	 * @param dtype    specifies what detector
+	 * @param x        left
+	 * @param y        top
+	 * @param w        width
+	 * @param h        height
+	 * @param index    the hit index associated with this feedback rect
+	 * @param data     the Data container associated with this feedback rect
+	 * @param opt      a user option
 	 * @param fbString optional cached feedback strings
 	 */
-	public FeedbackRect(Dtype dtype, int x, int y, int w, int h, int index,
-			int opt, List<String> fbString) {
+	public FeedbackRect(Dtype dtype, int x, int y, int w, int h, int index, int opt, List<String> fbString) {
 		super(x, y, w, h);
 		type = dtype;
 		hitIndex = index;
@@ -71,10 +71,10 @@ public class FeedbackRect extends Rectangle {
 	}
 
 	/**
-	 * Convenience function that both checks for inside and also, if it is
-	 * inside, adds the cached feedback String (if there is one.)
+	 * Convenience function that both checks for inside and also, if it is inside,
+	 * adds the cached feedback String (if there is one.)
 	 * 
-	 * @param pp the screen location
+	 * @param pp              the screen location
 	 * @param feedbackStrings the collection of feedback strings
 	 * @return <code>true</code> if the point is inside
 	 */
@@ -87,5 +87,4 @@ public class FeedbackRect extends Rectangle {
 		}
 		return inside;
 	}
-
 }

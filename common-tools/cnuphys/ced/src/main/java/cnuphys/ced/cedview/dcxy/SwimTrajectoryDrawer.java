@@ -15,16 +15,13 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 
 	public SwimTrajectoryDrawer(DCXYView view) {
 		_view = view;
-		_markSectChanges = true;
 	}
 
 	/**
 	 * Actual drawing method
 	 * 
-	 * @param g
-	 *            the graphics context
-	 * @param container
-	 *            the base container
+	 * @param g         the graphics context
+	 * @param container the base container
 	 */
 	@Override
 	public void draw(Graphics g, IContainer container) {
@@ -32,15 +29,24 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 			super.draw(g, container);
 		}
 	}
+	
+	@Override
+	public void drawTrajectories(Graphics g, IContainer container) {
+		for (SwimTrajectory2D trajectory2D : _trajectories2D) {
+			drawSwimTrajectory(g, container, trajectory2D);
+			if (_view.showSectorChange()) {
+				markSectorChanges(g, container, trajectory2D);
+			}
+		}
+	}
+
 
 	/**
-	 * Here we have a chance to veto a trajectory. For example, we may decide
-	 * that the trajectory won't appear on this view (assuming a view owns this
-	 * drawer) and so don't bother to compute it. The default implementation
-	 * vetoes nothing.
+	 * Here we have a chance to veto a trajectory. For example, we may decide that
+	 * the trajectory won't appear on this view (assuming a view owns this drawer)
+	 * and so don't bother to compute it. The default implementation vetoes nothing.
 	 * 
-	 * @param trajectory
-	 *            the trajectory to test.
+	 * @param trajectory the trajectory to test.
 	 * @return <code>true</code> if this trajectory is vetoed.
 	 */
 	@Override
@@ -51,10 +57,8 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 	/**
 	 * Just us the xy coordinates directly. Ignore z.
 	 * 
-	 * @param v3d
-	 *            the 3D vector (meters)
-	 * @param wp
-	 *            the projected world point.
+	 * @param v3d the 3D vector (meters)
+	 * @param wp  the projected world point.
 	 */
 	@Override
 	public void project(double[] v3d, Point2D.Double wp) {
@@ -90,13 +94,13 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 		String source = trajectory.getSource().toLowerCase();
 
 		if (source.contains("hbtracks")) {
-			System.err.println("DCXY HB TRACK ACCEPT: " + _view.showHB());
+//			System.err.println("DCXY HB TRACK ACCEPT: " + _view.showHB());
 			return _view.showHB();
 		} else if (source.contains("tbtracks")) {
-			System.err.println("DCXY TB TRACK ACCEPT: " + _view.showTB());
+//			System.err.println("DCXY TB TRACK ACCEPT: " + _view.showTB());
 			return _view.showTB();
 		} else if (source.contains("cvtrec")) {
-			System.err.println("DCXY CVT TRACK ACCEPT: " +  _view.showCVTTracks());
+//			System.err.println("DCXY CVT TRACK ACCEPT: " +  _view.showCVTTracks());
 			return _view.showCVTTracks();
 		}
 
