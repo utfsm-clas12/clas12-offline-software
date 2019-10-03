@@ -9,7 +9,7 @@ import cnuphys.magfield.CompositeProbe;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.swimZ.SwimZ;
-
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 /**
  *
  * @author ziegler, heddle
@@ -18,8 +18,10 @@ public class ProbeCollection {
     
     public final cnuphys.swimZ.SwimZ RCF_z;  //  rotated composite field - for swimming to fixed z 
     public final cnuphys.swimZ.SwimZ CF_z;   //  composite field - for swimming to fixed z 
-    public final cnuphys.swim.Swimmer RCF;   //  rotated composite field 
-    public final cnuphys.swim.Swimmer CF;    //  composite field 
+    //public final cnuphys.swim.Swimmer RCF;   //  rotated composite field 
+    //public final cnuphys.swim.Swimmer CF;    //  composite field 
+    public final cnuphys.adaptiveSwim.AdaptiveSwimmer RCF;   //  rotated composite field 
+    public final cnuphys.adaptiveSwim.AdaptiveSwimmer CF;    //  composite field 
     //Probes:
     public final RotatedCompositeProbe RCP;
     public final CompositeProbe CP; 
@@ -32,7 +34,9 @@ public class ProbeCollection {
         
         RCF_z   =   new SwimZ(MagneticFields.getInstance().getRotatedCompositeField());
         CF_z    =   new SwimZ(MagneticFields.getInstance().getCompositeField());
-        RCF     =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
-        CF      =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getCompositeField());
+        //RCF     =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
+        //CF      =   new cnuphys.swim.Swimmer(MagneticFields.getInstance().getCompositeField());
+        RCF     =   new cnuphys.adaptiveSwim.AdaptiveSwimmer(MagneticFields.getInstance().getRotatedCompositeField());
+        CF      =   new cnuphys.adaptiveSwim.AdaptiveSwimmer(MagneticFields.getInstance().getCompositeField());
     }
 }
