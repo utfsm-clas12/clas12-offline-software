@@ -11,6 +11,7 @@ import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.swim.DefaultDerivative;
+import cnuphys.swim.SwimTrajectory;
 
 /**
  * A swimmer for adaptive stepsize integrators. These swimmers are not thread safe. Every thread that needs an
@@ -76,6 +77,35 @@ public class AdaptiveSwimmer {
 		_probe = FieldProbe.factory(magneticField);
 	}
 
+	private void straightLine(final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			final double sf, AdaptiveSwimResult result) {
+		result.setFinalS(sf);
+		result.setNStep(2);
+		result.setStatus(SWIM_SUCCESS);
+
+		double uo[] = new double[6];
+		double uf[] = result.getUf();
+
+		double sintheta = Math.sin(Math.toRadians(theta));
+		double costheta = Math.cos(Math.toRadians(theta));
+		double sinphi = Math.sin(Math.toRadians(phi));
+		double cosphi = Math.cos(Math.toRadians(phi));
+
+		double xf = xo + sf * sintheta * cosphi;
+		double yf = yo + sf * sintheta * sinphi;
+		double zf = zo + sf * costheta;
+
+		stuffU(uo, xo, yo, zo, momentum, theta, phi);
+		stuffU(uf, xf, yf, zf, momentum, theta, phi);
+
+		if (result.hasTrajectory()) {
+
+			SwimTrajectory traj = result.getTrajectory();
+			traj.clear();
+			traj.add(uo, 0);
+			traj.add(uf, sf);
+		}
+	}
 	
 	/**
 	 * Swim using the current active field. This swimmer has no target. It will
@@ -97,9 +127,16 @@ public class AdaptiveSwimmer {
 	public void swim(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
 			final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
-		
+
+		if (charge == 0) {
+			System.err.println("Straight line");
+			straightLine(xo, yo, zo, momentum, theta, phi, sf, result);
+			return;
+		}
+
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
+
 				
 		if (momentum < MINMOMENTUM) {
 			System.err.println("Skipping low momentum fixed rho swim");
@@ -110,7 +147,7 @@ public class AdaptiveSwimmer {
 			result.setStatus(SWIM_BELOW_MIN_P);
 			return;
 		}
-
+		
 		//create the derivative object
 		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
 		AdaptiveDefaultStopper stopper = new AdaptiveDefaultStopper(uf, sf, result.getTrajectory());
@@ -143,6 +180,11 @@ public class AdaptiveSwimmer {
 	public void swimS(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
 			final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
+		
+		if (charge == 0) {
+			straightLine(xo, yo, zo, momentum, theta, phi, sf, result);
+			return;
+		}
 		
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
@@ -681,6 +723,13 @@ public class AdaptiveSwimmer {
 		//store initial values
 		result.setInitialValues(charge, xo, yo, zo, momentum, theta, phi);
 		
+		// set uf (in the result container) to the starting state vector
+		double uf[] = result.getUf();
+		stuffU(uf, xo, yo, zo, momentum, theta, phi);
+		return uf;
+	}
+	
+	private void stuffU(double[] u, final double xo, final double yo, final double zo, final double momentum, double theta, double phi) {
 		double thetaRad = Math.toRadians(theta);
 		double phiRad = Math.toRadians(phi);
 		double sinTheta = Math.sin(thetaRad);
@@ -690,15 +739,12 @@ public class AdaptiveSwimmer {
 		double tz = Math.cos(thetaRad); //pz/p
 		
 		// set uf (in the result container) to the starting state vector
-		double uf[] = result.getUf();
-		uf[0] = xo;
-		uf[1] = yo;
-		uf[2] = zo;
-		uf[3] = tx;
-		uf[4] = ty;
-		uf[5] = tz;
-
-		return uf;
+		u[0] = xo;
+		u[1] = yo;
+		u[2] = zo;
+		u[3] = tx;
+		u[4] = ty;
+		u[5] = tz;
 	}
 	
 	//allows us to bail if below min momentum

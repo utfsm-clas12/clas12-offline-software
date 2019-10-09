@@ -47,6 +47,7 @@ import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventMenu;
 import cnuphys.ced.clasio.ClasIoEventView;
 import cnuphys.ced.clasio.ClasIoMonteCarloView;
+import cnuphys.ced.clasio.CNFManager;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoReconEventView;
 import cnuphys.ced.dcnoise.edit.NoiseParameterDialog;
@@ -1211,6 +1212,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 		// initialize the trigger manager
 		TriggerManager.getInstance();
+		
+		//initialize CNF (Nuc Femtog) Manager
+		CNFManager.getInstance();
 
 		// init the clas 12 dir wherev the json files are
 		try {

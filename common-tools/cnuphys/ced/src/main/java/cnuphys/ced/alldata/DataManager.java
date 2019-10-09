@@ -210,7 +210,7 @@ public class DataManager {
 				Log.getInstance().info(bankName);
 
 				DataDescriptor dd = _dictionary.getDescriptor(bankName);
-
+				
 				String entries[] = dd.getEntryList();
 				for (String columnName : entries) {
 					int type = dd.getProperty("type", columnName);

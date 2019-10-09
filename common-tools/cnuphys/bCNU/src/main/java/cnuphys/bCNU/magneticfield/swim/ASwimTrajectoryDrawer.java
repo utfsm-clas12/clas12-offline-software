@@ -68,7 +68,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 
 		if (SwimMenu.getInstance().showMonteCarloTracks()) {
 			List<SwimTrajectory> trajectories = Swimming.getMCTrajectories();
-
+			
 			if (trajectories != null) {
 
 				for (SwimTrajectory trajectory : trajectories) {
@@ -103,6 +103,24 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 				drawTrajectories(g, container);
 			}
 		}
+		
+		//aux tracks
+		if (true) {
+			List<SwimTrajectory> trajectories = Swimming.getAuxTrajectories();
+
+			if (trajectories != null) {
+
+				for (SwimTrajectory trajectory : trajectories) {
+					if (!veto(trajectory)) {
+						_trajectories2D.add(new SwimTrajectory2D(trajectory, this));
+					}
+				}
+
+				drawTrajectories(g, container);
+			}
+		}
+
+		
 	}
 	
 	protected void drawTrajectories(Graphics g, IContainer container) {
@@ -168,7 +186,7 @@ public abstract class ASwimTrajectoryDrawer extends DrawableAdapter implements I
 //		_lundIds.add(new LundId("Lepton", "?HB" + SUPERZERO,   -300, 0, 0, 0));
 
 		LundId lid = trajectory.getTrajectory3D().getLundId();
-		int id = lid.getId();
+//		int id = lid.getId();
 
 		String source = trajectory.getSource().toLowerCase();
 		// System.err.println("SOURCE of TRAJ: [" + source + "]");

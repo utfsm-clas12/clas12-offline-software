@@ -6,6 +6,26 @@ import java.io.PrintStream;
 
 public class VRMLSupport {
 	
+	private static String _lineColors[] = {
+			
+			"0.0 0.0 0.0,",
+			"0.5 0.5 0.5,",
+			
+			"1.0 0.0 0.0,",
+			"0.5 0.0 0.0,",
+			
+			"0.0 1.0 0.0,",
+			"0.0 0.5 0.0,",
+			
+			"0.0 0.0 1.0,",
+			"0.0 0.0 0.5,",
+			"0.0 0.0 0.25,",	
+			
+			"1.0 1.0 0.0,",
+			"0.0 1.0 1.0,",
+			"1.0 0.0 1.0"
+	};
+	
 	private static int INDENT = 2;
 
 	public static PrintStream openForWriting(String path) {
@@ -34,13 +54,18 @@ public class VRMLSupport {
 		ps.close();
 	}
 	
-	public static void indexedFaceSet(PrintStream ps, int difColorR, int difColorG, int difColorB, float coords[], int[][] indices) {
+	public static void indexedFaceSet(PrintStream ps, float red, float green, float blue, float transparency, float coords[], int[][] indices) {
 		ps.println("Shape {");
 		
 		//appearance
 		indentPrint(ps, 1, "appearance Appearance {");
 		indentPrint(ps, 2, "material Material {");
-		indentPrint(ps, 3, "diffuseColor " + difColorR + " " + difColorG + " " + difColorB);
+		
+		String cs = String.format("diffuseColor %4.2f %4.2f %4.2f", red, green, blue);
+		indentPrint(ps, 3, cs);
+		
+		String ts = String.format("transparency %4.2f", transparency);
+		indentPrint(ps, 3, ts);
 		indentPrint(ps, 2, "}"); //material
 		indentPrint(ps, 1, "}"); //appearance
 
@@ -74,6 +99,7 @@ public class VRMLSupport {
 
 	}
 	
+	
 	private static void indentArray(PrintStream ps, int level, float[] coords) {
 		int len = coords.length;
 		int numPoints = len/3;
@@ -81,7 +107,7 @@ public class VRMLSupport {
 		for (int i = 0; i < numPoints; i++) {
 			int j = 3 * i;
 
-			String s = String.format("%8.1f, %8.1f, %8.1f", coords[j], coords[j + 1], coords[j + 2]);
+			String s = String.format("%8.1f %8.1f %8.1f", coords[j], coords[j + 1], coords[j + 2]);
 			
 			if (i != (numPoints - 1)) {
 				s += ",";

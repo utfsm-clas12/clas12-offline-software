@@ -56,7 +56,7 @@ public class SwimTrajectoryDrawer extends ASwimTrajectoryDrawer {
 		// if (true) return false;
 
 		if ((trajectory.userObject != null) && (trajectory.userObject instanceof SectorView)) {
-//			System.err.println("Vetoed wrong userobject");
+			System.err.println("Vetoed wrong userobject");
 			return (trajectory.userObject != _view);
 		}
 

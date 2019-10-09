@@ -20,6 +20,10 @@ public class Swimming {
 
 	// the recon trajectories
 	private static ArrayList<SwimTrajectory> _reconTrajectories = new ArrayList<SwimTrajectory>();
+	
+	// auxilliary (like CNF) trajectories
+	private static ArrayList<SwimTrajectory> _auxTrajectories = new ArrayList<SwimTrajectory>();
+
 
 	private static boolean _notifyOn = true;
 
@@ -48,6 +52,15 @@ public class Swimming {
 		_reconTrajectories.clear();
 		notifyListeners();
 	}
+	
+	/**
+	 * Clear all the aux trajectories.
+	 */
+	public static void clearAuxTrajectories() {
+		_auxTrajectories.clear();
+		notifyListeners();
+	}
+
 
 	/**
 	 * Clear all trajectories
@@ -56,6 +69,7 @@ public class Swimming {
 		_notifyOn = false;
 		clearMCTrajectories();
 		clearReconTrajectories();
+		clearAuxTrajectories();
 		_notifyOn = true;
 		notifyListeners();
 	}
@@ -77,6 +91,17 @@ public class Swimming {
 	public static ArrayList<SwimTrajectory> getReconTrajectories() {
 		return _reconTrajectories;
 	}
+	
+	/**
+	 * Get all the cached aux trajectories
+	 * 
+	 * @return all the cached aux trajectories
+	 */
+	public static ArrayList<SwimTrajectory> getAuxTrajectories() {
+		return _auxTrajectories;
+	}
+
+
 
 	/**
 	 * Add a trajectory to the mc collection
@@ -99,6 +124,18 @@ public class Swimming {
 		_reconTrajectories.add(traj);
 		notifyListeners();
 	}
+	
+	/**
+	 * Add a trajectory to the aux collection
+	 * 
+	 * @param traj the trajectory to add.
+	 */
+	public static void addAuxTrajectory(SwimTrajectory traj) {
+		_auxTrajectories.remove(traj);
+		_auxTrajectories.add(traj);
+		notifyListeners();
+	}
+
 
 	/**
 	 * Remove a trajectory from the mc collection
@@ -119,6 +156,17 @@ public class Swimming {
 		_reconTrajectories.remove(traj);
 		notifyListeners();
 	}
+	
+	/**
+	 * Remove a trajectory from the aux collection
+	 * 
+	 * @param traj the trajectory to remove.
+	 */
+	public static void removeAuxTrajectory(SwimTrajectory traj) {
+		_auxTrajectories.remove(traj);
+		notifyListeners();
+	}
+
 
 	// notify listeners that the collection of trajectories has changed
 	public static void notifyListeners() {

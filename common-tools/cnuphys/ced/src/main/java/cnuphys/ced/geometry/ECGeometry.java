@@ -773,27 +773,32 @@ public class ECGeometry {
 		
 		//VMRL
 		
-	//	int[][] indices = {{1, 2, 3, 4}, {5, 6, 7, 8}, {2, 3, 6, 7}, {1, 2, 7, 8}, {1, 4, 5, 8}, {4, 3, 6, 5}};
-		int[][] indices = {{0, 1, 2, 3}, {4, 5, 6, 7}, {1, 2, 5, 6}, {0, 1, 6, 7}, {0, 3, 4, 7}, {3, 2, 5, 4}};
-		
+		int[][] indices = {{0, 1, 2, 3}, {4, 5, 6, 7}, {0, 1, 5, 4}, {3, 0, 4, 7}, {2, 3, 7, 6}, {1, 2, 6, 5}};
 		
 		String dir = Environment.getInstance().getHomeDirectory();
 		File file = new File(dir, "ec.wrl");
 		if (file.exists()) {
 			file.delete();
 		}
+		
+//		int [][] red =   {{1, 0, 0}, {1, 0, 1}};
+//		int [][] green = {{0, 1, 0}, {0, 1, 1}};
+//		int [][] blue =  {{0, 0, 1}, {1, 1, 0}};
+
+//		float [][] red =   {{0.5f, 0.5f, 0.5f}, {0.5f, 0.5f, 0.5f}};
+//		float [][] green = {{0, 0, 0}, {0, 0, 0}};
+//		float [][] blue =  {{0, 0, 0}, {0, 0, 0}};
 
 		PrintStream ps = VRMLSupport.openForWriting(file.getPath());
+		float transparency = 0.5f;
 
 		for (int isect = 1; isect <= 6; isect++) {
-			for (int istack = 2; istack <= 2; istack++) {  //inner, outer
-				for (int iview = 1; iview <= 3; iview++) {
-					for (int istrip = 1; istrip <= 36; istrip += 2) {
+			for (int istack = 1; istack <= 2; istack++) {  //inner, outer
+				for (int iview = 1; iview <= 3; iview++) { //u, v, w
+					for (int istrip = 1; istrip <= 36; istrip++) {
 						getStrip(isect, istack, iview, istrip, coords);
-						int red = ((iview + 0) % 3) == 0 ? 1 : 0;
-						int blue = ((iview + 1) % 3) == 0 ? 1 : 0;
-						int green = ((iview + 2) % 3) == 0 ? 1 : 0;
-						VRMLSupport.indexedFaceSet(ps, red, green, blue, coords, indices);
+						float grayScale = ((istrip % 2) == 0) ? 0.5f : 0.7f;
+						VRMLSupport.indexedFaceSet(ps, grayScale, grayScale, grayScale, transparency, coords, indices);
 					}
 				}
 			}
