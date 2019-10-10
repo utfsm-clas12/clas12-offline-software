@@ -129,7 +129,7 @@ public class SwimTest {
 				if (e.getSource() == createTrajItem) {
 					CreateTestTrajectories.createTestTraj(3344632211L, 1000);
 				} else if (e.getSource() == testSectorItem) {
-					SectorTest.testSectorSwim(100000);
+					SectorTest.testSectorSwim(50000);
 				} else if (e.getSource() == threadItem) {
 					ThreadTest.threadTest(100, 8);
 				} else if (e.getSource() == polyItem) {
@@ -482,7 +482,7 @@ public class SwimTest {
 			return;
 		}
 
-		String out = String.format("%s [%-12.5f, %-12.5f, %-12.5f]", s, v[0], v[1], v[2]);
+		String out = String.format("%s [%-10.5f, %-10.5f, %-10.5f %-10.5f, %-10.5f, %-10.5f]", s, v[0], v[1], v[2], v[3], v[4], v[5]);
 		System.out.println(out);
 	}
 

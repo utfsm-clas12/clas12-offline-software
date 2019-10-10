@@ -9,9 +9,12 @@ import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
 import cnuphys.magfield.IMagField;
 import cnuphys.magfield.MagneticField;
+import cnuphys.magfield.RotatedCompositeProbe;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.swim.DefaultDerivative;
+import cnuphys.swim.SectorDerivative;
 import cnuphys.swim.SwimTrajectory;
+import cnuphys.swim.Swimmer;
 
 /**
  * A swimmer for adaptive stepsize integrators. These swimmers are not thread safe. Every thread that needs an
@@ -76,7 +79,16 @@ public class AdaptiveSwimmer {
 	public AdaptiveSwimmer(IMagField magneticField) {
 		_probe = FieldProbe.factory(magneticField);
 	}
+	
+	/**
+	 * Get the probe being used to swim
+	 * @return the probe
+	 */
+	public FieldProbe getProbe() {
+		return _probe;
+	};
 
+	//create a straight line for neutral particles
 	private void straightLine(final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
 			final double sf, AdaptiveSwimResult result) {
 		result.setFinalS(sf);
@@ -136,8 +148,7 @@ public class AdaptiveSwimmer {
 
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
-
-				
+		
 		if (momentum < MINMOMENTUM) {
 			System.err.println("Skipping low momentum fixed rho swim");
 			result.setNStep(0);
@@ -188,7 +199,7 @@ public class AdaptiveSwimmer {
 		
 		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
-				
+		
 		//bail if below minimum momentum
 		if (belowMinimumMomentum(momentum, result)) {
 			return;
@@ -256,6 +267,107 @@ public class AdaptiveSwimmer {
 		}
 	}
 
+	/**
+	 * Swims a charged particle in a sector coordinate system. This swims to a fixed
+	 * z value. THIS IS ONLY VALID IF THE
+	 * FIELD IS A RotatedComnpositeField or RotatedCompositeProbe
+	 * 
+	 * @param sector       the sector [1..6]
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param targetZ the target z in meters
+	 * @param accuracy the requested accuracy for the target z in meters
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void sectorSwimZ(final int sector, final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			final double targetZ, final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
+			throws AdaptiveSwimException {
+		
+		if (!(_probe instanceof RotatedCompositeProbe)) {
+			System.err.println("Can only call sectorSwim with a RotatedComposite Probe");
+			throw new AdaptiveSwimException("Bad Probe: Must call a sectorSwim method with a RotatedCompositeProbe");
+		}
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		double h = h0; //running stepsize
+		
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int count = 0;
+		int ns = 0;
+
+		//create the derivative object
+		SectorDerivative deriv = new SectorDerivative(sector, charge, momentum, (RotatedCompositeProbe) _probe);
+
+		//the stopper will stop if we come within range of the target z or if the
+		//pathlength reaches sf
+		AdaptiveZStopper stopper = new AdaptiveZStopper(uf, sf, targetZ, accuracy, result.getTrajectory());
+
+		//use a half-step advancer
+	//	RK4HalfStepAdvance advancer = new RK4HalfStepAdvance(6);
+
+		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
+		while (count < MAXTRIES) {
+			
+			if ((stopper.getS() + h) > stopper.getSmax()) {
+				h = stopper.getSmax()-stopper.getS();
+				if (h < 0) {
+					break;
+				}
+			}
+
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target z
+			
+			try {
+				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+						
+			if ((stopper.getS()) > stopper.getSmax()) {
+				break;
+			}
+			
+			double zlast = stopper.getU()[2];
+			del = Math.abs(zlast - targetZ);
+			
+			//succeed?
+			if (del < accuracy) {
+				break;
+			}
+						
+			count++;
+			
+			h /= 2;
+		}
+		
+		result.setFinalS(stopper.getS());
+		stopper.copy(stopper.getU(), uf);
+		result.setNStep(ns);
+
+		//if we are at the target z, the status = 0
+		//if we have reached sf, the status = -1
+		if (del < accuracy) {
+			result.setStatus(SWIM_SUCCESS);
+		} else {
+			result.setStatus(SWIM_TARGET_MISSED);
+		}
+		
+	};
 	
 	/**
 	 * Swim to a fixed z using the current active field

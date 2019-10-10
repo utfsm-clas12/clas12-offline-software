@@ -32,7 +32,6 @@ public class AdaptiveSwimResult {
 		this(6, saveTrajectory);
 	}
 
-
 	/**
 	 * Create a container for the swim results
 	 * @param dim the dimension of the system (probably 6)

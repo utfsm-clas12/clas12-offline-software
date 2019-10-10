@@ -69,6 +69,14 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	}
 	
 	/**
+	 * Clear the trajectory
+	 */
+	public void clear() {
+		super.clear();
+		_computedBDL = false;
+	}
+	
+	/**
 	 * Create a one point trajectory. Used hrn the initial momentum is lower than
 	 * some minimum value.
 	 * 
