@@ -50,7 +50,7 @@ public class SectorTest {
 		
 		//compare old swimmer and adaptive
 		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
-		Swimmer swimmer = new Swimmer();
+		Swimmer swimmer = new Swimmer(MagneticFields.getInstance().getRotatedCompositeField());
 		
 
 		swimmer.getProbe().getField().printConfiguration(System.out);
