@@ -20,148 +20,9 @@ import org.jlab.geom.prim.Vector3D;
  * @author ziegler
  */
 
-public class Swim {
+public class SwimTest extends SwimPars {
 
-    private double _x0;
-    private double _y0;
-    private double _z0;
-    private double _phi;
-    private double _theta;
-    private double _pTot;
-    private final double _rMax = 5 + 3; // increase to allow swimming to outer
-    // detectors
-    private double _maxPathLength = 9;
-    private boolean SwimUnPhys = false; //Flag to indicate if track is swimmable
-    private int _charge;
-
-    final double SWIMZMINMOM = 0.75; // GeV/c
-    final double MINTRKMOM = 0.05; // GeV/c
-    final double accuracy = 20e-6; // 20 microns
-    final double stepSize = 5.00 * 1.e-4; // 500 microns
-
-    private ProbeCollection PC;
-    
-    /**
-     * Class for swimming to various surfaces.  The input and output units are cm and GeV/c
-     */
-    public Swim() {
-        PC = Swimmer.getProbeCollection(Thread.currentThread());
-        if (PC == null) {
-            PC = new ProbeCollection();
-            Swimmer.put(Thread.currentThread(), PC);
-        }
-    }
-
-    /**
-     *
-     * @param direction
-     *            +1 for out -1 for in
-     * @param x0
-     * @param y0
-     * @param z0
-     * @param thx
-     * @param thy
-     * @param p
-     * @param charge
-     */
-    public void SetSwimParameters(int direction, double x0, double y0, double z0, double thx, double thy, double p,
-                    int charge) {
-        
-        // x,y,z in m = swimmer units
-        _x0 = x0 / 100;
-        _y0 = y0 / 100;
-        _z0 = z0 / 100;
-        this.checkR(_x0, _y0, _z0);
-        double pz = direction * p / Math.sqrt(thx * thx + thy * thy + 1);
-        double px = thx * pz;
-        double py = thy * pz;
-        _phi = Math.toDegrees(FastMath.atan2(py, px));
-        _pTot = Math.sqrt(px * px + py * py + pz * pz);
-        _theta = Math.toDegrees(Math.acos(pz / _pTot));
-
-        _charge = direction * charge;
-    }
-
-    /**
-     * Sets the parameters used by swimmer based on the input track state vector
-     * parameters swimming outwards
-     *
-     * @param superlayerIdx
-     * @param layerIdx
-     * @param x0
-     * @param y0
-     * @param thx
-     * @param thy
-     * @param p
-     * @param charge
-     */
-    public void SetSwimParameters(int superlayerIdx, int layerIdx, double x0, double y0, double z0, double thx,
-                    double thy, double p, int charge) {
-        // z at a given DC plane in the tilted coordinate system
-        // x,y,z in m = swimmer units
-        _x0 = x0 / 100;
-        _y0 = y0 / 100;
-        _z0 = z0 / 100;
-        this.checkR(_x0, _y0, _z0);
-        double pz = p / Math.sqrt(thx * thx + thy * thy + 1);
-        double px = thx * pz;
-        double py = thy * pz;
-        _phi = Math.toDegrees(FastMath.atan2(py, px));
-        _pTot = Math.sqrt(px * px + py * py + pz * pz);
-        _theta = Math.toDegrees(Math.acos(pz / _pTot));
-
-        _charge = charge;
-
-    }
-
-    /**
-     * Sets the parameters used by swimmer based on the input track parameters
-     *
-     * @param x0
-     * @param y0
-     * @param z0
-     * @param px
-     * @param py
-     * @param pz
-     * @param charge
-     */
-    public void SetSwimParameters(double x0, double y0, double z0, double px, double py, double pz, int charge) {
-        _x0 = x0 / 100;
-        _y0 = y0 / 100;
-        _z0 = z0 / 100;
-         this.checkR(_x0, _y0, _z0);
-        _phi = Math.toDegrees(FastMath.atan2(py, px));
-        _pTot = Math.sqrt(px * px + py * py + pz * pz);
-        _theta = Math.toDegrees(Math.acos(pz / _pTot));
-
-        _charge = charge;
-
-    }
-
-    /**
-     * 
-     * @param xcm
-     * @param ycm
-     * @param zcm
-     * @param phiDeg
-     * @param thetaDeg
-     * @param p
-     * @param charge
-     * @param maxPathLength
-     */
-    public void SetSwimParameters(double xcm, double ycm, double zcm, double phiDeg, double thetaDeg, double p,
-                    int charge, double maxPathLength) {
-
-        _maxPathLength = maxPathLength;
-        _charge = charge;
-        _phi = phiDeg;
-        _theta = thetaDeg;
-        _pTot = p;
-        _x0 = xcm / 100;
-        _y0 = ycm / 100;
-        _z0 = zcm / 100;
-
-    }
+    final double stepSize = 0.0001;  //initial ss = 1 cm
 
     public double[] SwimToPlaneTiltSecSys(int sector, double z_cm) {
         double z = z_cm / 100; // the magfield method uses meters
@@ -219,7 +80,6 @@ public class Swim {
 
                 traj = PC.RCF.sectorSwim(sector, _charge, _x0, _y0, _z0, _pTot, _theta, _phi, z, accuracy, _rMax,
                                 _maxPathLength, stepSize, cnuphys.swim.Swimmer.CLAS_Tolerance, hdata);
-
                 // traj.computeBDL(sector, rprob);
                 if(traj==null)
                     return null;
@@ -327,15 +187,10 @@ public class Swim {
 
     }
 
-    private void checkR(double _x0, double _y0, double _z0) {
-        if(Math.sqrt(_x0*_x0 + _y0*_y0)>this._rMax || 
-                Math.sqrt(_x0*_x0 + _y0*_y0 + _z0*_z0)>this._maxPathLength)
-            this.SwimUnPhys=true;
-    }
     /**
      * Cylindrical stopper
      */
-    private class CylindricalBoundarySwimStopper implements IStopper {
+    private class CylindricalcalBoundarySwimStopper implements IStopper {
 
         private double _finalPathLength = Double.NaN;
 
@@ -347,7 +202,7 @@ public class Swim {
          * @param maxR
          *            the max radial coordinate in meters.
          */
-        private CylindricalBoundarySwimStopper(double Rad) {
+        private CylindricalcalBoundarySwimStopper(double Rad) {
                 // DC reconstruction units are cm. Swim units are m. Hence scale by
                 // 100
                 _Rad = Rad;
@@ -395,7 +250,7 @@ public class Swim {
         if(this.SwimUnPhys)
             return null;
         
-        CylindricalBoundarySwimStopper stopper = new CylindricalBoundarySwimStopper(Rad);
+        CylindricalcalBoundarySwimStopper stopper = new CylindricalcalBoundarySwimStopper(Rad);
         
         SwimTrajectory st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize,
                         0.0005);
@@ -621,61 +476,10 @@ public class Swim {
                 value[5] = lastY[5] * _pTot;
                 value[6] = lastY[6] * 100;
                 value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
-
-                // System.out.println("\nCOMPARE plane swims DIRECTION = " +
-                // dir);
-                // for (int i = 0; i < 8; i++) {
-                // System.out.print(String.format("%-8.5f ", value[i]));
-                // }
-
             }
         } catch (RungeKuttaException e) {
                 e.printStackTrace();
         }
-
-//		PlaneBoundarySwimStopper stopper = new PlaneBoundarySwimStopper(d, n, dir);
-
-        // this is a uniform stepsize swimmer (dph)
-//		st = PC.CF.swim(_charge, _x0, _y0, _z0, _pTot, _theta, _phi, stopper, _maxPathLength, stepSize, 0.0005);
-//		st.computeBDL(PC.CP);
-//		// st.computeBDL(compositeField);
-//
-//		double[] lastY = st.lastElement();
-//
-//		value[0] = lastY[0] * 100; // convert back to cm
-//		value[1] = lastY[1] * 100; // convert back to cm
-//		value[2] = lastY[2] * 100; // convert back to cm
-//		value[3] = lastY[3] * _pTot; // normalized values
-//		value[4] = lastY[4] * _pTot;
-//		value[5] = lastY[5] * _pTot;
-//		value[6] = lastY[6] * 100;
-//		value[7] = lastY[7] * 10; // Conversion from kG.m to T.cm
-//
-//		double tv1 = Math.abs(tvalue[0]);
-//		double v1 = Math.abs(value[0]);
-//
-//		double fract = (Math.abs(tv1 - v1) / Math.max(tv1, v1));
-//		if (fract > 0.9) {
-//			System.out.println("\nBig Diff fract = " + fract + "   direction = " + dir + "   DIST = " + d);
-//
-//			double vtxR = Math.sqrt(_x0 * _x0 + _y0 * _y0 + _z0 * _z0);
-//			System.out.println("VTX: (" + _x0 + ", " + _y0 + ", " + _z0 + ") VtxR: " + vtxR + "   P: " + _pTot
-//					+ "  theta: " + _theta + "  phi: " + _phi);
-//
-//			printV("tV", tvalue);
-//			printV(" V", value);
-//			// System.out.println("tV: (" + tvalue[0]/100 + ", " + tvalue[1]/100
-//			// + ", " + tvalue[2]/100 + ")");
-//			// System.out.println(" V: (" + value[0]/100 + ", " + value[1]/100 +
-//			// ", " + value[2]/100 + ")");
-//		}
-//
-//		// System.out.println();
-//		// for (int i = 0; i < 8; i++) {
-//		// System.out.print(String.format("%-8.5f ", value[i]));
-//		// }
-//		// System.out.println();
-
         return value;
 
     }
@@ -763,46 +567,5 @@ public class Swim {
 
     
     
-    private void printV(String pfx, double v[]) {
-            double x = v[0] / 100;
-            double y = v[1] / 100;
-            double z = v[2] / 100;
-            double r = Math.sqrt(x * x + y * y + z * z);
-            System.out.println(String.format("%s: (%-8.5f, %-8.5f, %-8.5f) R: %-8.5f", pfx, z, y, z, r));
-    }
-
-    /**
-     * 
-     * @param sector
-     * @param x_cm
-     * @param y_cm
-     * @param z_cm
-     * @param result B field components in T in the tilted sector system
-     */
-    public void Bfield(int sector, double x_cm, double y_cm, double z_cm, float[] result) {
-
-        PC.RCP.field(sector, (float) x_cm, (float) y_cm, (float) z_cm, result);
-        // rcompositeField.field((float) x_cm, (float) y_cm, (float) z_cm,
-        // result);
-        result[0] = result[0] / 10;
-        result[1] = result[1] / 10;
-        result[2] = result[2] / 10;
-
-    }
-    /**
-     * 
-     * @param x_cm
-     * @param y_cm
-     * @param z_cm
-     * @param result B field components in T in the lab frame
-     */
-    public void BfieldLab(double x_cm, double y_cm, double z_cm, float[] result) {
-
-        PC.CP.field((float) x_cm, (float) y_cm, (float) z_cm, result);
-        result[0] = result[0] / 10;
-        result[1] = result[1] / 10;
-        result[2] = result[2] / 10;
-
-    }
-
+    
 }
