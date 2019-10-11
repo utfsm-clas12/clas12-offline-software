@@ -36,8 +36,8 @@ public class Cylinder {
 	}
 	
 	/**
-	 * Get the shortest distance between this line (as an infinite line) and a point
-	 * 
+	 * Get the shortest distance between the surface of this infinite cylinder and a point.
+	 * If the value is negative, we are inside the cylinder.
 	 * @param x the x coordinate
 	 * @param y the y coordinate
 	 * @param z the z coordinate
