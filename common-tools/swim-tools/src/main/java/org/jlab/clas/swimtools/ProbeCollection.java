@@ -20,8 +20,8 @@ public class ProbeCollection {
     public final cnuphys.swimZ.SwimZ CF_z;   //  composite field - for swimming to fixed z 
     public final cnuphys.swim.Swimmer RCF;   //  rotated composite field 
     public final cnuphys.swim.Swimmer CF;    //  composite field 
-    public final cnuphys.adaptiveSwim.AdaptiveSwimmer ARCF;   //  rotated composite field 
-    public final cnuphys.adaptiveSwim.AdaptiveSwimmer ACF;    //  composite field 
+    public final cnuphys.adaptiveSwim.AdaptiveSwimmer ARCF;   //  rotated composite field - for adaptive step swimming
+    public final cnuphys.adaptiveSwim.AdaptiveSwimmer ACF;    //  composite field - for adaptive step swimming
     //Probes:
     public final RotatedCompositeProbe RCP;
     public final CompositeProbe CP; 

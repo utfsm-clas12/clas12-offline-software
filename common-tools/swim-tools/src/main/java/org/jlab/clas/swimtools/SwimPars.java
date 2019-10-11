@@ -5,15 +5,7 @@
  */
 package org.jlab.clas.swimtools;
 
-import cnuphys.rk4.IStopper;
-import cnuphys.rk4.RungeKuttaException;
-import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.util.Plane;
-import cnuphys.swimZ.SwimZException;
-import cnuphys.swimZ.SwimZResult;
-import cnuphys.swimZ.SwimZStateVector;
 import org.apache.commons.math3.util.FastMath;
-import org.jlab.geom.prim.Vector3D;
 
 /**
  *
