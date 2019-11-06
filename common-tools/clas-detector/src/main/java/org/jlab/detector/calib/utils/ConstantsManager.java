@@ -24,8 +24,9 @@ public class ConstantsManager {
     private volatile Map<Integer,DatabaseConstantsDescriptor>  runConstants = new LinkedHashMap<Integer,DatabaseConstantsDescriptor>();
     private String   databaseVariation = "default";
     private String   timeStamp         = "";
-   
-    private volatile Map<Integer,RCDBConstants> rcdbConstants = new LinkedHashMap<Integer,RCDBConstants>();
+  
+    // RCDB constants are engine-independent, make it a static:
+    private static volatile Map<Integer,RCDBConstants> rcdbConstants = new LinkedHashMap<Integer,RCDBConstants>();
     
     public ConstantsManager(){
         
@@ -52,8 +53,8 @@ public class ConstantsManager {
     }
     
     public synchronized void init(List<String>  keys, List<String>  tables){
-        Set<String> keysSet = new LinkedHashSet<String>(keys);
-        Set<String> tablesSet = new LinkedHashSet<String>(tables);
+        Set<String> keysSet = new LinkedHashSet<>(keys);
+        Set<String> tablesSet = new LinkedHashSet<>(tables);
         this.defaultDescriptor.addTables(keysSet,tablesSet);
         
     }
@@ -71,10 +72,10 @@ public class ConstantsManager {
     }
   
     public RCDBConstants getRcdbConstants(int run) {
-        if(this.rcdbConstants.containsKey(run)==false){
+        if(ConstantsManager.rcdbConstants.containsKey(run)==false){
             this.loadConstantsForRun(run);
         }
-        return this.rcdbConstants.get(run);
+        return ConstantsManager.rcdbConstants.get(run);
     }
     
     public RCDBConstants.RCDBConstant getRcdbConstant(int run,String name) {
@@ -91,10 +92,8 @@ public class ConstantsManager {
                 this.databaseVariation, this.timeStamp);
         
         
-        List<String>   tn = new ArrayList<String>(desc.getTableNames());
-        List<String>   tk = new ArrayList<String>(desc.getTableKeys());
-        
-        //for(String tableName : desc.getTableNames())
+        List<String>   tn = new ArrayList<>(desc.getTableNames());
+        List<String>   tk = new ArrayList<>(desc.getTableKeys());
         
         for(int i = 0; i < desc.getTableNames().size(); i++){                
             String tableName = tn.get(i);
@@ -102,8 +101,6 @@ public class ConstantsManager {
                 IndexedTable  table = provider.readTable(tableName);
                 desc.getMap().put(tk.get(i), table);
                 System.out.println(String.format("***** >>> adding : %14s / table = %s", tk.get(i),tableName));
-                //System.out.println("***** >>> adding : table " + tableName 
-                //        + "  key = " + tk.get(i));
             } catch (Exception e) {
                 System.out.println("[ConstantsManager] ---> error reading table : "
                         + tableName);
@@ -111,11 +108,17 @@ public class ConstantsManager {
         }
         provider.disconnect();
         this.runConstants.put(run, desc);
-        //System.out.println(this.toString());
 
-        RCDBProvider rcdbpro = new RCDBProvider();
-        this.rcdbConstants.put(run,rcdbpro.getConstants(run));
-        rcdbpro.disconnect();
+        if (!ConstantsManager.rcdbConstants.containsKey(run)) {
+            if (run > RCDBProvider.MIN_RUN) {
+                RCDBProvider rcdbpro = new RCDBProvider();
+                ConstantsManager.rcdbConstants.put(run,rcdbpro.getConstants(run));
+                rcdbpro.disconnect();
+            }
+            else {
+                ConstantsManager.rcdbConstants.put(run,new RCDBConstants());
+            }
+        }
     }
     
     @Override
@@ -137,15 +140,13 @@ public class ConstantsManager {
      */
     public static class DatabaseConstantsDescriptor {
         
-        private String  descName   = "descriptor";
         private int     runNumber  = 10;
-        private int     nIndex     = 3;
         
-        Set<String>    tableNames  = new LinkedHashSet<String>();
+        Set<String>    tableNames  = new LinkedHashSet<>();
         
-        Set<String>    mapKeys     = new LinkedHashSet<String>();
+        Set<String>    mapKeys     = new LinkedHashSet<>();
         
-        Map<String,IndexedTable>  hashTables = new LinkedHashMap<String,IndexedTable>();
+        Map<String,IndexedTable>  hashTables = new LinkedHashMap<>();
         
         public DatabaseConstantsDescriptor(){
             
@@ -213,7 +214,6 @@ public class ConstantsManager {
             StringBuilder str = new StringBuilder();
             int i = 0;
             for(String name : tableNames){
-                //for(int i = 0; i < this.tableNames.size();i++){
                 str.append(String.format("%4d : %s\n", i , name));
                 i++;
             }

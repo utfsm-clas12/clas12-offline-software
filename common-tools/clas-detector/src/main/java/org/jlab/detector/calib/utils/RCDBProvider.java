@@ -16,7 +16,10 @@ public class RCDBProvider {
 
     private org.rcdb.JDBCProvider provider;
 
-    private int debugMode = 2;
+    // do not access RCDB for run numbers smaller than this:
+    public static final int MIN_RUN=100;
+    
+    private static final int DEBUG = 2;
 
     public RCDBProvider(){
         String address = DEFAULTADDRESS;
@@ -61,14 +64,14 @@ public class RCDBProvider {
     private void initialize(String address){
         provider = RCDB.createProvider(address);
         try {
-            if (debugMode>1) {
+            if (DEBUG>1) {
                 System.out.println("[RCDB] --->  open connection with : " + address);
             }
             provider.connect();
         }
         catch (Exception e) {
         }
-        if (debugMode>1) {
+        if (DEBUG>1) {
             if(provider.isConnected()==true){
                 System.out.println("[RCDB] --->  database connection  : success");
             } else {
@@ -79,7 +82,7 @@ public class RCDBProvider {
 
     public void disconnect(){
         if (provider.isConnected()) {
-            if (debugMode>1) {
+            if (DEBUG>1) {
                 System.out.println("[RCDB] --->  database disconnect  : success");
             }
             provider.close();
