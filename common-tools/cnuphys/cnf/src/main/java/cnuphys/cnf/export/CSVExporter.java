@@ -154,7 +154,7 @@ public class CSVExporter extends AExporter {
 						sb.append(",");
 					}
 					
-					String s = String.format("%7g", data[index]);
+					String s = String.format("%5.4g", data[index]);
 					sb.append(s);
 					
 					//sb.append(data[index]);
