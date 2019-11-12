@@ -174,6 +174,7 @@ public class SwimTest {
 		final JMenuItem lineItem = new JMenuItem("Line Test");
 		final JMenuItem zItem = new JMenuItem("Z Test");
 		final JMenuItem cylinderItem = new JMenuItem("Cylinder Test");
+		final JMenuItem sphereItem = new JMenuItem("Sphere Test");
 		final JMenuItem noStopperItem = new JMenuItem("No Stopper Test");
 		
 		
@@ -198,6 +199,9 @@ public class SwimTest {
 				}
                 else if (e.getSource() == cylinderItem) {
 					AdaptiveTests.cylinderTest();
+				}
+                else if (e.getSource() == sphereItem) {
+					AdaptiveTests.sphereTest();
 				}
                 else if (e.getSource() == noStopperItem) {
 					AdaptiveTests.noStopperTest();
@@ -484,12 +488,6 @@ public class SwimTest {
 
 		String out = String.format("%s [%-10.5f, %-10.5f, %-10.5f %-10.5f, %-10.5f, %-10.5f]", s, v[0], v[1], v[2], v[3], v[4], v[5]);
 		System.out.println(out);
-	}
-
-	private static void hdataReport(double hdata[], double toCM) {
-		String s = String.format("Min step: %-12.5e   Avg Step: %-12.5f   Max Step: %-12.5f cm", toCM * hdata[0],
-				toCM * hdata[1], toCM * hdata[2]);
-		System.out.println(s);
 	}
 
 	/**

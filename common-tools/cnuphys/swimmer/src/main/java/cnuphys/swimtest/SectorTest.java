@@ -96,9 +96,10 @@ public class SectorTest {
 				traj.sectorComputeBDL(sector, (RotatedCompositeProbe) probe);
 				System.out.println("BDL = " + traj.getComputedBDL() + " kG-m");
 
-				double lastY[] = swimResult.getUf();
+				double lastY[] = swimResult.getLastTrajectoryPoint();
 				System.out.print("Sector: " + sector + "  ");
 				SwimTest.printVect(lastY, " last ");
+				System.out.println("Final s: " + swimResult.getFinalS());
 			}
 			catch (AdaptiveSwimException e) {
 				e.printStackTrace();
@@ -172,7 +173,7 @@ public class SectorTest {
 			z = 5.75;
 
 			adaptiveSwimmer.sectorSwimZ(1, charge, x0, y0, z0, pTot, theta, phi, z, accuracy, 10, stepSize, eps, swimResult);
-			double lastY[] = swimResult.getUf();
+			double lastY[] = swimResult.getLastTrajectoryPoint();
 			SwimTest.printVect(lastY, " last (NEW, FORWARD) ");
 			
 			
@@ -190,7 +191,7 @@ public class SectorTest {
 			phi = FastMath.atan2Deg(tyf, txf);
 
 			adaptiveSwimmer.sectorSwimZ(1, -charge, x0, y0, z0, pTot, theta, phi, z, accuracy, 10, stepSize, eps, swimResult);
-			lastY = swimResult.getUf();
+			lastY = swimResult.getLastTrajectoryPoint();
 			SwimTest.printVect(lastY, " last (NEW, BACKWARD) ");
 
 		}

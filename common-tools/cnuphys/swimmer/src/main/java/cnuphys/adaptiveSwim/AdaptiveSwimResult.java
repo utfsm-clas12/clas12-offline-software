@@ -63,11 +63,29 @@ public class AdaptiveSwimResult {
 	
 	/**
 	 * Get the final state vector, usually [x, y, x, px/p, py/p, pz/p]
-	 * where x, y, z are in meters
-	 * @return the final state vector
+	 * where x, y, z are in meters. This final vector is never augmented.
+	 * To get the augmented, assume the trajectory was created, use
+	 * getLastTrajectoryPoint.
+	 * @return the final state vector, always with six elements.
 	 */
 	public double[] getUf() {
 		return _uf;
+	}
+	
+	/**
+	 * Gets the last trajectory point if the trajectory was saved.
+	 * This should be augmented with pathlength and bdl in indices 6 and 7.
+	 * Otherwise return the usual six element final state vector.
+	 * @return last trajectory point
+	 */
+	public double[] getLastTrajectoryPoint() {
+		if (_trajectory == null) {
+			return getUf();
+		}
+		else {
+			//augmented
+			return _trajectory.lastElement();
+		}
 	}
 
 	/**

@@ -4,6 +4,7 @@ import cnuphys.adaptiveSwim.geometry.Cylinder;
 import cnuphys.adaptiveSwim.geometry.Line;
 import cnuphys.adaptiveSwim.geometry.Plane;
 import cnuphys.adaptiveSwim.geometry.Point;
+import cnuphys.adaptiveSwim.geometry.Sphere;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
 import cnuphys.magfield.FieldProbe;
@@ -641,6 +642,95 @@ public class AdaptiveSwimmer {
 			result.setStatus(SWIM_TARGET_MISSED);
 		}
 	}
+	
+	/**
+	 * Swim to an arbitrary sphere using the current active field
+	 * @param charge in integer units of e
+	 * @param xo the x vertex position in meters
+	 * @param yo the y vertex position in meters
+	 * @param zo the z vertex position in meters
+	 * @param momentum the momentum in GeV/c
+	 * @param theta the initial polar angle in degrees
+	 * @param phi the initial azimuthal angle in degrees
+	 * @param targetSphere the target sphere
+	 * @param accuracy the requested accuracy for the target rho in meters
+	 * @param sf the final (max) value of the independent variable (pathlength) unless the integration is terminated by the stopper
+	 * @param h0 the initial stepsize in meters
+	 * @param eps the overall fractional tolerance (e.g., 1.0e-5)
+	 * @param result the container for some of the swimming results
+	 * @throws AdaptiveSwimException
+	 */
+	public void swimSphere(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
+			Sphere targetSphere, final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
+			throws AdaptiveSwimException {
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		double h = h0; //running stepsize
+				
+		//bail if below minimum momentum
+		if (belowMinimumMomentum(momentum, result)) {
+			return;
+		}
+				
+		double del = Double.POSITIVE_INFINITY;
+		int count = 0;
+		int ns = 0;
+
+		//create the derivative object
+		DefaultDerivative deriv = new DefaultDerivative(charge, momentum, _probe);
+
+		//the stopper will stop if we come within range of the target cylinder or the
+		//pathlength reaches sf
+		AdaptiveSphereStopper stopper = new AdaptiveSphereStopper(uf, sf, targetSphere, accuracy, result.getTrajectory());
+
+		ButcherAdvance advancer = new ButcherAdvance(6, ButcherTableau.CASH_KARP);
+		while (count < MAXTRIES) {
+			
+			if ((stopper.getS() + h) > stopper.getSmax()) {
+				h = (stopper.getSmax()-stopper.getS())/4;
+				if (h < 0) {
+					break;
+				}
+			}
+
+			//this will try to swim us the rest of the way to sf, but hopefully
+			//we'll get stopped earlier because we reach the target plane
+			
+			try {
+				ns += AdaptiveSwimUtilities.driver(h, deriv, stopper, advancer, eps, uf);
+			} catch (AdaptiveSwimException e) {
+				//put in a message that allows us to reproduce the track
+			}
+						
+			if ((stopper.getS()) > stopper.getSmax()) {
+				break;
+			}
+			
+			del = Math.abs(targetSphere.distance(stopper.getU()[0], stopper.getU()[1], stopper.getU()[2]));
+			
+			//succeed?
+			if (del < accuracy) {
+				break;
+			}
+						
+			count++;
+			
+			h /= 2;
+		}
+		
+		result.setFinalS(stopper.getS());
+		stopper.copy(stopper.getU(), uf);
+		result.setNStep(ns);
+
+		//if we are at the target rho, the status = 0
+		//if we have reached sf, the status = -1
+		if (del < accuracy) {
+			result.setStatus(SWIM_SUCCESS);
+		} else {
+			result.setStatus(SWIM_TARGET_MISSED);
+		}
+	}
+	
 	
 
 	/**

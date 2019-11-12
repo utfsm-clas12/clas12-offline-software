@@ -409,6 +409,11 @@ public class AdaptiveTests {
 			e.printStackTrace();
 		}
 	}
+	
+	/** Test swimming to a cylinder */
+	public static void sphereTest() {
+
+	}
 
 	/** Test swimming to a cylinder */
 	public static void cylinderTest() {
