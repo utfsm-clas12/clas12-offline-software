@@ -170,6 +170,25 @@ public class AdaptiveSwimResult {
 		_initialValues.theta = theta;
 		_initialValues.phi = phi;
 	}
+	
+	/**
+	 * Used to compare to old swimmer
+	 * @param traj trajectory (probably from old swimmer)
+	 */
+	public void setTrajectory(SwimTrajectory traj) {
+		_trajectory = traj;
+		
+		double last[] = traj.lastElement();
+		for (int i = 0; i < 6; i++) {
+			_uf[i] = last[i];
+		}
+		
+		if (last.length > 6) {
+			_finalS = last[6];
+		}
+	}
+	
+	
 
 	
 	/**
@@ -230,6 +249,7 @@ public class AdaptiveSwimResult {
 				String.format("[phi, rho, z] = [%10.7f, %10.7f, %10.7f]\n", phi, rho, z);
 	}
 	
+	//the momentum string
 	private String momentumString() {
 
 		double tx = _uf[3];

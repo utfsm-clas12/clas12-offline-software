@@ -11,6 +11,7 @@ import cnuphys.magfield.FastMath;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
+import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
 import cnuphys.swimtest.SwimTest;
 
@@ -197,7 +198,89 @@ public class AdaptiveTests {
 	}
 
 	public static void zTest() {
+		long seed = 9459363;
+		Random rand = new Random(seed);
+		int num = 100;
+		int n0 = 0;
+		
+		//the initial values
+		InitialValues[] ivals = InitialValues.getInitialValues(rand, num, 1, true, 
+				0., 0., 0.,  //vertex mins
+				0., 0., 0.,  //vertex max
+				5, 8.0,      //momentum range
+				20., 30.,    //theta range
+				0., 360.     //phi range
+				);
 
+		System.out.println("TEST swimming to a fixed z");
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
+
+		double maxPathLength = 8; // m
+		double accuracy = 5e-3; // m
+		double zTarg = 5; // m
+		double eps = 1.0e-6;
+		long time;
+
+		double stepsizeAdaptive = 0.01; // starting
+		
+		Swimmer swimmer = new Swimmer();
+		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
+		AdaptiveSwimResult oldResult = new AdaptiveSwimResult(false);
+		AdaptiveSwimResult newResult = new AdaptiveSwimResult(false);
+
+
+        double hdata[] = new double[3];
+		
+		InitialValues iv = null;
+		time = System.currentTimeMillis();
+		
+		SwimTrajectory traj = null;
+		
+		//old swimmer
+		for (int i = n0; i < num; i++) {
+			iv = ivals[i];
+			
+			try {
+				traj = swimmer.swim(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, zTarg, accuracy, maxPathLength, stepsizeAdaptive,
+						Swimmer.CLAS_Tolerance, hdata);
+			} catch (RungeKuttaException e) {
+				e.printStackTrace();
+			}
+            
+			//cause this old swimmer does not call init
+			oldResult.setInitialValues(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi);
+
+		}
+		
+		traj.computeBDL(swimmer.getProbe());
+		oldResult.setTrajectory(traj);
+		time = System.currentTimeMillis() - time;
+		oldResult.printOut(System.out, "Z test (old)");
+		System.out.println(
+				String.format("[OLD] Adaptive time: %-7.3f",
+						((double) time) / 1000.));
+		
+		time = System.currentTimeMillis();
+		//new swimmer
+		for (int i = n0; i < num; i++) {
+			iv = ivals[i];
+			
+			try {
+				adaptiveSwimmer.swimZ(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, zTarg, accuracy,
+						maxPathLength, stepsizeAdaptive, eps, newResult);
+			} catch (AdaptiveSwimException e) {
+				e.printStackTrace();
+			}
+
+		}
+		
+		time = System.currentTimeMillis() - time;
+		newResult.printOut(System.out, "Z test (new)");
+		System.out.println(
+				String.format("[NEW] Adaptive time: %-7.3f",
+						((double) time) / 1000.));
+
+		System.out.println("Done with z-test");
 	}
 
 	/** Test swimming to a fixed rho */
