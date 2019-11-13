@@ -55,7 +55,7 @@ public class StripData {
 			public void run() {
 				double t = (System.currentTimeMillis() - _startTime) / 1000;
 				double val = _valueGetter.value(t);
-
+				
 				// do we have to bump left?
 				if (_xColumn.size() == _capacity) {
 					_xColumn.removeFirst();

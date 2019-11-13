@@ -196,19 +196,20 @@ public class AdaptiveTests {
 	
 		
 	}
-
-	public static void zTest() {
-		long seed = 9459363;
+	
+	//ztest for time
+	public static void TIMEzTest() {
+		long seed = 9479365;
 		Random rand = new Random(seed);
-		int num = 100;
+		int num = 100000;
 		int n0 = 0;
 		
 		//the initial values
 		InitialValues[] ivals = InitialValues.getInitialValues(rand, num, 1, true, 
-				0., 0., 0.,  //vertex mins
-				0., 0., 0.,  //vertex max
+				-0.05, -0.05, -0.05,  //vertex mins
+				0.05, 0.05, 0.05,  //vertex max
 				5, 8.0,      //momentum range
-				20., 30.,    //theta range
+				20., 35.,    //theta range
 				0., 360.     //phi range
 				);
 
@@ -218,7 +219,7 @@ public class AdaptiveTests {
 		double maxPathLength = 8; // m
 		double accuracy = 5e-3; // m
 		double zTarg = 5; // m
-		double eps = 1.0e-6;
+		double eps = 1.0e-5;
 		long time;
 
 		double stepsizeAdaptive = 0.01; // starting
@@ -279,6 +280,79 @@ public class AdaptiveTests {
 		System.out.println(
 				String.format("[NEW] Adaptive time: %-7.3f",
 						((double) time) / 1000.));
+
+		System.out.println("Done with z-test");
+	}
+
+
+	//test swim to fixed z
+	public static void zTest() {
+		long seed = 9479365;
+		Random rand = new Random(seed);
+		int num = 100;
+		int n0 = 0;
+		
+
+		System.out.println("TEST swimming to a fixed z");
+		MagneticFields.getInstance().setActiveField(FieldType.COMPOSITE);
+
+		double maxPathLength = 8; // m
+		double accuracy = 5e-3; // m
+		double zTarg = 5; // m
+		double eps = 1.0e-5;
+
+		double stepsizeAdaptive = 0.01; // starting
+		
+		Swimmer swimmer = new Swimmer();
+		AdaptiveSwimmer adaptiveSwimmer = new AdaptiveSwimmer();
+		AdaptiveSwimResult oldResult = new AdaptiveSwimResult(false);
+		AdaptiveSwimResult newResult = new AdaptiveSwimResult(false);
+
+
+        double hdata[] = new double[3];
+				
+		SwimTrajectory traj = null;
+		
+		InitialValues iv = new InitialValues();
+		
+		for (int i = n0; i < num; i++) {
+			InitialValues.randomInitVal(rand, iv, 1, true, 
+					-0.05, -0.05, -0.05,  //vertex mins
+					0.05, 0.05, 0.05,  //vertex max
+					5, 8.0,      //momentum range
+					20., 35.,    //theta range
+					0., 360.     //phi range
+					);
+			
+			//old swimmer
+			try {
+				traj = swimmer.swim(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, zTarg, accuracy, maxPathLength, stepsizeAdaptive,
+						Swimmer.CLAS_Tolerance, hdata);
+			} catch (RungeKuttaException e) {
+				e.printStackTrace();
+			}
+            
+			//cause this old swimmer does not call init
+			oldResult.setInitialValues(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi);
+			
+			//new swimmer
+			try {
+				adaptiveSwimmer.swimZ(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, zTarg, accuracy,
+						maxPathLength, stepsizeAdaptive, eps, newResult);
+			} catch (AdaptiveSwimException e) {
+				e.printStackTrace();
+			}
+
+		}
+		
+		
+		//print last
+		traj.computeBDL(swimmer.getProbe());
+		oldResult.setTrajectory(traj);
+		oldResult.printOut(System.out, "Z test (old)");
+		
+		
+		newResult.printOut(System.out, "Z test (new)");
 
 		System.out.println("Done with z-test");
 	}

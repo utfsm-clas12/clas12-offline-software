@@ -38,9 +38,14 @@ import cnuphys.splot.plot.PlotParameters;
 import cnuphys.splot.plot.VerticalLine;
 import cnuphys.splot.style.SymbolType;
 
+@SuppressWarnings("serial")
 public class Grid extends JFrame implements IValueGetter {
 
+	private static int NUMPLOTS = 6;
+	
 	private PlotGrid _plotGrid;
+	
+	private PlotCanvas[] _canvases = new PlotCanvas[NUMPLOTS];
 
 	private Font _titleFont = Environment.getInstance().getCommonFont(12);
 	private Font _statusFont = Environment.getInstance().getCommonFont(9);
@@ -48,6 +53,7 @@ public class Grid extends JFrame implements IValueGetter {
 	private Font _legendFont = Environment.getInstance().getCommonFont(10);
 
 	public Grid() {
+		
 		super("sPlot");
 
 		// Initialize look and feel
@@ -86,29 +92,31 @@ public class Grid extends JFrame implements IValueGetter {
 		add(_plotGrid, BorderLayout.CENTER);
 
 		// add some plots
-		for (int index = 0; index < 6; index++) {
+		for (int index = 0; index < NUMPLOTS; index++) {
 			try {
-				PlotCanvas canvas = new PlotCanvas(createDataSet(index), getPlotTitle(index), getXAxisLabel(index),
+				_canvases[index] = new PlotCanvas(createDataSet(index), getPlotTitle(index), getXAxisLabel(index),
 						getYAxisLabel(index));
 
-				fillData(canvas, index);
-				setPreferences(canvas, index);
+				fillData(_canvases[index], index);
+				setPreferences(_canvases[index], index);
 
-				_plotGrid.addPlotCanvas(canvas);
+				_plotGrid.addPlotCanvas(_canvases[index]);
 			}
 			catch (DataSetException e) {
 				e.printStackTrace();
 				return;
 			}
+			
+			_canvases[index].setWorldSystem();
 		}
 
 		// test
-		for (int row = 0; row < 2; row++) {
-			for (int col = 0; col < 3; col++) {
-				System.out.println("Plot at row: " + row + " col: " + col + "  has title: "
-						+ _plotGrid.getPlotCanvas(row, col).getTitle());
-			}
-		}
+//		for (int row = 0; row < 2; row++) {
+//			for (int col = 0; col < 3; col++) {
+//				System.out.println("Plot at row: " + row + " col: " + col + "  has title: "
+//						+ _plotGrid.getPlotCanvas(row, col).getTitle());
+//			}
+//		}
 		sizeToScreen(0.85);
 	}
 
@@ -125,6 +133,7 @@ public class Grid extends JFrame implements IValueGetter {
 		setSize(d);
 	}
 
+	//get the dataset based in the plot index
 	protected DataSet createDataSet(int index) throws DataSetException {
 		switch (index) {
 		case 0:
@@ -153,6 +162,7 @@ public class Grid extends JFrame implements IValueGetter {
 		return null;
 	}
 
+	//get the column names based on plot index
 	protected String[] getColumnNames(int index) {
 		switch (index) {
 		case 0:
@@ -182,6 +192,7 @@ public class Grid extends JFrame implements IValueGetter {
 		return null;
 	}
 
+	//get the x axis label based on plot index
 	protected String getXAxisLabel(int index) {
 		switch (index) {
 		case 0:
@@ -207,6 +218,8 @@ public class Grid extends JFrame implements IValueGetter {
 		return null;
 	}
 
+	
+	//get the y axis label based on index
 	protected String getYAxisLabel(int index) {
 		switch (index) {
 		case 0:
@@ -232,6 +245,7 @@ public class Grid extends JFrame implements IValueGetter {
 		return null;
 	}
 
+	//get the plot title based on index
 	protected String getPlotTitle(int index) {
 		switch (index) {
 		case 0:
@@ -257,7 +271,7 @@ public class Grid extends JFrame implements IValueGetter {
 		return null;
 	}
 
-	// fill the plot data
+	// fill the plot data based on index
 	public void fillData(PlotCanvas canvas, int index) {
 
 		DataSet ds = canvas.getDataSet();
@@ -266,7 +280,11 @@ public class Grid extends JFrame implements IValueGetter {
 		case 0:
 			for (int i = 0; i < ErfTest._rawdata.length - 2; i += 3) {
 				try {
-					ds.add(ErfTest._rawdata[i], ErfTest._rawdata[i + 1], ErfTest._rawdata[i + 2]);
+					double x = ErfTest._rawdata[i];
+					double y = ErfTest._rawdata[i+1];
+					double e = ErfTest._rawdata[i+2];
+	//				System.out.println("Plot [" + index + "]  (x, y, e) = (" + x + ", " + y + ", " + e + ")");
+					ds.add(x, y, e);
 				}
 				catch (DataSetException e) {
 					e.printStackTrace();

@@ -33,6 +33,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import cnuphys.splot.edit.DataEditor;
 import cnuphys.splot.edit.PlotPreferencesDialog;
+import cnuphys.splot.pdata.DataChangeListener;
 import cnuphys.splot.pdata.DataColumn;
 import cnuphys.splot.pdata.DataSet;
 import cnuphys.splot.pdata.DataSetException;
@@ -48,7 +49,7 @@ import cnuphys.splot.toolbar.ToolBarButton;
 import cnuphys.splot.toolbar.ToolBarToggleButton;
 
 public class PlotCanvas extends JComponent
-		implements MouseListener, MouseMotionListener, IRubberbanded, IToolBarListener, TableModelListener {
+		implements MouseListener, MouseMotionListener, IRubberbanded, IToolBarListener, TableModelListener, DataChangeListener {
 
 	public static final String DONEDRAWINGPROP = "Done Drawing";
 	public static final String TITLECHANGEPROP = "Plot Title Change";
@@ -244,10 +245,15 @@ public class PlotCanvas extends JComponent
 	public void setDataSet(DataSet ds) {
 
 		_dataSet = ds;
+		
+		ds.removeDataChangeListener(this);
+		ds.addDataChangeListener(this);
+
+		
 		if (_dataSet != null) {
 			_dataSet.notifyListeners();
 		}
-		setWorldSystem();
+//		setWorldSystem();
 		repaint();
 	}
 
@@ -286,7 +292,7 @@ public class PlotCanvas extends JComponent
 	 * set.
 	 */
 	public void setWorldSystem() {
-
+		
 		if (_worldSystem == null) {
 			_worldSystem = new Rectangle2D.Double();
 		}
@@ -1045,6 +1051,12 @@ public class PlotCanvas extends JComponent
 				ppan._toolbar.setSelectedToggle(s);
 			}
 		}
+	}
+
+	@Override
+	public void dataSetChanged(DataSet dataSet) {
+		setWorldSystem();
+		needsRedraw(false);
 	}
 
 }

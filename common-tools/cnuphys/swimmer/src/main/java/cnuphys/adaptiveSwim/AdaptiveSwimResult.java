@@ -178,6 +178,8 @@ public class AdaptiveSwimResult {
 	public void setTrajectory(SwimTrajectory traj) {
 		_trajectory = traj;
 		
+		_nStep = traj.size();
+		
 		double last[] = traj.lastElement();
 		for (int i = 0; i < 6; i++) {
 			_uf[i] = last[i];
