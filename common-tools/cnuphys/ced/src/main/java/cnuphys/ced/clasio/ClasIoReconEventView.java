@@ -53,8 +53,9 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			addTracks(event, _trajData, "HitBasedTrkg::HBTracks");
 			addTracks(event, _trajData, "TimeBasedTrkg::TBTracks");
 
-			// only look for cvt tracks if we have no other recon tracks?
+			// look for cvt tyracks
 			addTracks(event, _trajData, "CVTRec::Tracks");
+			addTracks(event, _trajData, "CVTRec::TracksCA");
 
 			model.setData(_trajData);
 			model.fireTableDataChanged();
@@ -73,11 +74,15 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 				return;
 			}
 
-			// treat CVT tracks separately
-			if (bankName.contains("CVTRec")) {
+			if (bankName.contains("CVTRec::TracksCA")) {
 				addCVTTracks(event, data, bankName);
 				return;
 			}
+			if (bankName.contains("CVTRec::Tracks")) {
+				addCVTTracks(event, data, bankName);
+				return;
+			}
+
 
 			boolean hitBased = bankName.contains("HitBased");
 			DataManager dm = DataManager.getInstance();
