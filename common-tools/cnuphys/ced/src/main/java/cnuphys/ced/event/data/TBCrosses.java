@@ -5,7 +5,7 @@ public class TBCrosses extends Crosses {
 	private static TBCrosses _instance;
 	
 	private TBCrosses() {
-		super("TimeBasedTrkg::TBCrosses");
+		super("DCTB::crosses");
 	}
 	
 	/**

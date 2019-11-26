@@ -5,7 +5,7 @@ public class HBHits extends TbHbHits {
 	private static HBHits _instance;
 	
 	private HBHits() {
-		super("HitBasedTrkg::HBHits");
+		super("DCHB::tracks");
 	}
 	
 	/**

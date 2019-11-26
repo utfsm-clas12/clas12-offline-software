@@ -301,7 +301,7 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
         segments =  segFinder.get_Segments(pclusters, event, dcDetector, true);
         
         if(segments!=null && segments.size()>0) {
-            DataBank bankE = event.createBank("TimeBasedTrkg::TBSegmentTrajectory", segments.size() * 6);
+            DataBank bankE = event.createBank("DCTB::segtrajectory", segments.size() * 6);
             int index = 0;
             for (Segment aSeglist : segments) {
                 if (aSeglist.get_Id() == -1) {
@@ -332,9 +332,9 @@ public class LayerEfficiencyAnalyzer extends DCEngine implements IDataEventListe
 	
 	float trkDBinning = (float) ((float) 4.0/40.0);
 	private void ProcessLayerEffs(DataEvent event) {
-		if(event.hasBank("TimeBasedTrkg::TBSegmentTrajectory")==false)
+		if(event.hasBank("DCTB::segtrajectory")==false)
                     return;
-		DataBank Bank = event.getBank("TimeBasedTrkg::TBSegmentTrajectory") ;
+		DataBank Bank = event.getBank("DCTB::segtrajectory") ;
 		int nrows =  Bank.rows();
 		//Bank.show(); System.out.println(" NUMBER OF ENTRIES IN BANK = "+nrows);
 		for (int i = 0; i < nrows; i++) {

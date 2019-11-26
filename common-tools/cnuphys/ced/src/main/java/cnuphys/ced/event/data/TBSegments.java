@@ -5,7 +5,7 @@ public class TBSegments extends Segments {
 	private static TBSegments _instance;
 	
 	private TBSegments() {
-		super("TimeBasedTrkg::TBSegments");
+		super("DCTB::segments");
 	}
 	
 	/**

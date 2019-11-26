@@ -249,13 +249,13 @@ public class HitReader {
         0: this.getConstantsManager().getConstants(newRun, "/calibration/dc/signal_generation/doca_resolution"),
         1: this.getConstantsManager().getConstants(newRun, "/calibration/dc/time_to_distance/t2d")
         */
-        if (!event.hasBank("HitBasedTrkg::HBHits")) {
+        if (!event.hasBank("DCHB::hits")) {
             //System.err.println("there is no HB dc bank ");
             _HBHits = new ArrayList<>();
             return;
         }
         
-        DataBank bank = event.getBank("HitBasedTrkg::HBHits");
+        DataBank bank = event.getBank("DCHB::hits");
         int rows = bank.rows();
 
         int[] id = new int[rows];

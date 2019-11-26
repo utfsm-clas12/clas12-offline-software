@@ -49,32 +49,32 @@ public class DCReconstructionTest {
     DCHBEngine engineHB = new DCHBEngine();
     engineHB.init();
     engineHB.processDataEvent(testEvent);
-    if(testEvent.hasBank("HitBasedTrkg::HBTracks")) {
-        testEvent.getBank("HitBasedTrkg::HBTracks").show();
+    if(testEvent.hasBank("DCHB::tracks")) {
+        testEvent.getBank("DCHB::tracks").show();
     }
     
-    assertEquals(testEvent.hasBank("HitBasedTrkg::HBTracks"), true);
-    assertEquals(testEvent.getBank("HitBasedTrkg::HBTracks").rows(), 1);
-    assertEquals(testEvent.getBank("HitBasedTrkg::HBTracks").getByte("q", 0), -1);
-    assertEquals(ClasMath.isWithinXPercent(16.0, testEvent.getBank("HitBasedTrkg::HBTracks").getFloat("p0_x", 0), 1.057), true);
-    assertEquals(testEvent.getBank("HitBasedTrkg::HBTracks").getFloat("p0_y", 0) > -0.1, true);
-    assertEquals(testEvent.getBank("HitBasedTrkg::HBTracks").getFloat("p0_y", 0) < 0.1, true);
-    assertEquals(ClasMath.isWithinXPercent(16.0, testEvent.getBank("HitBasedTrkg::HBTracks").getFloat("p0_z", 0), 2.266), true);
+    assertEquals(testEvent.hasBank("DCHB::tracks"), true);
+    assertEquals(testEvent.getBank("DCHB::tracks").rows(), 1);
+    assertEquals(testEvent.getBank("DCHB::tracks").getByte("q", 0), -1);
+    assertEquals(ClasMath.isWithinXPercent(16.0, testEvent.getBank("DCHB::tracks").getFloat("px", 0), 1.057), true);
+    assertEquals(testEvent.getBank("DCHB::tracks").getFloat("py", 0) > -0.1, true);
+    assertEquals(testEvent.getBank("DCHB::tracks").getFloat("py", 0) < 0.1, true);
+    assertEquals(ClasMath.isWithinXPercent(16.0, testEvent.getBank("DCHB::tracks").getFloat("pz", 0), 2.266), true);
 
     DCTBEngine engineTB = new DCTBEngine();
     engineTB.init();
     engineTB.processDataEvent(testEvent);
-    if(testEvent.hasBank("TimeBasedTrkg::TBTracks")) {
-        testEvent.getBank("TimeBasedTrkg::TBTracks").show();
+    if(testEvent.hasBank("DCTB::tracks")) {
+        testEvent.getBank("DCTB::tracks").show();
     }
     
-    assertEquals(testEvent.hasBank("TimeBasedTrkg::TBTracks"), true);
-    assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").rows(), 1);
-    assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").getByte("q", 0), -1);
-    assertEquals(ClasMath.isWithinXPercent(5.0, testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_x", 0), 1.057), true);
-    assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_y", 0) > -0.05, true);
-    assertEquals(testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_y", 0) < 0.05, true);
-    assertEquals(ClasMath.isWithinXPercent(5.0, testEvent.getBank("TimeBasedTrkg::TBTracks").getFloat("p0_z", 0), 2.266), true);
+    assertEquals(testEvent.hasBank("DCTB::tracks"), true);
+    assertEquals(testEvent.getBank("DCTB::tracks").rows(), 1);
+    assertEquals(testEvent.getBank("DCTB::tracks").getByte("q", 0), -1);
+    assertEquals(ClasMath.isWithinXPercent(5.0, testEvent.getBank("DCTB::tracks").getFloat("px", 0), 1.057), true);
+    assertEquals(testEvent.getBank("DCTB::tracks").getFloat("py", 0) > -0.05, true);
+    assertEquals(testEvent.getBank("DCTB::tracks").getFloat("py", 0) < 0.05, true);
+    assertEquals(ClasMath.isWithinXPercent(5.0, testEvent.getBank("DCTB::tracks").getFloat("pz", 0), 2.266), true);
     
     }
 

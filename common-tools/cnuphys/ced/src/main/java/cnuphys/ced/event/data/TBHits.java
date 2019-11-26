@@ -5,7 +5,7 @@ public class TBHits extends TbHbHits {
 	private static TBHits _instance;
 	
 	private TBHits() {
-		super("TimeBasedTrkg::TBHits");
+		super("DCTB::hits");
 	}
 	
 	/**

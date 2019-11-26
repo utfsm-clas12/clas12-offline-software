@@ -53,14 +53,14 @@ public class TrackReader {
 
         ArrayList<Track> Tracks = new ArrayList<Track>();
 
-        if (event.hasBank("TimeBasedTrkg::TBTracks") == true || event.hasBank("HitBasedTrkg::HBTracks") == true) {
+        if (event.hasBank("DCTB::tracks") == true || event.hasBank("DCHB::tracks") == true) {
             DataBank bankDC = null;
-            if(event.hasBank("TimeBasedTrkg::TBTracks") == true) {
-                bankDC = event.getBank("TimeBasedTrkg::TBTracks");
+            if(event.hasBank("DCTB::tracks") == true) {
+                bankDC = event.getBank("DCTB::tracks");
                 Tracks = this.setTracksFromBank(bankDC);
             }
-            if(event.hasBank("HitBasedTrkg::HBTracks")==true && event.hasBank("TimeBasedTrkg::TBTracks") == false) {
-                bankDC = event.getBank("HitBasedTrkg::HBTracks");
+            if(event.hasBank("DCHB::tracks")==true && event.hasBank("DCTB::tracks") == false) {
+                bankDC = event.getBank("DCHB::tracks");
                 Tracks = this.setTracksFromBank(bankDC);
             }
         }

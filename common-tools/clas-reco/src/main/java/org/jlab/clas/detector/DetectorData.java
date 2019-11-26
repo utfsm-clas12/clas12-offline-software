@@ -474,8 +474,8 @@ public class DetectorData {
 
            for(int row = 0; row < nrows; row++){
                int    charge = bank.getByte("q", row);
-               Vector3D pvec = DetectorData.readVector(bank, row, "p0_x", "p0_y", "p0_z");
-               Vector3D vertex = DetectorData.readVector(bank, row, "Vtx0_x", "Vtx0_y", "Vtx0_z");
+               Vector3D pvec = DetectorData.readVector(bank, row, "px", "py", "pz");
+               Vector3D vertex = DetectorData.readVector(bank, row, "xVtx", "yVtx", "zVtx");
 
                DetectorTrack  track = new DetectorTrack(charge,pvec.mag(), (row));
                track.setVector(pvec.x(), pvec.y(), pvec.z());
@@ -484,11 +484,11 @@ public class DetectorData {
                track.setSector(bank.getByte("sector", row));
 
                // t1 = HTCC, c1 = DCR1, c3 = DCR3
-               Vector3D lc_vec = DetectorData.readVector(bank, row, "t1_x", "t1_y", "t1_z");
-               Vector3D lc_dir = DetectorData.readVector(bank, row, "t1_px", "t1_py", "t1_pz");
+               Vector3D lc_vec = DetectorData.readVector(bank, row, "xExtrapReg1", "yExtrapReg1", "zExtrapReg1");
+               Vector3D lc_dir = DetectorData.readVector(bank, row, "xExtrapReg1UnitDir", "yExtrapReg1UnitDir", "zExtrapReg1UnitDir");
 
-               Vector3D hc_vec = DetectorData.readVector(bank, row, "c3_x", "c3_y", "c3_z");
-               Vector3D hc_dir = DetectorData.readVector(bank, row, "c3_ux", "c3_uy", "c3_uz");
+               Vector3D hc_vec = DetectorData.readVector(bank, row, "xCrossReg3", "yCrossReg3", "zCrossReg3");
+               Vector3D hc_dir = DetectorData.readVector(bank, row, "xCrossReg3UnitDir", "yCrossReg3UnitDir", "zCrossReg3UnitDir");
                track.addCross(lc_vec.x(), lc_vec.y(), lc_vec.z(), lc_dir.x(), lc_dir.y(), lc_dir.z());
                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
 

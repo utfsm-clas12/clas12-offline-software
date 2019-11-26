@@ -314,11 +314,11 @@ public class RICHEventBuilder{
 
         }else{
 
-            if(event.hasBank("TimeBasedTrkg::TBTracks") && event.hasBank("TimeBasedTrkg::Trajectory") && event.hasBank("TimeBasedTrkg::TBCovMat")){
+            if(event.hasBank("DCTB::tracks") && event.hasBank("DCTB::trajectory") && event.hasBank("DCTB::covmat")){
 
-                String trackBank = "TimeBasedTrkg::TBTracks";
-                String tracjBank = "TimeBasedTrkg::Trajectory";
-                String covBank   = "TimeBasedTrkg::TBCovMat";
+                String trackBank = "DCTB::tracks";
+                String tracjBank = "DCTB::trajectory";
+                String covBank   = "DCTB::covmat";
 	        if(debugMode>=1)  System.out.format("Look for tracks before EB: %s %s %s \n",trackBank,tracjBank,covBank);
 
                 List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(event, trackBank, tracjBank, covBank);

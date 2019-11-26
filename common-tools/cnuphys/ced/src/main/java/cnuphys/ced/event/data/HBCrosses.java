@@ -5,7 +5,7 @@ public class HBCrosses extends Crosses {
 	private static HBCrosses _instance;
 	
 	private HBCrosses() {
-		super("HitBasedTrkg::HBCrosses");
+		super("DCHB::crosses");
 	}
 	
 	/**

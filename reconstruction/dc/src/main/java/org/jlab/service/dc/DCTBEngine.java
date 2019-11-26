@@ -158,12 +158,12 @@ public class DCTBEngine extends DCEngine {
         
         //
         // also need Track bank
-        if (event.hasBank("HitBasedTrkg::HBTracks") == false) {
+        if (event.hasBank("DCHB::tracks") == false) {
             return true;
         }
         
-        DataBank trkbank = event.getBank("HitBasedTrkg::HBTracks");
-        DataBank trkcovbank = event.getBank("TimeBasedTrkg::TBCovMat");
+        DataBank trkbank = event.getBank("DCHB::tracks");
+        DataBank trkcovbank = event.getBank("DCTB::covmat");
         int trkrows = trkbank.rows();
         if(trkbank.rows()!=trkcovbank.rows()) {
             return true; // HB tracks not saved correctly
@@ -174,9 +174,9 @@ public class DCTBEngine extends DCEngine {
             HBtrk.set_Id(trkbank.getShort("id", i));
             HBtrk.set_Sector(trkbank.getByte("sector", i));
             HBtrk.set_Q(trkbank.getByte("q", i));
-            HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("p0_x", i), trkbank.getFloat("p0_y", i), trkbank.getFloat("p0_z", i)));
+            HBtrk.set_pAtOrig(new Vector3D(trkbank.getFloat("px", i), trkbank.getFloat("py", i), trkbank.getFloat("pz", i)));
             HBtrk.set_P(HBtrk.get_pAtOrig().mag());
-            HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("Vtx0_x", i), trkbank.getFloat("Vtx0_y", i), trkbank.getFloat("Vtx0_z", i)));
+            HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("xVtx", i), trkbank.getFloat("yVtx", i), trkbank.getFloat("zVtx", i)));
             HBtrk.set_FitChi2(trkbank.getFloat("chi2", i));
             StateVec HBFinalSV = new StateVec(trkbank.getFloat("x", i), trkbank.getFloat("y", i), 
                     trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));

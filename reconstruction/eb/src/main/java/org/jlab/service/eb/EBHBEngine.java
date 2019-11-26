@@ -30,7 +30,7 @@ public class EBHBEngine extends EBEngine {
         this.setScintillatorBank("RECHB::Scintillator");
         this.setTrackBank("RECHB::Track");
         this.setCrossBank("RECHB::TrackCross");
-        this.setTrackType("HitBasedTrkg::HBTracks");
+        this.setTrackType("DCHB::tracks");
         this.setFTOFHitsType("FTOF::hbhits");
         this.setFTBank("RECHB::ForwardTagger");
     }

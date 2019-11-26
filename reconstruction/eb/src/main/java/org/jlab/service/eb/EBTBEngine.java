@@ -36,9 +36,9 @@ public class EBTBEngine extends EBEngine {
         this.setTrajectoryBank("REC::Traj");        
         this.setFTBank("REC::ForwardTagger");
         this.setFTOFHitsType("FTOF::hits");
-        this.setTrackType("TimeBasedTrkg::TBTracks");
-        this.setTrajectoryType("TimeBasedTrkg::Trajectory");
-        this.setCovMatrixType("TimeBasedTrkg::TBCovMat");
+        this.setTrackType("DCTB::tracks");
+        this.setTrajectoryType("DCTB::trajectory");
+        this.setCovMatrixType("DCTB::covmat");
     }
     
 }

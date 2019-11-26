@@ -50,8 +50,8 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			// now fill the table.
 			TrajectoryTableModel model = _trajectoryTable.getTrajectoryModel();
 
-			addTracks(event, _trajData, "HitBasedTrkg::HBTracks");
-			addTracks(event, _trajData, "TimeBasedTrkg::TBTracks");
+			addTracks(event, _trajData, "DCHB::tracks");
+			addTracks(event, _trajData, "DCTB::tracks");
 			
 			//only look for cvt tracks if we have no other recon tracks?
 			addTracks(event, _trajData, "CVTRec::Tracks");
@@ -82,13 +82,13 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			
 			boolean hitBased = bankName.contains("HitBased");
 			DataManager dm = DataManager.getInstance();
-			float[] vx = dm.getFloatArray(event, bankName + "." + "Vtx0_x"); //vertex x cm
+			float[] vx = dm.getFloatArray(event, bankName + "." + "xVtx"); //vertex x cm
 			if ((vx != null) && (vx.length > 0)) {
-				float[] vy = dm.getFloatArray(event, bankName + "." + "Vtx0_y"); //vertex y cm
-				float[] vz = dm.getFloatArray(event, bankName + "." + "Vtx0_z"); //vertex z cm
-				float px[] = dm.getFloatArray(event, bankName + "." + "p0_x");
-				float py[] = dm.getFloatArray(event, bankName + "." + "p0_y");
-				float pz[] = dm.getFloatArray(event, bankName + "." + "p0_z");
+				float[] vy = dm.getFloatArray(event, bankName + "." + "yVtx"); //vertex y cm
+				float[] vz = dm.getFloatArray(event, bankName + "." + "zVtx"); //vertex z cm
+				float px[] = dm.getFloatArray(event, bankName + "." + "px");
+				float py[] = dm.getFloatArray(event, bankName + "." + "py");
+				float pz[] = dm.getFloatArray(event, bankName + "." + "pz");
 				byte q[] = dm.getByteArray(event, bankName + "." + "q");
 				short status[] = dm.getShortArray(event, bankName + "." + "status");
 				short id[] = dm.getShortArray(event, bankName + "." + "id");

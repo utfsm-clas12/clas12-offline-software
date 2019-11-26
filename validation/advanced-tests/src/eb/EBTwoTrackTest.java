@@ -202,7 +202,7 @@ public class EBTwoTrackTest {
     private void getBanks(DataEvent de) {
         ctrkBank    = getBank(de,"CVTRec::Tracks");
         tofBank     = getBank(de,"FTOF::clusters");
-        trkBank     = getBank(de,"TimeBasedTrkg::TBTracks");
+        trkBank     = getBank(de,"DCTB::tracks");
         recPartBank = getBank(de,"REC::Particle");
         recFtPartBank = getBank(de,"RECFT::Particle");
         mcBank      = getBank(de,"MC::Particle");

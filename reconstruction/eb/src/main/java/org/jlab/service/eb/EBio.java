@@ -65,10 +65,10 @@ public class EBio {
      * @return 
      */
     public static List<DetectorParticle>  readTracks(DataEvent event, int type){
-        String bankName = "HitBasedTrkg::HBTracks";
+        String bankName = "DCHB::tracks";
         switch (type){
-            case 1 : bankName =  "HitBasedTrkg::HBTracks"; break;
-            case 2 : bankName = "TimeBasedTrkg::TBTracks"; break;
+            case 1 : bankName =  "DCHB::tracks"; break;
+            case 2 : bankName = "DCTB::tracks"; break;
             default: break;
         }
         List<DetectorParticle> dpList = new ArrayList<>();
@@ -83,14 +83,14 @@ public class EBio {
                 DetectorParticle p = new DetectorParticle();
                 
                 p.vector().setXYZ(
-                        bank.getDouble("p0_x",i),
-                        bank.getDouble("p0_y",i),
-                        bank.getDouble("p0_z",i));
+                        bank.getDouble("px",i),
+                        bank.getDouble("py",i),
+                        bank.getDouble("pz",i));
                 
                 p.vertex().setXYZ(
-                        bank.getDouble("Vtx0_x",i),
-                        bank.getDouble("Vtx0_y",i),
-                        bank.getDouble("Vtx0_z",i));
+                        bank.getDouble("xVtx",i),
+                        bank.getDouble("yVtx",i),
+                        bank.getDouble("zVtx",i));
                 
                 p.setCharge(bank.getInt("q", i));
                 dpList.add(p);

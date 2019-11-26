@@ -5,7 +5,7 @@ public class HBSegments extends Segments {
 	private static HBSegments _instance;
 	
 	private HBSegments() {
-		super("HitBasedTrkg::HBSegments");
+		super("DCHB::segments");
 	}
 	
 	/**

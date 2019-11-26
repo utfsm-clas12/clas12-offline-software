@@ -99,11 +99,11 @@ public class TrackDictionaryValidation {
             if (event.hasBank("REC::Track")) {
                 recTrack = event.getBank("REC::Track");
             }
-            if (event.hasBank("TimeBasedTrkg::TBTracks")) {
-                tbtTrack = event.getBank("TimeBasedTrkg::TBTracks");
+            if (event.hasBank("DCTB::tracks")) {
+                tbtTrack = event.getBank("DCTB::tracks");
             }
-            if (event.hasBank("TimeBasedTrkg::TBHits")) {
-                tbtHits = event.getBank("TimeBasedTrkg::TBHits");
+            if (event.hasBank("DCTB::hits")) {
+                tbtHits = event.getBank("DCTB::hits");
             }
             if (event.hasBank("ECAL::clusters")) {
                 ecalCluster = event.getBank("ECAL::clusters");
@@ -779,11 +779,11 @@ public class TrackDictionaryValidation {
             if (event.hasBank("REC::Track")) {
                 recTrack = event.getBank("REC::Track");
             }
-            if (event.hasBank("TimeBasedTrkg::TBTracks")) {
-                tbtTrack = event.getBank("TimeBasedTrkg::TBTracks");
+            if (event.hasBank("DCTB::tracks")) {
+                tbtTrack = event.getBank("DCTB::tracks");
             }
-            if (event.hasBank("TimeBasedTrkg::TBHits")) {
-                tbtHits = event.getBank("TimeBasedTrkg::TBHits");
+            if (event.hasBank("DCTB::hits")) {
+                tbtHits = event.getBank("DCTB::hits");
             }
             if (event.hasBank("ECAL::clusters")) {
                 ecalCluster = event.getBank("ECAL::clusters");

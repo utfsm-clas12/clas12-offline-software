@@ -549,7 +549,7 @@ public class ClusterFinder {
         }
         // now fill the bank
         int bankSize = 6 * 6 * 6;
-        EvioDataBank bank = (EvioDataBank) event.getDictionary().createBank("HitBasedTrkg::LayerEffs", bankSize);
+        EvioDataBank bank = (EvioDataBank) event.getDictionary().createBank("DCTB::LayerEffs", bankSize);
         int bankEntry = 0;
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {

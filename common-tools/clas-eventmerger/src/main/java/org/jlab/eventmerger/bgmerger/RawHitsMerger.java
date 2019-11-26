@@ -54,7 +54,7 @@ public class RawHitsMerger extends ReconstructionEngine {
             //System.out.println("************************************************************* ");
             DataEvent event = reader.getNextEvent();
             DataEvent event2 = reader2.getNextEvent();
-            if(event2.hasBank("TimeBasedTrkg::TBTracks"))
+            if(event2.hasBank("DCTB::tracks"))
                 continue;
             //if(event.hasBank("DC::tdc")==false || event.hasBank("FTOF::tdc")==false || event2.hasBank("DC::tdc")==false || event2.hasBank("FTOF::tdc")==false) {
             //    continue;

@@ -56,7 +56,7 @@ public class RecoBankWriter {
 
     private DataBank fillHBHitsBank(DataEvent event, List<FittedHit> hitlist) {
 
-        DataBank bank = event.createBank("HitBasedTrkg::HBHits", hitlist.size());
+        DataBank bank = event.createBank("DCHB::hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
@@ -71,22 +71,22 @@ public class RecoBankWriter {
             bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
             bank.setFloat("trkDoca", i, (float) hitlist.get(i).get_ClusFitDoca());
-            bank.setFloat("LocX", i, (float) hitlist.get(i).get_lX());
-            bank.setFloat("LocY", i, (float) hitlist.get(i).get_lY());
-            bank.setFloat("X", i, (float) hitlist.get(i).get_X());
-            bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
+            bank.setFloat("xLocal", i, (float) hitlist.get(i).get_lX());
+            bank.setFloat("yLocal", i, (float) hitlist.get(i).get_lY());
+            bank.setFloat("xWire", i, (float) hitlist.get(i).get_X());
+            bank.setFloat("zWire", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
             bank.setShort("clusterID", i, (short) hitlist.get(i).get_AssociatedClusterID());
             bank.setByte("trkID", i, (byte) hitlist.get(i).get_AssociatedHBTrackID());
 
             bank.setInt("TDC",i,hitlist.get(i).get_TDC());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
-            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
-            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
+            bank.setFloat("tProp", i, (float) hitlist.get(i).getTProp());
+            bank.setFloat("tFlight", i, (float) hitlist.get(i).getTFlight());
 
             if(hitlist.get(i).get_AssociatedHBTrackID()>-1 && !event.hasBank("MC::Particle")) {
-                bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
-                bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+                bank.setFloat("tProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire());
+                bank.setFloat("tFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
             }
         }
 
@@ -101,7 +101,7 @@ public class RecoBankWriter {
      */
     private DataBank fillHBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
 
-        DataBank bank = event.createBank("HitBasedTrkg::HBClusters", cluslist.size());
+        DataBank bank = event.createBank("DCHB::clusters", cluslist.size());
 
         int[] hitIdxArray = new int[12];
 
@@ -162,7 +162,7 @@ public class RecoBankWriter {
      */
     private DataBank fillHBSegmentsBank(DataEvent event, List<Segment> seglist) {
 
-        DataBank bank = event.createBank("HitBasedTrkg::HBSegments", seglist.size());
+        DataBank bank = event.createBank("DCHB::segments", seglist.size());
 
         int[] hitIdxArray = new int[12]; // only saving 12 hits for now
 
@@ -264,7 +264,7 @@ public class RecoBankWriter {
                 banksize++;
         }
 
-        DataBank bank = event.createBank("HitBasedTrkg::HBCrosses", banksize);
+        DataBank bank = event.createBank("DCHB::crosses", banksize);
 
         int index=0;
         for (Cross aCrosslist : crosslist) {
@@ -276,15 +276,15 @@ public class RecoBankWriter {
                 bank.setFloat("x", index, (float) aCrosslist.get_Point().x());
                 bank.setFloat("y", index, (float) aCrosslist.get_Point().y());
                 bank.setFloat("z", index, (float) aCrosslist.get_Point().z());
-                bank.setFloat("err_x", index, (float) aCrosslist.get_PointErr().x());
-                bank.setFloat("err_y", index, (float) aCrosslist.get_PointErr().y());
-                bank.setFloat("err_z", index, (float) aCrosslist.get_PointErr().z());
-                bank.setFloat("ux", index, (float) aCrosslist.get_Dir().x());
-                bank.setFloat("uy", index, (float) aCrosslist.get_Dir().y());
-                bank.setFloat("uz", index, (float) aCrosslist.get_Dir().z());
-                bank.setFloat("err_ux", index, (float) aCrosslist.get_DirErr().x());
-                bank.setFloat("err_uy", index, (float) aCrosslist.get_DirErr().y());
-                bank.setFloat("err_uz", index, (float) aCrosslist.get_DirErr().z());
+                bank.setFloat("xError", index, (float) aCrosslist.get_PointErr().x());
+                bank.setFloat("yError", index, (float) aCrosslist.get_PointErr().y());
+                bank.setFloat("zError", index, (float) aCrosslist.get_PointErr().z());
+                bank.setFloat("xUnitDir", index, (float) aCrosslist.get_Dir().x());
+                bank.setFloat("yUnitDir", index, (float) aCrosslist.get_Dir().y());
+                bank.setFloat("zUnitDir", index, (float) aCrosslist.get_Dir().z());
+                bank.setFloat("xUnitDirErr", index, (float) aCrosslist.get_DirErr().x());
+                bank.setFloat("yUnitDirErr", index, (float) aCrosslist.get_DirErr().y());
+                bank.setFloat("zUnitDirErr", index, (float) aCrosslist.get_DirErr().z());
                 bank.setShort("Segment1_ID", index, (short) aCrosslist.get_Segment1().get_Id());
                 bank.setShort("Segment2_ID", index, (short) aCrosslist.get_Segment2().get_Id());
                 index++;
@@ -295,7 +295,7 @@ public class RecoBankWriter {
 
     private DataBank fillHBTracksBank(DataEvent event, List<Track> candlist) {
 
-        DataBank bank = event.createBank("HitBasedTrkg::HBTracks", candlist.size());
+        DataBank bank = event.createBank("DCHB::tracks", candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -303,46 +303,46 @@ public class RecoBankWriter {
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
             bank.setShort("status", i, (short) (100+candlist.get(i).get_Status()*10+candlist.get(i).get_MissingSuperlayer()));
             if(candlist.get(i).get_PreRegion1CrossPoint()!=null) {
-                bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
-                bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
-                bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
-                bank.setFloat("c1_ux", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
-                bank.setFloat("c1_uy", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
-                bank.setFloat("c1_uz", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
+                bank.setFloat("xCrossReg1", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
+                bank.setFloat("yCrossReg1", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
+                bank.setFloat("zCrossReg1", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
+                bank.setFloat("xCrossReg1UnitDir", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
+                bank.setFloat("yCrossReg1UnitDir", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
+                bank.setFloat("yCrossReg1UnitDir", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
             }
             if(candlist.get(i).get_PostRegion3CrossPoint()!=null) {
-                bank.setFloat("c3_x", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
-                bank.setFloat("c3_y", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
-                bank.setFloat("c3_z", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
-                bank.setFloat("c3_ux", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
-                bank.setFloat("c3_uy", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
-                bank.setFloat("c3_uz", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
+                bank.setFloat("xCrossReg3", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
+                bank.setFloat("yCrossReg3", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
+                bank.setFloat("zCrossReg3", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
+                bank.setFloat("xCrossReg3UnitDir", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
+                bank.setFloat("yCrossReg3UnitDir", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
+                bank.setFloat("zCrossReg3UnitDir", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
             }
             if(candlist.get(i).get_Region1TrackX()!=null) {
-                bank.setFloat("t1_x", i, (float) candlist.get(i).get_Region1TrackX().x());
-                bank.setFloat("t1_y", i, (float) candlist.get(i).get_Region1TrackX().y());
-                bank.setFloat("t1_z", i, (float) candlist.get(i).get_Region1TrackX().z());
-                bank.setFloat("t1_px", i, (float) candlist.get(i).get_Region1TrackP().x());
-                bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
-                bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
+                bank.setFloat("xExtrapReg1", i, (float) candlist.get(i).get_Region1TrackX().x());
+                bank.setFloat("yExtrapReg1", i, (float) candlist.get(i).get_Region1TrackX().y());
+                bank.setFloat("zExtrapReg1", i, (float) candlist.get(i).get_Region1TrackX().z());
+                bank.setFloat("xExtrapReg1UnitDir", i, (float) candlist.get(i).get_Region1TrackP().x());
+                bank.setFloat("yExtrapReg1UnitDir", i, (float) candlist.get(i).get_Region1TrackP().y());
+                bank.setFloat("zExtrapReg1UnitDir", i, (float) candlist.get(i).get_Region1TrackP().z());
             }
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());
-            bank.setFloat("Vtx0_x", i, (float) candlist.get(i).get_Vtx0().x());
-            bank.setFloat("Vtx0_y", i, (float) candlist.get(i).get_Vtx0().y());
-            bank.setFloat("Vtx0_z", i, (float) candlist.get(i).get_Vtx0().z());
-            bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
-            bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
-            bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
+            bank.setFloat("xVtx", i, (float) candlist.get(i).get_Vtx0().x());
+            bank.setFloat("yVtx", i, (float) candlist.get(i).get_Vtx0().y());
+            bank.setFloat("zVtx", i, (float) candlist.get(i).get_Vtx0().z());
+            bank.setFloat("px", i, (float) candlist.get(i).get_pAtOrig().x());
+            bank.setFloat("py", i, (float) candlist.get(i).get_pAtOrig().y());
+            bank.setFloat("pz", i, (float) candlist.get(i).get_pAtOrig().z());
             bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
             bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
             bank.setShort("Cross3_ID", i, (short) candlist.get(i).get(2).get_Id());
             bank.setFloat("chi2", i, (float) candlist.get(i).get_FitChi2());
             bank.setShort("ndf", i, (short) candlist.get(i).get_FitNDF());
-            bank.setFloat("x", i, (float) candlist.get(i).getFinalStateVec().x());
-            bank.setFloat("y", i, (float) candlist.get(i).getFinalStateVec().y());
-            bank.setFloat("z", i, (float) candlist.get(i).getFinalStateVec().getZ());
-            bank.setFloat("tx", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
-            bank.setFloat("ty", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
+            bank.setFloat("xStateVec", i, (float) candlist.get(i).getFinalStateVec().x());
+            bank.setFloat("yStateVec", i, (float) candlist.get(i).getFinalStateVec().y());
+            bank.setFloat("zStateVec", i, (float) candlist.get(i).getFinalStateVec().getZ());
+            bank.setFloat("txStateVec", i, (float) candlist.get(i).getFinalStateVec().tanThetaX());
+            bank.setFloat("tyStateVec", i, (float) candlist.get(i).getFinalStateVec().tanThetaY());
             
         }
         //bank.show();
@@ -356,7 +356,7 @@ public class RecoBankWriter {
      */
     private DataBank fillTrackCovMatBank(DataEvent event, List<Track> candlist) {
 
-        DataBank bank = event.createBank("TimeBasedTrkg::TBCovMat", candlist.size());
+        DataBank bank = event.createBank("DCTB::covmat", candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -398,7 +398,7 @@ public class RecoBankWriter {
      *
      */
      private DataBank fillTBHitsBank(DataEvent event, List<FittedHit> hitlist) {
-        if(event.hasBank("TimeBasedTrkg::TBHits")) { // for second pass tracking
+        if(event.hasBank("DCTB::hits")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
                // HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBHits");
@@ -406,7 +406,7 @@ public class RecoBankWriter {
                 //group.show();
                 //dde.removeGroup("TimeBasedTrkg::TBHits");
         }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBHits", hitlist.size());
+        DataBank bank = event.createBank("DCTB::hits", hitlist.size());
 
         for (int i = 0; i < hitlist.size(); i++) {
             if (hitlist.get(i).get_Id() == -1) {
@@ -421,8 +421,8 @@ public class RecoBankWriter {
             bank.setByte("sector", i, (byte) hitlist.get(i).get_Sector());
             bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
 
-            bank.setFloat("X", i, (float) hitlist.get(i).get_X());
-            bank.setFloat("Z", i, (float) hitlist.get(i).get_Z());
+            bank.setFloat("xWire", i, (float) hitlist.get(i).get_X());
+            bank.setFloat("yWire", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
 
             // checks the existing schema to fill the time
@@ -440,7 +440,7 @@ public class RecoBankWriter {
                bank.setFloat("fitResidual", i, (float) hitlist.get(i).get_TrkResid());
             }
             if(bank.getDescriptor().hasEntry("Alpha")){
-               bank.setFloat("Alpha", i, (float) hitlist.get(i).getAlpha());
+               bank.setFloat("alpha", i, (float) hitlist.get(i).getAlpha());
             }
             bank.setFloat("doca", i, (float) hitlist.get(i).get_Doca());
             bank.setFloat("docaError", i, (float) hitlist.get(i).get_DocaErr());
@@ -452,23 +452,23 @@ public class RecoBankWriter {
             
             bank.setInt("TDC",i,hitlist.get(i).get_TDC());
             bank.setFloat("B", i, (float) hitlist.get(i).getB());
-            bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp());
-            bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
-            bank.setFloat("T0", i, (float) hitlist.get(i).getT0());
-            bank.setFloat("TStart", i, (float) hitlist.get(i).getTStart());
+            bank.setFloat("tProp", i, (float) hitlist.get(i).getTProp());
+            bank.setFloat("tFlight", i, (float) hitlist.get(i).getTFlight());
+            bank.setFloat("t0", i, (float) hitlist.get(i).getT0());
+            bank.setFloat("tStart", i, (float) hitlist.get(i).getTStart());
             if(bank.getDescriptor().hasEntry("beta")){
                bank.setFloat("beta", i, (float) hitlist.get(i).get_Beta());
             }
             if(hitlist.get(i).get_AssociatedTBTrackID()>-1 && !event.hasBank("MC::Particle")) {
                 if(hitlist.get(i).getSignalPropagTimeAlongWire()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
-                    bank.setFloat("TProp", i, (float) hitlist.get(i).getTProp()); //old value if track fit failed
+                    bank.setFloat("tProp", i, (float) hitlist.get(i).getTProp()); //old value if track fit failed
                 } else {
-                    bank.setFloat("TProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire()); //new calculated value
+                    bank.setFloat("tProp", i, (float) hitlist.get(i).getSignalPropagTimeAlongWire()); //new calculated value
                 }
                 if(hitlist.get(i).getSignalTimeOfFlight()==0 || hitlist.get(i).get_AssociatedTBTrackID()<1) {
-                    bank.setFloat("TFlight", i, (float) hitlist.get(i).getTFlight());
+                    bank.setFloat("tFlight", i, (float) hitlist.get(i).getTFlight());
                 } else {
-                    bank.setFloat("TFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
+                    bank.setFloat("tFlight", i, (float) hitlist.get(i).getSignalTimeOfFlight());
                 }
             }
 
@@ -484,7 +484,7 @@ public class RecoBankWriter {
      * @return clusters bank
      */
     private DataBank fillTBClustersBank(DataEvent event, List<FittedCluster> cluslist) {
-        if(event.hasBank("TimeBasedTrkg::TBClusters")) { // for second pass tracking
+        if(event.hasBank("DCTB::clusters")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
                 //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBClusters");
@@ -492,7 +492,7 @@ public class RecoBankWriter {
                 //group.show();
                 //dde.removeGroup("TimeBasedTrkg::TBClusters");
         }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBClusters", cluslist.size());
+        DataBank bank = event.createBank("DCTB::clusters", cluslist.size());
 
         int[] hitIdxArray = new int[12];
 
@@ -552,7 +552,7 @@ public class RecoBankWriter {
      * @return segments bank
      */
     private DataBank fillTBSegmentsBank(DataEvent event, List<Segment> seglist) {
-        if(event.hasBank("TimeBasedTrkg::TBSegments")) { // for second pass tracking
+        if(event.hasBank("DCTB::segments")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
                 //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBSegments");
@@ -560,7 +560,7 @@ public class RecoBankWriter {
                 //group.show();
                 //dde.removeGroup("TimeBasedTrkg::TBSegments");
         }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBSegments", seglist.size());
+        DataBank bank = event.createBank("DCTB::segments", seglist.size());
 
         int[] hitIdxArray = new int[12];
 
@@ -660,7 +660,7 @@ public class RecoBankWriter {
      */
     private DataBank fillTBCrossesBank(DataEvent event, List<Cross> crosslist) {
 
-        if(event.hasBank("TimeBasedTrkg::TBCrosses")) { // for second pass tracking
+        if(event.hasBank("DCTB::crosses")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
                 //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBCrosses");
@@ -673,7 +673,7 @@ public class RecoBankWriter {
             if (aCrosslist1.get_Id() != -1)
                 banksize++;
         }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBCrosses", banksize);
+        DataBank bank = event.createBank("DCTB::crosses", banksize);
         int index=0;
         for (Cross aCrosslist : crosslist) {
             if (aCrosslist.get_Id() != -1) {
@@ -684,15 +684,15 @@ public class RecoBankWriter {
                 bank.setFloat("x", index, (float) aCrosslist.get_Point().x());
                 bank.setFloat("y", index, (float) aCrosslist.get_Point().y());
                 bank.setFloat("z", index, (float) aCrosslist.get_Point().z());
-                bank.setFloat("err_x", index, (float) aCrosslist.get_PointErr().x());
-                bank.setFloat("err_y", index, (float) aCrosslist.get_PointErr().y());
-                bank.setFloat("err_z", index, (float) aCrosslist.get_PointErr().z());
-                bank.setFloat("ux", index, (float) aCrosslist.get_Dir().x());
-                bank.setFloat("uy", index, (float) aCrosslist.get_Dir().y());
-                bank.setFloat("uz", index, (float) aCrosslist.get_Dir().z());
-                bank.setFloat("err_ux", index, (float) aCrosslist.get_DirErr().x());
-                bank.setFloat("err_uy", index, (float) aCrosslist.get_DirErr().y());
-                bank.setFloat("err_uz", index, (float) aCrosslist.get_DirErr().z());
+                bank.setFloat("xError", index, (float) aCrosslist.get_PointErr().x());
+                bank.setFloat("yError", index, (float) aCrosslist.get_PointErr().y());
+                bank.setFloat("zError", index, (float) aCrosslist.get_PointErr().z());
+                bank.setFloat("xUnitDir", index, (float) aCrosslist.get_Dir().x());
+                bank.setFloat("yUnitDir", index, (float) aCrosslist.get_Dir().y());
+                bank.setFloat("zUnitDir", index, (float) aCrosslist.get_Dir().z());
+                bank.setFloat("xUnitDirErr", index, (float) aCrosslist.get_DirErr().x());
+                bank.setFloat("yUnitDirErr", index, (float) aCrosslist.get_DirErr().y());
+                bank.setFloat("zUnitDirErr", index, (float) aCrosslist.get_DirErr().z());
                 bank.setShort("Segment1_ID", index, (short) aCrosslist.get_Segment1().get_Id());
                 bank.setShort("Segment2_ID", index, (short) aCrosslist.get_Segment2().get_Id());
                 index++;
@@ -707,7 +707,7 @@ public class RecoBankWriter {
      * @return segments bank
      */
     private DataBank fillTBTracksBank(DataEvent event, List<Track> candlist) {
-        if(event.hasBank("TimeBasedTrkg::TBTracks")) { // for second pass tracking
+        if(event.hasBank("DCTB::tracks")) { // for second pass tracking
                 HipoDataEvent de = (HipoDataEvent) event;
                 //HipoEvent dde = de.getHipoEvent();
 //                HipoGroup group = dde.getGroup("TimeBasedTrkg::TBTracks");
@@ -715,7 +715,7 @@ public class RecoBankWriter {
                 //group.show();
                 //dde.removeGroup("TimeBasedTrkg::TBTracks");
         }
-        DataBank bank = event.createBank("TimeBasedTrkg::TBTracks", candlist.size());
+        DataBank bank = event.createBank("DCTB::tracks", candlist.size());
 
         for (int i = 0; i < candlist.size(); i++) {
             bank.setShort("id", i, (short) candlist.get(i).get_Id());
@@ -724,36 +724,36 @@ public class RecoBankWriter {
             bank.setByte("q", i, (byte) candlist.get(i).get_Q());
             //bank.setFloat("p", i, (float) candlist.get(i).get_P());
             if(candlist.get(i).get_PreRegion1CrossPoint()!=null) {
-                bank.setFloat("c1_x", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
-                bank.setFloat("c1_y", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
-                bank.setFloat("c1_z", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
-                bank.setFloat("c1_ux", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
-                bank.setFloat("c1_uy", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
-                bank.setFloat("c1_uz", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
+                bank.setFloat("xCrossReg1", i, (float) candlist.get(i).get_PreRegion1CrossPoint().x());
+                bank.setFloat("yCrossReg1", i, (float) candlist.get(i).get_PreRegion1CrossPoint().y());
+                bank.setFloat("zCrossReg1", i, (float) candlist.get(i).get_PreRegion1CrossPoint().z());
+                bank.setFloat("xCrossReg1UnitDir", i, (float) candlist.get(i).get_PreRegion1CrossDir().x());
+                bank.setFloat("yCrossReg1UnitDir", i, (float) candlist.get(i).get_PreRegion1CrossDir().y());
+                bank.setFloat("zCrossReg1UnitDir", i, (float) candlist.get(i).get_PreRegion1CrossDir().z());
             }
             if(candlist.get(i).get_PostRegion3CrossPoint()!=null) {
-                bank.setFloat("c3_x", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
-                bank.setFloat("c3_y", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
-                bank.setFloat("c3_z", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
-                bank.setFloat("c3_ux", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
-                bank.setFloat("c3_uy", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
-                bank.setFloat("c3_uz", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
+                bank.setFloat("xCrossReg3", i, (float) candlist.get(i).get_PostRegion3CrossPoint().x());
+                bank.setFloat("yCrossReg3", i, (float) candlist.get(i).get_PostRegion3CrossPoint().y());
+                bank.setFloat("zCrossReg3", i, (float) candlist.get(i).get_PostRegion3CrossPoint().z());
+                bank.setFloat("xCrossReg3UnitDir", i, (float) candlist.get(i).get_PostRegion3CrossDir().x());
+                bank.setFloat("yCrossReg3UnitDir", i, (float) candlist.get(i).get_PostRegion3CrossDir().y());
+                bank.setFloat("zCrossReg3UnitDir", i, (float) candlist.get(i).get_PostRegion3CrossDir().z());
             }
             if(candlist.get(i).get_Region1TrackX()!=null) {
-                bank.setFloat("t1_x", i, (float) candlist.get(i).get_Region1TrackX().x());
-                bank.setFloat("t1_y", i, (float) candlist.get(i).get_Region1TrackX().y());
-                bank.setFloat("t1_z", i, (float) candlist.get(i).get_Region1TrackX().z());
-                bank.setFloat("t1_px", i, (float) candlist.get(i).get_Region1TrackP().x());
-                bank.setFloat("t1_py", i, (float) candlist.get(i).get_Region1TrackP().y());
-                bank.setFloat("t1_pz", i, (float) candlist.get(i).get_Region1TrackP().z());
+                bank.setFloat("xExtrapReg1", i, (float) candlist.get(i).get_Region1TrackX().x());
+                bank.setFloat("yExtrapReg1", i, (float) candlist.get(i).get_Region1TrackX().y());
+                bank.setFloat("zExtrapReg1", i, (float) candlist.get(i).get_Region1TrackX().z());
+                bank.setFloat("xExtrapReg1UnitDir", i, (float) candlist.get(i).get_Region1TrackP().x());
+                bank.setFloat("yExtrapReg1UnitDir", i, (float) candlist.get(i).get_Region1TrackP().y());
+                bank.setFloat("zExtrapReg1UnitDir", i, (float) candlist.get(i).get_Region1TrackP().z());
             }
             bank.setFloat("pathlength", i, (float) candlist.get(i).get_TotPathLen());
-            bank.setFloat("Vtx0_x", i, (float) candlist.get(i).get_Vtx0().x());
-            bank.setFloat("Vtx0_y", i, (float) candlist.get(i).get_Vtx0().y());
-            bank.setFloat("Vtx0_z", i, (float) candlist.get(i).get_Vtx0().z());
-            bank.setFloat("p0_x", i, (float) candlist.get(i).get_pAtOrig().x());
-            bank.setFloat("p0_y", i, (float) candlist.get(i).get_pAtOrig().y());
-            bank.setFloat("p0_z", i, (float) candlist.get(i).get_pAtOrig().z());
+            bank.setFloat("xVtx", i, (float) candlist.get(i).get_Vtx0().x());
+            bank.setFloat("yVtx", i, (float) candlist.get(i).get_Vtx0().y());
+            bank.setFloat("xVtx", i, (float) candlist.get(i).get_Vtx0().z());
+            bank.setFloat("px", i, (float) candlist.get(i).get_pAtOrig().x());
+            bank.setFloat("py", i, (float) candlist.get(i).get_pAtOrig().y());
+            bank.setFloat("pz", i, (float) candlist.get(i).get_pAtOrig().z());
             if(candlist.get(i).size()==3) {
                 bank.setShort("Cross1_ID", i, (short) candlist.get(i).get(0).get_Id());
                 bank.setShort("Cross2_ID", i, (short) candlist.get(i).get(1).get_Id());
@@ -785,7 +785,7 @@ public class RecoBankWriter {
                 continue;
             size+=track.trajectory.size();
         }       
-        DataBank bank = event.createBank("TimeBasedTrkg::Trajectory", size);
+        DataBank bank = event.createBank("DCTB::trajectory", size);
         int i1=0;
         for (Track track : tracks) {
             if (track == null)
