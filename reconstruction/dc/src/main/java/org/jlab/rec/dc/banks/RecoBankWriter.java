@@ -422,7 +422,7 @@ public class RecoBankWriter {
             bank.setShort("wire", i, (short) hitlist.get(i).get_Wire());
 
             bank.setFloat("xWire", i, (float) hitlist.get(i).get_X());
-            bank.setFloat("yWire", i, (float) hitlist.get(i).get_Z());
+            bank.setFloat("zWire", i, (float) hitlist.get(i).get_Z());
             bank.setByte("LR", i, (byte) hitlist.get(i).get_LeftRightAmb());
 
             // checks the existing schema to fill the time
