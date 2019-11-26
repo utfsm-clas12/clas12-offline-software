@@ -33,12 +33,12 @@ public class TrackReader {
                 // if(fitChisq[i]>1)
                 // continue; // check this
                 int id      = bankDC.getShort("id", i);
-                double x    = bankDC.getFloat("c3_x", i);
-                double y    = bankDC.getFloat("c3_y", i);
-                double z    = bankDC.getFloat("c3_z", i);
-                double ux   = bankDC.getFloat("c3_ux", i);
-                double uy   = bankDC.getFloat("c3_uy", i);
-                double uz   = bankDC.getFloat("c3_uz", i);
+                double x    = bankDC.getFloat("xCrossReg3", i);
+                double y    = bankDC.getFloat("yCrossReg3", i);
+                double z    = bankDC.getFloat("zCrossReg3", i);
+                double ux   = bankDC.getFloat("xCrossReg3UnitDir", i);
+                double uy   = bankDC.getFloat("yCrossReg3UnitDir", i);
+                double uz   = bankDC.getFloat("zCrossReg3UnitDir", i);
                 double path = bankDC.getFloat("pathlength", i);
 
                 Line3d line = new Line3d(new Vector3d(x,y,z), new Vector3d(x+5*ux,y+5*uy, z+5*uz));

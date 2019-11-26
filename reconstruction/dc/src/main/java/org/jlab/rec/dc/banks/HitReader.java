@@ -285,8 +285,8 @@ public class HitReader {
             trkDoca[i] = bank.getFloat("trkDoca", i);
             clusterID[i] = bank.getShort("clusterID", i);
             trkID[i] = bank.getByte("trkID", i);
-            tProp[i] = bank.getFloat("TProp", i);
-            tFlight[i] = bank.getFloat("TFlight", i);
+            tProp[i] = bank.getFloat("tProp", i);
+            tFlight[i] = bank.getFloat("tFlight", i);
             if (event.hasBank("MC::Particle") ||
                     event.getBank("RUN::config").getInt("run", 0) < 100) {
                 tProp[i] = 0;

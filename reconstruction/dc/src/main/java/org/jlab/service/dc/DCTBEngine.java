@@ -178,9 +178,9 @@ public class DCTBEngine extends DCEngine {
             HBtrk.set_P(HBtrk.get_pAtOrig().mag());
             HBtrk.set_Vtx0(new Point3D(trkbank.getFloat("xVtx", i), trkbank.getFloat("yVtx", i), trkbank.getFloat("zVtx", i)));
             HBtrk.set_FitChi2(trkbank.getFloat("chi2", i));
-            StateVec HBFinalSV = new StateVec(trkbank.getFloat("x", i), trkbank.getFloat("y", i), 
-                    trkbank.getFloat("tx", i), trkbank.getFloat("ty", i));
-            HBFinalSV.setZ(trkbank.getFloat("z", i));
+            StateVec HBFinalSV = new StateVec(trkbank.getFloat("xStateVec", i), trkbank.getFloat("yStateVec", i), 
+                    trkbank.getFloat("txStateVec", i), trkbank.getFloat("txStateVec", i));
+            HBFinalSV.setZ(trkbank.getFloat("zStateVec", i));
             HBtrk.setFinalStateVec(HBFinalSV);
             Matrix initCMatrix = new Matrix();
             initCMatrix.set(new double[][]{
