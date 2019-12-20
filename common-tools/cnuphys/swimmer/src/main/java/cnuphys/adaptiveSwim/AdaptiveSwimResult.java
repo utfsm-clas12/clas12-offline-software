@@ -2,6 +2,8 @@ package cnuphys.adaptiveSwim;
 
 import java.io.PrintStream;
 
+import cnuphys.adaptiveSwim.test.InitialValues;
+import cnuphys.magfield.FastMath;
 import cnuphys.swim.SwimTrajectory;
 
 public class AdaptiveSwimResult {
@@ -172,6 +174,14 @@ public class AdaptiveSwimResult {
 	}
 	
 	/**
+	 * Set the initial values
+	 * @param iv the source
+	 */
+	public void setInitialValies(InitialValues iv) {
+		_initialValues = new InitialValues(iv);
+	}
+	
+	/**
 	 * Used to compare to old swimmer
 	 * @param traj trajectory (probably from old swimmer)
 	 */
@@ -223,6 +233,7 @@ public class AdaptiveSwimResult {
 		ps.println("\n" + message);
 		ps.println(toString());
 		
+		
 		if (printTrajectory && hasTrajectory()) {
 			_trajectory.print(ps);
 		}
@@ -234,6 +245,11 @@ public class AdaptiveSwimResult {
 		sb.append(locationString());
 		sb.append(momentumString());
 		sb.append(infoString());
+		
+		if (hasTrajectory()) {
+			sb.append("\nBDL: "+ _trajectory.getComputedBDL());
+		}
+
 		return sb.toString();
 	}
 	
@@ -308,4 +324,70 @@ public class AdaptiveSwimResult {
 	}
 
 
+	/**
+	 * get the final theta in degrees
+	 * @return the final theta in degrees
+	 */
+	public double getFinalTheta() {
+		double x = _uf[0];
+		double y = _uf[1];
+		double z = _uf[2];
+		double r = Math.sqrt(x*x + y*y + z*z);
+		
+		if (r < 1.0e-10) {
+			return 0;
+		}
+		
+		return Math.toDegrees(Math.acos(z/r));
+
+	}
+	
+	/**
+	 * get the final phi in degrees
+	 * @return the final phi in degrees
+	 */
+	public double getFinalPhi() {
+		double x = _uf[0];
+		double y = _uf[1];
+		return Math.toDegrees(Math.atan2(y, x));
+
+	}
+	
+	/**
+	 * Used for testing z swim.
+	 * @param zTarg the target z (m)
+	 * @return the signed difference zFinal -  zTarg
+	 */
+	public double finalDeltaZ(double zTarg) {
+		return _uf[2] - zTarg;
+	}
+	
+	/**
+	 * Get the "initial values" that allows a retrace. This is used mostly
+	 * for testing. Assumes the initial values have been set,
+	 * @return the "initial values" that allows a retrace.
+	 */
+	public InitialValues retrace() {
+		InitialValues iv =  getInitialValues();
+		InitialValues revIv= new InitialValues();
+		double uf[] = getUf();
+		
+		double txf = uf[3];
+		double tyf = uf[4];
+		double tzf = uf[5];
+		
+		txf *= -1;
+		tyf *= -1;
+		tzf *= -1;
+		
+		revIv.charge = -iv.charge;
+		revIv.p = iv.p;
+		revIv.xo = uf[0];
+		revIv.yo = uf[1];
+		revIv.zo = uf[2];
+		revIv.theta = FastMath.acos2Deg(tzf);
+		revIv.phi = FastMath.atan2Deg(tyf, txf);
+		
+		return revIv;
+	}
 }

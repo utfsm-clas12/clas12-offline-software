@@ -1,4 +1,4 @@
-package cnuphys.adaptiveSwim;
+package cnuphys.adaptiveSwim.test;
 
 import java.util.Random;
 
@@ -40,7 +40,7 @@ public class InitialValues {
 	
 	/**
 	 * Store the initial conditions of a swim
-	 * @param q The integer charge
+	 * @param charge The integer charge
 	 * @param xo The x coordinate of the vertex in meters
 	 * @param yo The y coordinate of the vertex in meters
 	 * @param zo The z coordinate of the vertex in meters
@@ -48,14 +48,22 @@ public class InitialValues {
 	 * @param theta The polar angle in degrees
 	 * @param phi The azimuthal angle in degrees
 	 */
-	public InitialValues(int q, double xo, double yo, double zo, double p, double theta, double phi) {
-		this.charge = q;
+	public InitialValues(int charge, double xo, double yo, double zo, double p, double theta, double phi) {
+		this.charge = charge;
 		this.xo = xo;
 		this.yo = yo;
 		this.zo = zo;
 		this.p = p;
 		this.theta = theta;
 		this.phi = phi;
+	}
+	
+	/**
+	 * Copy constructor
+	 * @param src the source initial values
+	 */
+	public InitialValues(InitialValues src) {
+		this(src.charge, src.xo, src.yo, src.zo, src.p, src.theta, src.phi);
 	}
 	
 	@Override
@@ -68,7 +76,6 @@ public class InitialValues {
 		String.format("p: %10.7e GeV/c\n", p) +
 		String.format("theta: %10.7f deg\n", theta) +
 		String.format("phi: %10.7f deg", phi);
-
 	}
 	
 

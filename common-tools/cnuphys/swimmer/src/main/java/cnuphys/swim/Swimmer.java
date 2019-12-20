@@ -351,7 +351,7 @@ public final class Swimmer {
 	 * @param phi          initial azimuthal angle in degrees
 	 * @param fixedRho     the fixed rho value (meters) that terminates (or
 	 *                     maxPathLength if reached first)
-	 * @param accuracy     the accuracy of the fixed z termination, in meters
+	 * @param accuracy     the accuracy of the fixed rho termination, in meters
 	 * @param sMax         Max path length in meters. This determines the max number
 	 *                     of steps based on the step size. If a stopper is used,
 	 *                     the integration might terminate before all the steps are
@@ -474,7 +474,7 @@ public final class Swimmer {
 	 * @param phi                  initial azimuthal angle in degrees
 	 * @param fixedRho             the fixed rho value (meters) that terminates (or
 	 *                             maxPathLength if reached first)
-	 * @param accuracy             the accuracy of the fixed z termination, in
+	 * @param accuracy             the accuracy of the fixed rho termination, in
 	 *                             meters
 	 * @param stopper              an optional object that can terminate the
 	 *                             swimming based on some condition

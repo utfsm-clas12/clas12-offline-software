@@ -392,8 +392,8 @@ public class Fit {
 			sb.append(cntStr + "<BR>");
 
 			double results[] = hd.getBasicStatistics();
-			String statStr = String.format(UnicodeSupport.SMALL_MU + " = %9.3f&nbsp;&nbsp;"
-					+ colorStr("rms = %9.3f&nbsp;&nbsp;", "red") + UnicodeSupport.SMALL_SIGMA + " = %9.3f", results[0],
+			String statStr = String.format(UnicodeSupport.SMALL_MU + " = %9.3g&nbsp;&nbsp;"
+					+ colorStr("rms = %9.3g&nbsp;&nbsp;", "red") + UnicodeSupport.SMALL_SIGMA + " = %9.3g", results[0],
 					results[2], results[1]);
 			sb.append(statStr + "<BR>");
 		}

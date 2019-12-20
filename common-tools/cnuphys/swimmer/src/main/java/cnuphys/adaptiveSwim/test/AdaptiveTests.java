@@ -1,7 +1,10 @@
-package cnuphys.adaptiveSwim;
+package cnuphys.adaptiveSwim.test;
 
 import java.util.Random;
 
+import cnuphys.adaptiveSwim.AdaptiveSwimException;
+import cnuphys.adaptiveSwim.AdaptiveSwimResult;
+import cnuphys.adaptiveSwim.AdaptiveSwimmer;
 import cnuphys.adaptiveSwim.geometry.Cylinder;
 import cnuphys.adaptiveSwim.geometry.Line;
 import cnuphys.adaptiveSwim.geometry.Plane;
@@ -116,8 +119,6 @@ public class AdaptiveTests {
 
 		try {
 			
-			InitialValues revIv = new InitialValues();
-			
 			InitialValues iv = null;
 			double[] uf = null;
 			
@@ -127,9 +128,11 @@ public class AdaptiveTests {
 			
 			for (int i = n0; i < num; i++) {
 				iv = ivals[i];
+				result.setInitialValies(iv);
 				
 				adaptiveSwimmer.swimPlane(iv.charge, iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi, plane, accuracy,
 						maxPathLength, stepsizeAdaptive, eps, result);
+				
 				
 				uf = result.getUf();
 				status[i] = result.getStatus();
@@ -137,30 +140,8 @@ public class AdaptiveTests {
 					goodCount++;
 					//try to swim back
 					
-					uf = result.getUf();
-					
-					double txf = uf[3];
-					double tyf = uf[4];
-					double tzf = uf[5];
-					
-					txf *= -1;
-					tyf *= -1;
-					tzf *= -1;
-					
-					revIv.charge = -iv.charge;
-					revIv.p = iv.p;
-					revIv.xo = uf[0];
-					revIv.yo = uf[1];
-					revIv.zo = uf[2];
-					revIv.theta = FastMath.acos2Deg(tzf);
-					revIv.phi = FastMath.atan2Deg(tyf, txf);
-					
-	//				double zTarg = 0;
-
-					if (i == 711) {
-						System.out.println("FORWARD init conditions\n" + iv);
-						result.printOut(System.out, "Forward result", true);
-					}
+					InitialValues revIv = result.retrace();
+				
 					
 //					adaptiveSwimmer.swimZ(revIv.charge, revIv.xo, revIv.yo, revIv.zo, revIv.p, revIv.theta, revIv.phi, zTarg, accuracy, maxPathLength, stepsizeAdaptive, eps, result);
 //					adaptiveSwimmer.swim(revIv.charge, revIv.xo, revIv.yo, revIv.zo, revIv.p, revIv.theta, revIv.phi, result.getFinalS(), stepsizeAdaptive, eps, result);
@@ -286,7 +267,7 @@ public class AdaptiveTests {
 
 
 	//test swim to fixed z
-	public static void zTest() {
+	public static void xxxxxxzTest() {
 		long seed = 9479365;
 		Random rand = new Random(seed);
 		int num = 100;

@@ -21,7 +21,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
-import cnuphys.adaptiveSwim.AdaptiveTests;
+import cnuphys.adaptiveSwim.test.AdaptiveBeamlineSwimTest;
+import cnuphys.adaptiveSwim.test.AdaptiveSectorSwimTest;
+import cnuphys.adaptiveSwim.test.AdaptiveTests;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundStyle;
 import cnuphys.lund.LundSupport;
@@ -169,6 +171,7 @@ public class SwimTest {
 		JMenu atmenu = new JMenu("Test AdaptiveSwim Package");
 		
 		final JMenuItem rhoItem = new JMenuItem("Rho Test");
+		final JMenuItem beamLineItem = new JMenuItem("Beamline Test");
 		final JMenuItem retraceItem = new JMenuItem("Retrace Test");
 		final JMenuItem planeItem = new JMenuItem("Plane Test");
 		final JMenuItem lineItem = new JMenuItem("Line Test");
@@ -185,6 +188,9 @@ public class SwimTest {
                 if (e.getSource() == rhoItem) {
 					AdaptiveTests.rhoTest();
 				}
+                else if (e.getSource() == beamLineItem) {
+					AdaptiveBeamlineSwimTest.beamLineTest();
+				}
                 else if (e.getSource() == retraceItem) {
 					AdaptiveTests.retraceTest();
 				}
@@ -195,7 +201,7 @@ public class SwimTest {
 					AdaptiveTests.lineTest();
 				}
                 else if (e.getSource() == zItem) {
-					AdaptiveTests.zTest();
+					AdaptiveSectorSwimTest.zTest();
 				}
                 else if (e.getSource() == cylinderItem) {
 					AdaptiveTests.cylinderTest();
@@ -210,6 +216,7 @@ public class SwimTest {
 		};
 		
 		rhoItem.addActionListener(al);
+		beamLineItem.addActionListener(al);
 		retraceItem.addActionListener(al);
 		planeItem.addActionListener(al);
 		lineItem.addActionListener(al);
@@ -218,6 +225,7 @@ public class SwimTest {
 		noStopperItem.addActionListener(al);
 
 		atmenu.add(rhoItem);
+		atmenu.add(beamLineItem);
 		atmenu.add(retraceItem);
 		atmenu.add(planeItem);
 		atmenu.add(lineItem);

@@ -199,11 +199,11 @@ public class HistoData {
 	public String statStr() {
 		double res[] = getBasicStatistics();
 		if (_rmsInHistoLegend) {
-			return String.format(UnicodeSupport.SMALL_MU + ": %-6.2f " + "rms: %-6.2f", res[0], res[2]);
+			return String.format(UnicodeSupport.SMALL_MU + ": %-4.2g " + "rms: %-4.2g under: %d over: %d", res[0], res[2], _underCount, _overCount);
 		}
 		else {
-			return String.format(UnicodeSupport.SMALL_MU + ": %-6.2f " + UnicodeSupport.SMALL_SIGMA + ": %-6.2f",
-					res[0], res[1]);
+			return String.format(UnicodeSupport.SMALL_MU + ": %-4.2g " + UnicodeSupport.SMALL_SIGMA + ": %-4.2g under: %d over: %d",
+					res[0], res[1], _underCount, _overCount);
 		}
 	}
 
@@ -441,8 +441,16 @@ public class HistoData {
 					params.getMinExponentX());
 			String maxstr = DoubleFormat.doubleFormat(histo.getBinMaxX(bin), params.getNumDecimalX(),
 					params.getMinExponentX());
+			
+			String name = histo.getName();
+			if ((name != null) && (name.length() > 0)) {
+				name = "[" + name + "]";
+			}
+			else {
+				name = "";
+			}
 
-			s = "[" + histo.getName() + "] bin: " + bin + " [" + minstr + " - " + maxstr + "]";
+			s = name + " bin: " + bin + " [" + minstr + " - " + maxstr + "]";
 			s += " counts: " + histo.getCount(bin);
 		}
 

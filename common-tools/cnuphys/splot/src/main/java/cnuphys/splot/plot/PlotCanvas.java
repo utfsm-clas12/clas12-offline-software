@@ -554,7 +554,7 @@ public class PlotCanvas extends JComponent
 			// pp.x -= _activeBounds.x;
 			// pp.y -= _activeBounds.y;
 			localToWorld(pp, _workPoint);
-			_locationString = String.format("<html>(x, y) = (%7.2f, %-7.2f)<br>count = %d", _workPoint.x, _workPoint.y, _dataSet.size());
+			_locationString = String.format("<html>(x, y) = (%7.2g, %-7.2g)<br>count = %d", _workPoint.x, _workPoint.y, _dataSet.size());
 
 			if (_dataSet.is1DHistoSet()) {
 				Vector<DataColumn> ycols = (Vector<DataColumn>) _dataSet.getAllVisibleCurves();

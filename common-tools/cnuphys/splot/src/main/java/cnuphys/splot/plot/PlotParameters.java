@@ -7,14 +7,14 @@ import java.util.Vector;
 public class PlotParameters {
 	
 	// for legend
-	private Font _textFont = Environment.getInstance().getCommonFont(12);
-	private Color _textFillColor = new Color(240, 240, 240, 164);
+	private Font _textFont = Environment.getInstance().getCommonFont(10);
+	private Color _textFillColor = new Color(248, 248, 248, 224);
 	private Color _textTextColor = Color.black;
 	private Color _textBorderColor = Color.black;
 
 	// for extra text
 	private Font _extraFont = Environment.getInstance().getCommonFont(10);
-	private Color _extraFillColor = new Color(240, 240, 248, 164);
+	private Color _extraFillColor = new Color(248, 248, 248, 224);
 	private Color _extraTextColor = Color.black;
 	private Color _extraBorderColor = Color.black;
 
