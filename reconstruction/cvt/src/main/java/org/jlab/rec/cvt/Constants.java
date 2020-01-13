@@ -2,12 +2,15 @@ package org.jlab.rec.cvt;
 
 public class Constants {
 
+    
+
     /**
      * Constants used in the reconstruction
      */
     Constants() {
     }
 
+    public static boolean TrueTrack = false;
     // SIMULATION FLAG
     public static boolean isSimulation = true;
 
