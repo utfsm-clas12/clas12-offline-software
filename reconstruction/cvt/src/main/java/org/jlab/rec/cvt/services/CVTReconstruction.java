@@ -232,6 +232,8 @@ public class CVTReconstruction extends ReconstructionEngine {
             trkcands.add(kf.OutputTrack(seed, SVTGeom, swimmer));
             if (kf.setFitFailed == false) {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(2);
+                if(Constants.TrueTrack)
+                    this.getMCTrk(event, trkcands.get(trkcands.size() - 1));
            } else {
                 trkcands.get(trkcands.size() - 1).set_TrackingStatus(1);
            }
@@ -412,6 +414,22 @@ public class CVTReconstruction extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with all region (default) ");
         }
         
+        String TrueTrack = this.getEngineConfigString("TrueTrack");
+        
+        if (TrueTrack!=null) {
+            System.out.println("["+this.getName()+"] TrueTrack "+TrueTrack+" based on yaml");
+            Constants.TrueTrack =Boolean.valueOf(TrueTrack);
+        }
+        else {
+            TrueTrack = System.getenv("COAT_CVT_TRUETRACK");
+            if (TrueTrack!=null) {
+                System.out.println("["+this.getName()+"] run with  "+TrueTrack+"chosen based on env");
+                Constants.TrueTrack =Boolean.valueOf(TrueTrack);
+            }
+        }
+        if (TrueTrack==null) {
+             System.out.println("["+this.getName()+"] run TrueTrack (default=false) ");
+        }
         // Load other geometries
         variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
@@ -425,4 +443,25 @@ public class CVTReconstruction extends ReconstructionEngine {
     private String variationName;
     
 
+    private void getMCTrk(DataEvent event, Track tr) {
+        
+        DataBank bn = event.getBank("MC::Particle");
+
+        double h_dca = 0;
+        double px = bn.getFloat("px",0);
+        double py = bn.getFloat("py",0);
+        double pz = bn.getFloat("pz",0);
+        double h_phi0 = Math.atan2(py, px);
+        double R = Math.sqrt(px * px + py * py)/(5*Constants.LIGHTVEL);
+
+        double h_dz = bn.getFloat("vz",0)*10.;
+        double h_tandip = pz / Math.sqrt(px * px + py * py);
+
+        double curv = Math.signum(tr.get_helix().get_curvature())/R;
+        Helix newH = new Helix(h_dca, h_phi0, curv, h_dz, h_tandip, tr.get_helix().get_covmatrix());
+        tr.set_helix(newH);
+        tr.set_Pt(Math.sqrt(px * px + py * py));
+        tr.set_P(Math.sqrt(px * px + py * py + pz * pz));
+        tr.set_Pz(pz);
+    }
 }
