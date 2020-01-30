@@ -109,15 +109,15 @@ public class CVTReconstruction extends ReconstructionEngine {
             if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
             
-            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
-            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
-            System.out.println("SVT LOADING WITH VARIATION "+variationName);
-            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
-            cp = SVTConstants.connect( cp );
-            cp.disconnect();  
-            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
-            SVTGeom.setSvtStripFactory(svtFac);
-            Constants.Load(isCosmics, isSVTonly);
+//            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+//            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
+//            System.out.println("SVT LOADING WITH VARIATION "+variationName);
+//            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
+//            cp = SVTConstants.connect( cp );
+//            cp.disconnect();  
+//            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+//            SVTGeom.setSvtStripFactory(svtFac);
+//            Constants.Load(isCosmics, isSVTonly);
             this.setRun(newRun);
 
         }
@@ -392,6 +392,17 @@ public class CVTReconstruction extends ReconstructionEngine {
     }
 
         public boolean init() {
+            // Load  geometries
+            variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
+            CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
+            System.out.println("SVT LOADING WITH VARIATION "+variationName);
+            DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
+            cp = SVTConstants.connect( cp );
+            cp.disconnect();  
+            SVTStripFactory svtFac = new SVTStripFactory(cp, true);
+            SVTGeom.setSvtStripFactory(svtFac);
+            Constants.Load(false, false);
         // Load config
         String rmReg = this.getEngineConfigString("removeRegion");
         
@@ -410,8 +421,7 @@ public class CVTReconstruction extends ReconstructionEngine {
              System.out.println("["+this.getName()+"] run with all region (default) ");
         }
         
-        // Load other geometries
-        variationName = Optional.ofNullable(this.getEngineConfigString("variation")).orElse("default");
+        
         ConstantProvider providerCTOF = GeometryFactory.getConstants(DetectorType.CTOF, 11, variationName);
         CTOFGeom = new CTOFGeant4Factory(providerCTOF);        
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
