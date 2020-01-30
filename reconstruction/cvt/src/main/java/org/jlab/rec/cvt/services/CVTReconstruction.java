@@ -101,7 +101,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         //-------------------
         int newRun = bank.getInt("run", 0);
         
-        if (Run != newRun) {
+        if (Run != newRun && newRun!=0) {
             boolean align=false;
             //Load field scale
             double SolenoidScale =(double) bank.getFloat("solenoid", 0);
