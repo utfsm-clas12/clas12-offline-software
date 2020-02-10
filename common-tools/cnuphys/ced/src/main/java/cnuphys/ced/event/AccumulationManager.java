@@ -28,6 +28,9 @@ import cnuphys.ced.event.data.FTCAL;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.HTCC2;
 import cnuphys.ced.event.data.LTCC;
+import cnuphys.ced.event.data.RTPC;
+import cnuphys.ced.event.data.RTPCHit;
+import cnuphys.ced.event.data.RTPCHitList;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.CND;
 import cnuphys.ced.event.data.TdcAdcHit;
@@ -80,6 +83,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	// ftcc accumulated data
 	private int _FTCALAccumulatedData[];
+	
+	//rtpc accumulated data
+	private int _RTPCAccumulatedData[][];
 
 	// dc accumulated data indices are sector, superlayer, layer, wire
 	private int _DCAccumulatedData[][][][];
@@ -128,6 +134,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 		// FTCAL data
 		_FTCALAccumulatedData = new int[476];
+		
+		// RTPC Data
+		_RTPCAccumulatedData = new int[RTPC.NUMCOMPONENT][RTPC.NUMLAYER];
 
 		// cnd data (24 sectors, 3 layers, left and right)
 		_CNDAccumulatedData = new int[24][3][2];
@@ -188,6 +197,13 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		// clear ftcal
 		for (int i = 0; i < _FTCALAccumulatedData.length; i++) {
 			_FTCALAccumulatedData[i] = 0;
+		}
+		
+		//clear RTPC
+		for (int i = 0; i < RTPC.NUMCOMPONENT; i++) {
+			for (int j = 0; j < RTPC.NUMLAYER; j++) {
+				_RTPCAccumulatedData[i][j] = 0;
+			}
 		}
 
 		// clear accumulated CND
@@ -312,6 +328,16 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 	public int[] getAccumulatedFTCALData() {
 		return _FTCALAccumulatedData;
+	}
+	
+	/**
+	 * Get the accumulated RTPC data
+	 * 
+	 * @return the accumulated RTPC data
+	 */
+
+	public int[][] getAccumulatedRTPCData() {
+		return _RTPCAccumulatedData;
 	}
 
 	/**
@@ -465,6 +491,15 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 	public int getMedianFTCALCount() {
 		return getMedian(_FTCALAccumulatedData);
 	}
+	
+	/**
+	 * Get the median counts for RTPC
+	 * 
+	 * @return the median counts for RTPC
+	 */
+	public int getMedianRTPCCount() {
+		return getMedian(_RTPCAccumulatedData);
+	}
 
 	/**
 	 * Get the median counts for CND
@@ -612,7 +647,11 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		// FTCal Data
 		AdcHitList ftcalList = FTCAL.getInstance().updateAdcList();
 		accumFTCAL(ftcalList);
-
+		
+		//RTPCData
+		RTPCHitList rtpcList = RTPC.getInstance().updateAdcList();
+		accumRTPC(rtpcList);
+		
 		// CND a special case
 		CND.getInstance().updateData();
 		accumCND();
@@ -686,6 +725,19 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 			_FTCALAccumulatedData[hit.component] += 1;
 		}
 	}
+	
+	// accumulate rtpc
+		private void accumRTPC(RTPCHitList list) {
+			if ((list == null) || list.isEmpty()) {
+				return;
+			}
+
+			for (RTPCHit hit : list) {
+				int cm1 = hit.component-1;
+				int lm1 = hit.layer-1;
+				_RTPCAccumulatedData[cm1][lm1] += 1;
+			}
+		}
 
 	// accumulate CND which is a special case
 	private void accumCND() {
@@ -1029,7 +1081,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		ArrayList<Integer> v = new ArrayList<>(data.length);
 
 		for (int val : data) {
-			v.add(val);
+			if (val != 0) {
+				v.add(val);
+			}
 		}
 
 		int size = v.size();
@@ -1052,7 +1106,10 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 
 		for (int iarry[] : data) {
 			for (int val : iarry) {
-				v.add(val);
+				if (val != 0) {
+					v.add(val);
+				}
+
 			}
 		}
 
@@ -1077,7 +1134,9 @@ public class AccumulationManager implements IAccumulator, IClasIoEventListener, 
 		for (int iarry1[][] : data) {
 			for (int iarray2[] : iarry1) {
 				for (int val : iarray2) {
-					v.add(val);
+					if (val != 0) {
+						v.add(val);
+					}
 				}
 			}
 		}

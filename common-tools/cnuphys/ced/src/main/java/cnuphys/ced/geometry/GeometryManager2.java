@@ -18,7 +18,7 @@ public class GeometryManager2 {
 		// we need to run with this flag
 		ConstantProvider providerDC = GeometryFactory.getConstants(DetectorType.DC, runNb, var);
 		// dcDetector = new DCGeant4Factory(providerDC);
-		dcDetector = new DCGeant4Factory(providerDC, DCGeant4Factory.MINISTAGGERON);
+		dcDetector = new DCGeant4Factory(providerDC, DCGeant4Factory.MINISTAGGERON, false);
 	}
 
 	/**

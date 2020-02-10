@@ -132,6 +132,7 @@ public class Fonts {
 				commonFamily = backupFamily;
 			}
 			Log.getInstance().config("Common font family: " + commonFamily);
+			System.out.println("Common font family: " + commonFamily);
 		}
 
 		String key = commonFamily + "$" + size + "$" + style;

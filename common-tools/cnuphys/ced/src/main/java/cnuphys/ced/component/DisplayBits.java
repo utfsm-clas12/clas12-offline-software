@@ -59,6 +59,7 @@ public class DisplayBits {
 	/** sector change diamonds */
     public static final int SECTORCHANGE = 01000000;
 
+
 	/** Distance scale */
 	// public static final int SCALE = 04;
 

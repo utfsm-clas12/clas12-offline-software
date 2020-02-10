@@ -80,7 +80,7 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 
 	// our mode
 	protected Mode _mode = Mode.SINGLE_EVENT;
-
+	
 	// basic toolbar bits
 	protected static final int TOOLBARBITS = BaseToolBar.NODRAWING & ~BaseToolBar.TEXTFIELD
 			& ~BaseToolBar.CONTROLPANELBUTTON & ~BaseToolBar.RECTGRIDBUTTON & ~BaseToolBar.TEXTBUTTON
@@ -1190,6 +1190,22 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 	 */
 	public void setMedianSetting(double medianSetting) {
 		_medianRelSetting = Math.max(0, Math.min(1, medianSetting));
+	}
+	
+	/**
+	 * Some views (e.g., RTPC) have a threshold. Thay must override.
+	 * @return the adc threshold for viewing hits
+	 */
+	public int getAdcThreshold() {
+		return 0;
+	}
+	
+	/**
+	 * Get the default value for the adc threshold
+	 * @return the default value for the adc threshold
+	 */
+	public int getAdcThresholdDefault() {
+		return 0;
 	}
 
 	/**

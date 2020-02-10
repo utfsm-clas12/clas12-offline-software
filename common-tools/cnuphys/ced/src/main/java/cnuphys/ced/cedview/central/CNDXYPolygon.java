@@ -3,8 +3,10 @@ package cnuphys.ced.cedview.central;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.util.List;
 
@@ -79,6 +81,8 @@ public class CNDXYPolygon extends Polygon {
 	 * @param container the drawing container
 	 */
 	public void draw(Graphics g, IContainer container, Color fillColor, Color lineColor) {
+		Graphics2D g2 = (Graphics2D)g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		reset();
 		Point pp = new Point();
 

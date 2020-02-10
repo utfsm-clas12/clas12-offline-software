@@ -35,7 +35,6 @@ import cnuphys.ced.item.MagFieldItem;
  *
  */
 public class ControlPanel extends JPanel implements ChangeListener {
-
 	private static final int SLIDERWIDTH = 210;
 	private static final int FEEDBACKWIDTH = 220;
 
@@ -71,6 +70,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 
 	/** Bit used for accumulation only all dc panel */
 	public static final int ALLDC_ACCUM_ONLY = 01000;
+	
+	/** and adc threshold slider */
+	public static final int ADCTHRESHOLDSLIDER = 02000;
 
 	// the view parent
 	private CedView _view;
@@ -86,6 +88,11 @@ public class ControlPanel extends JPanel implements ChangeListener {
 
 	// control the value of phi
 	private JSlider _phiSlider;
+	
+	
+	//control threshold value of adc to display
+	private JSlider _adcThresholdSlider;
+	private CommonBorder _adcThresholdBorder;
 
 	// the feedback pane
 	private FeedbackPane _feedbackPane;
@@ -260,6 +267,8 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		// }
 
 		// basic.add(box);
+		
+
 
 		if (_displayArray != null) {
 			JPanel sp = new JPanel();
@@ -275,9 +284,15 @@ public class ControlPanel extends JPanel implements ChangeListener {
 //				_colorPanel.getSlider().setEnabled(false);
 //				_colorPanel.getSlider().addChangeListener(this);
 
-				sp.add(_colorPanel, BorderLayout.SOUTH);
+				sp.add(_colorPanel, BorderLayout.CENTER);
+			}
+			
+			//adc threshold
+			if (Bits.checkBit(controlPanelBits, ADCTHRESHOLDSLIDER)) {
+				sp.add(createAdcThresholdSlider(), BorderLayout.SOUTH);
 			}
 
+			
 			tabbedPane.add(sp, "display");
 		}
 
@@ -339,6 +354,45 @@ public class ControlPanel extends JPanel implements ChangeListener {
 //		return box;
 //	}
 
+	
+	/**
+	 * Create the slider used to control the target z
+	 * 
+	 * @return the slider used to control the target z
+	 */
+	private Box createAdcThresholdSlider() {
+		Box box = Box.createVerticalBox();
+
+		int slider_min = 0;
+		int slider_max = 1000;
+		int slider_init = _view.getAdcThresholdDefault();
+
+		_adcThresholdSlider = new JSlider(SwingConstants.HORIZONTAL, slider_min, slider_max, slider_init);
+
+		_adcThresholdSlider.setMajorTickSpacing(250);
+		_adcThresholdSlider.setMinorTickSpacing(50);
+
+		
+		_adcThresholdSlider.setPaintTicks(true);
+		_adcThresholdSlider.setPaintLabels(true);
+		_adcThresholdSlider.setFont(Fonts.tinyFont);
+		_adcThresholdSlider.setFocusable(false); // so ugly focus border not drawn
+
+		if (_view instanceof ChangeListener) {
+			_adcThresholdSlider.addChangeListener((ChangeListener) _view);
+		}
+
+		Dimension d = _adcThresholdSlider.getPreferredSize();
+		d.width = SLIDERWIDTH;
+		_adcThresholdSlider.setPreferredSize(d);
+		box.add(_adcThresholdSlider);
+
+		_adcThresholdBorder = new CommonBorder("ADC Display Threshold (" + _view.getAdcThresholdDefault() + ")");
+		box.setBorder(_adcThresholdBorder);
+		return box;
+	}
+	
+	
 	/**
 	 * Create the slider used to control the target z
 	 * 
@@ -381,6 +435,23 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		box.setBorder(new CommonBorder(
 				UnicodeSupport.CAPITAL_DELTA + UnicodeSupport.SMALL_PHI + " relative to midplane (deg)"));
 		return box;
+	}
+	
+	/**
+	 * Get the slider for adc threshold.
+	 * 
+	 * @return the slider for adc threshold.
+	 */
+	public JSlider getAdcThresholdSlider() {
+		return _adcThresholdSlider;
+	}
+
+	/**
+	 * Get the adc threshold border so we can adjust the title.
+	 * @return the adc threshold border
+	 */
+	public CommonBorder getAdcThresholdBorder() {
+		return _adcThresholdBorder;
 	}
 
 	/**

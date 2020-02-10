@@ -5,9 +5,11 @@ import java.util.Vector;
 import cnuphys.adaptiveSwim.AdaptiveSwimException;
 import cnuphys.adaptiveSwim.AdaptiveSwimResult;
 import cnuphys.adaptiveSwim.AdaptiveSwimmer;
+import cnuphys.adaptiveSwim.test.InitialValues;
 import cnuphys.bCNU.magneticfield.swim.ISwimAll;
 import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.clasio.ClasIoReconEventView;
+import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
@@ -80,7 +82,14 @@ public class SwimAllRecon implements ISwimAll {
 					result.getTrajectory().setLundId(lid);
 					result.getTrajectory().setSource(trd.getSource());
 					
-					result.printOut(System.err, trd.getSource());
+					if (result.getTrajectory().getGeneratedParticleRecord() == null) {
+						InitialValues iv = result.getInitialValues();
+						GeneratedParticleRecord genPart =  new GeneratedParticleRecord(iv.charge,
+								iv.xo, iv.yo, iv.zo, iv.p, iv.theta, iv.phi);
+						result.getTrajectory().setGeneratedParticleRecord(genPart);
+					}
+					
+	//				result.printOut(System.err, trd.getSource());
 					Swimming.addReconTrajectory(result.getTrajectory());
 				} catch (AdaptiveSwimException e) {
 					e.printStackTrace();

@@ -3,8 +3,10 @@ package cnuphys.ced.cedview;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
@@ -69,6 +71,10 @@ public abstract class CedXYView extends CedView {
 
 	// draw the axes
 	protected void drawAxes(Graphics g, IContainer container, Rectangle bounds, boolean drawPhi) {
+		
+		Graphics2D g2 = (Graphics2D)g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		
 		Rectangle sr = getActiveScreenRectangle(container);
 		// Rectangle sr = container.getInsetRectangle();
 

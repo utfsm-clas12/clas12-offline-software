@@ -131,6 +131,11 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 */
 	public SwimTrajectory(GeneratedParticleRecord genPartRec, int initialCapacity) {
 		super(initialCapacity);
+		
+		if (genPartRec == null) {
+			System.err.println("NULL GEN PART REC (A)");
+		}
+		
 		_genPartRec = genPartRec;
 	}
 
@@ -139,6 +144,13 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	 * @param genPart the generated particle record
 	 */
 	public void setGeneratedParticleRecord(GeneratedParticleRecord genPart) {
+		
+		if (genPart == null) {
+			System.err.println("NULL GEN PART REC (A)");
+			(new Throwable()).printStackTrace();
+		}
+
+		
 		_genPartRec = genPart;
 	}
 	/**

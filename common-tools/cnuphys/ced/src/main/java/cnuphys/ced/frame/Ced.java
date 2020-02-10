@@ -42,6 +42,7 @@ import cnuphys.ced.cedview.central.CentralXYView;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.cedview.dcxy.DCXYView;
 import cnuphys.ced.cedview.ft.FTCalXYView;
+import cnuphys.ced.cedview.rtpc.RTPCView;
 import cnuphys.ced.cedview.sectorview.DisplaySectors;
 import cnuphys.ced.cedview.sectorview.SectorView;
 import cnuphys.ced.clasio.ClasIoEventMenu;
@@ -120,7 +121,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private static String _geoVariation = "default";
 	
 	//ced release 
-	private static final String _release = "build 1.4.05";
+	private static final String _release = "build 1.4.3";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -173,6 +174,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private ClasIoEventView _eventView;
 	private CentralXYView _centralXYView;
 	private CentralZView _centralZView;
+	private RTPCView _rtpcView;
 	private FTCalXYView _ftcalXyView;
 	private DCXYView _dcXyView;
 
@@ -298,6 +300,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 		// note no constraint means "center"
 		_virtualView.moveTo(_dcXyView, 7);
+		
+		_virtualView.moveTo(_rtpcView, 8);
+
 
 		_virtualView.moveTo(_pcalView, 4);
 		_virtualView.moveTo(_ecView, 5);
@@ -374,6 +379,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 		// add a ftcalxyYView
 		_ftcalXyView = FTCalXYView.createFTCalXYView();
+		
+		// add an RTPC vie
+		_rtpcView = RTPCView.createRTPCView();
 
 		// add a DC XY View
 		_dcXyView = DCXYView.createDCXYView();
@@ -1224,6 +1232,9 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 		}
 
 		FileUtilities.setDefaultDir("data");
+		
+		boolean isLinux = Environment.getInstance().isLinux();
+		System.err.println("Is Linux: " + isLinux);
 
 		// create a console log listener
 		// Log.getInstance().addLogListener(new ConsoleLogListener());
@@ -1260,7 +1271,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 						FileUtilities.setDefaultDir(arg[i]);
 					}
 				}
-				else if (arg[i].contains("NO3D") || arg[i].contains("TAKETHATGAGIKANDVERONIQUE")) {
+				else if (isLinux ||  arg[i].contains("NO3D") || arg[i].contains("TAKETHATGAGIKANDVERONIQUE")) {
 					_use3D = false;
 					System.err.println("Not using 3D");
 				} else if (arg[i].contains("OLDDCGEO")) {

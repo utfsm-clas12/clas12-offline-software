@@ -36,7 +36,7 @@ public class DCGeometry2 {
 	public static void initialize(String geomDBVar) {
 		ConstantProvider provider = GeometryFactory.getConstants(DetectorType.DC, 11,
 				Optional.ofNullable(geomDBVar).orElse("default"));
-		dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON);
+		dcDetector = new DCGeant4Factory(provider, DCGeant4Factory.MINISTAGGERON, false);
 
 		// get the wire endpoints
 		loadWirePositions();

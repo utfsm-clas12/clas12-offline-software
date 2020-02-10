@@ -70,7 +70,8 @@ public class RungeKutta {
 		final int nDim = yo.length;
 
 		// uniform step size
-		double h = (tf - to) / (nstep - 1);
+		double h = (tf - to) / nstep;
+	//	double h = (tf - to) / (nstep - 1);
 
 		// put starting step in
 		t[0] = to;

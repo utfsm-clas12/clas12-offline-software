@@ -15,6 +15,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
@@ -342,6 +343,8 @@ public class CentralXYView extends CedXYView implements ILabCoordinates {
 
 	// draw one BST panel
 	public void drawBSTPanel(Graphics2D g2, IContainer container, BSTxyPanel panel, Color color) {
+		
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		Stroke oldStroke = g2.getStroke();
 		g2.setColor(color);

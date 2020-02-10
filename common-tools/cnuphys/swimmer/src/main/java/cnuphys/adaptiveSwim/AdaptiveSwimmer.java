@@ -140,14 +140,14 @@ public class AdaptiveSwimmer {
 	public void swim(final int charge, final double xo, final double yo, final double zo, final double momentum, double theta, double phi,
 			final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
+		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 
 		if (charge == 0) {
-			System.err.println("Straight line");
 			straightLine(xo, yo, zo, momentum, theta, phi, sf, result);
 			return;
 		}
 
-		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
 		
 		if (momentum < MINMOMENTUM) {
@@ -193,12 +193,13 @@ public class AdaptiveSwimmer {
 			final double accuracy, final double sf, final double h0, final double eps, AdaptiveSwimResult result)
 			throws AdaptiveSwimException {
 		
+		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
+		
 		if (charge == 0) {
 			straightLine(xo, yo, zo, momentum, theta, phi, sf, result);
 			return;
 		}
 		
-		double uf[] = init(charge, xo, yo, zo, momentum, theta, phi, result);
 		double h = h0; //running stepsize
 		
 		//bail if below minimum momentum

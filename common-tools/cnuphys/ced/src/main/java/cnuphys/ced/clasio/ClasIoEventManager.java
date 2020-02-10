@@ -220,7 +220,7 @@ public class ClasIoEventManager {
 			String[] cbanks = _currentEvent.getBankList();
 			if (cbanks != null) {
 				for (String bankName : cbanks) {
-					if (bankName.contains("::true") || (bankName.equals("MC::Particle"))) {
+					if (bankName.contains("::true") || (bankName.contains("::Particle"))) {
 
 						// boolean hasBank = _currentEvent.hasBank(bankName);
 						//

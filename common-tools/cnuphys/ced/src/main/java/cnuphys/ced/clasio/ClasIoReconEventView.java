@@ -52,6 +52,8 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 
 			addTracks(event, _trajData, "HitBasedTrkg::HBTracks");
 			addTracks(event, _trajData, "TimeBasedTrkg::TBTracks");
+			
+			addTracks(event, _trajData, "REC::Particle");
 
 			// look for cvt tyracks
 			addTracks(event, _trajData, "CVTRec::Tracks");
@@ -83,8 +85,14 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 				return;
 			}
 
+			if (bankName.contains("REC::Particle")) {
+				addRECParticleTracks(event, data, bankName);
+				return;
+			}
 
 			boolean hitBased = bankName.contains("HitBased");
+			
+			
 			DataManager dm = DataManager.getInstance();
 			float[] vx = dm.getFloatArray(event, bankName + "." + "Vtx0_x"); // vertex x cm
 			if ((vx != null) && (vx.length > 0)) {
@@ -125,6 +133,68 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 			Log.getInstance().warning(warning);
 		}
 	}
+	
+	// add CVT reconstructed tracks
+	private void addRECParticleTracks(DataEvent event, Vector<TrajectoryRowData> data, String bankName) {
+		
+		DataManager dm = DataManager.getInstance();
+		
+		try {
+		float[] vx = dm.getFloatArray(event, bankName + "." + "vx"); // vertex x cm
+		if ((vx != null) && (vx.length > 0)) {
+			float[] vy = dm.getFloatArray(event, bankName + "." + "vy"); // vertex y cm
+			float[] vz = dm.getFloatArray(event, bankName + "." + "vz"); // vertex z cm
+			float px[] = dm.getFloatArray(event, bankName + "." + "px");
+			float py[] = dm.getFloatArray(event, bankName + "." + "py");
+			float pz[] = dm.getFloatArray(event, bankName + "." + "pz");
+			byte charge[] = dm.getByteArray(event, bankName + "." + "charge");
+				short status[] = dm.getShortArray(event, bankName + "." + "status");
+				int pid[] = dm.getIntArray(event, bankName + "." + "pid");
+
+				LundId lid;
+				
+				for (int i = 0; i < vx.length; i++) {
+
+					if (pid[i] == 0) {
+						if (charge[i] == -1) {
+							lid = LundSupport.unknownMinus;
+						}
+						if (charge[i] == 1) {
+							lid = LundSupport.unknownPlus;
+						}
+						else {
+							lid = LundSupport.unknownNeutral;
+
+						}
+					} else {
+						lid = LundSupport.getInstance().get(pid[i]);
+					}
+
+				double xo = vx[i]; // cm
+				double yo = vy[i]; // cm
+				double zo = vz[i]; // cm
+
+				double pxo = px[i]; // GeV/c
+				double pyo = py[i];
+				double pzo = pz[i];
+
+				double p = Math.sqrt(pxo * pxo + pyo * pyo + pzo * pzo); // GeV
+				double phi = Math.atan2(pyo, pxo);
+				double theta = Math.acos(pzo / p);
+
+				// note conversions to degrees and MeV
+				TrajectoryRowData row = new TrajectoryRowData(0, lid, xo, yo, zo, 1000 * p,
+						Math.toDegrees(theta), Math.toDegrees(phi), status[i], bankName);
+				data.add(row);
+
+			}
+		}
+	} catch (Exception e) {
+		String warning = "[ClasIoReconEventView.addTracks] " + e.getMessage();
+		Log.getInstance().warning(warning);
+	}
+	}
+
 
 	// add CVT reconstructed tracks
 	private void addCVTTracks(DataEvent event, Vector<TrajectoryRowData> data, String bankName) {
