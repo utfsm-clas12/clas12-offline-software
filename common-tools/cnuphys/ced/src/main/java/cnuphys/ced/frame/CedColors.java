@@ -44,6 +44,11 @@ public class CedColors {
 	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
 	public static final Color TB_TRANS = X11Colors.getX11Color("dark orange", 240);
 	public static final Color TB_DOCAFRAME = TB_COLOR.darker();
+	
+	// neural net based
+		public static final Color NN_COLOR = X11Colors.getX11Color("cyan");
+		public static final Color NN_TRANS = X11Colors.getX11Color("cyan", 240);
+
 
 	// doca fills
 	public static final Color DOCA_COLOR = new Color(0, 255, 0, 60);

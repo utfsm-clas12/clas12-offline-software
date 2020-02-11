@@ -16,12 +16,10 @@ import org.jlab.geom.detector.dc.DCSuperlayer;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Plane3D;
 import org.jlab.geom.prim.Point3D;
-import org.jlab.geom.prim.Shape3D;
 import org.jlab.geom.prim.Triangle3D;
 
 import cnuphys.bCNU.util.Environment;
 import cnuphys.ced.frame.Ced;
-import cnuphys.swim.SwimTrajectory;
 
 public class DCGeometry {
 

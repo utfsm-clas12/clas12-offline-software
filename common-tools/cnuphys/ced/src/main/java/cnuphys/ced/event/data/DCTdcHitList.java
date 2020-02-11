@@ -6,6 +6,11 @@ import java.util.Vector;
 import cnuphys.bCNU.log.Log;
 import cnuphys.ced.alldata.ColumnData;
 
+/**
+ * This is the raw data for dc hits
+ * @author heddle
+ *
+ */
 public class DCTdcHitList extends Vector<DCTdcHit> {
 
 	// used to log erors
@@ -13,6 +18,7 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 
 	private String DCBank = "DC::tdc";
 	private String DocaBank = "DC::doca"; // only in sim data
+	private String DCNNBank = "nn::dchits"; //neural net hits
 
 	public int[] sectorCounts = { -1, 0, 0, 0, 0, 0, 0 }; // use 7 no off by one
 
@@ -24,7 +30,7 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		if ((sector == null) || (sector.length < 1)) {
 			return;
 		}
-
+		
 		byte[] layer = ColumnData.getByteArray(DCBank + ".layer");
 		short[] wire = ColumnData.getShortArray(DCBank + ".component");
 		// byte[] order = ColumnData.getByteArray(DCBank + ".order");
@@ -35,6 +41,11 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 			Log.getInstance().warning("[" + DCBank + "] " + _error);
 			return;
 		}
+		
+		//see if there is a nnhits bank
+		byte[] nntrackid = ColumnData.getByteArray(DCNNBank + ".id");
+		short[] nnindex = ColumnData.getShortArray(DCNNBank + ".index");
+		int nnlen = (nntrackid == null) ? 0 : nntrackid.length;
 
 		// see if there are doca arrays of the same length
 		byte[] lr = ColumnData.getByteArray(DocaBank + ".LR");
@@ -62,26 +73,35 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		}
 
 		// now build the list
-
+		
+		//array just used locally
+		DCTdcHit[] hitArray = new DCTdcHit[length];
 		for (int i = 0; i < length; i++) {
+			DCTdcHit hit;
 			if (docalen == length) {
-				add(new DCTdcHit(sector[i], layer[i], wire[i], TDC[i], lr[i], doca[i], sdoca[i], time[i], stime[i]));
+				hit = new DCTdcHit(sector[i], layer[i], wire[i], TDC[i], lr[i], doca[i], sdoca[i], time[i], stime[i]);
 			} else {
-				add(new DCTdcHit(sector[i], layer[i], wire[i], TDC[i]));
+				hit = new DCTdcHit(sector[i], layer[i], wire[i], TDC[i]);
 			}
-
-			if ((sector[i] > 0) && (sector[i] < 7)) {
-				sectorCounts[sector[i]] += 1;
+			hitArray[i] = hit;
+			add(hit);
+		}
+		
+		if (nnlen > 0) {
+			for (int j = 0; j < nnlen; j++) {
+				int idx = nnindex[j] - 1;
+				DCTdcHit hit = hitArray[idx];
+				hit.nnHit = true;
+				hit.nnTrackId = nntrackid[j];
 			}
 		}
+
+		
 
 		if (size() > 1) {
 			Collections.sort(this);
 		}
 
-//		for (DCTdcHit hit : this) {
-//			System.out.println(hit.toString());
-//		}
 	}
 
 	private int checkArrays(byte[] lr, float[] doca, float[] time, float[] sdoca, float[] stime) {

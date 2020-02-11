@@ -494,6 +494,43 @@ public class WorldGraphicsUtilities {
 
 		return new Polygon(x, y, NUMCIRCSTEP);
 	}
+	
+	/**
+	 * Draw a world oval.
+	 * 
+	 * @param g              the graphics context.
+	 * @param container      the container on which it is rendered.
+	 * @param worldRectangle the world rectangle defining the enclosed oval
+	 * @param fillColor      the fill color (can be <code>null</code>).
+	 * @param lineColor      the line color (can be <code>null</code>).
+	 * @param lineWidth      the line width in pixels.
+	 * @param lineStyle      the line style.
+	 */
+	public static void drawWorldOval(Graphics g, IContainer container, Rectangle2D.Double worldRectangle,
+			Color fillColor, Color lineColor, int lineWidth, LineStyle lineStyle) {
+
+		Graphics2D g2 = (Graphics2D) g;
+
+		Rectangle rectangle = new Rectangle();
+		container.worldToLocal(rectangle, worldRectangle);
+
+		// fill?
+		if (fillColor != null) {
+			g2.setColor(fillColor);
+			g2.fillOval(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+		}
+
+		// outline?
+		if (lineColor != null) {
+			Stroke oldStroke = g2.getStroke();
+			Stroke newStroke = GraphicsUtilities.getStroke(lineWidth, lineStyle);
+			g2.setStroke(newStroke);
+			g2.setColor(lineColor);
+			g2.drawOval(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+			g2.setStroke(oldStroke);
+		}
+
+	}
 
 	/**
 	 * Draw a world rectangle.
@@ -531,6 +568,20 @@ public class WorldGraphicsUtilities {
 		}
 
 	}
+	
+	/**
+	 * Draw a world oval with a solid, 1 pixel outline.
+	 * 
+	 * @param g              the graphics context.
+	 * @param container      the container on which it is rendered.
+	 * @param worldRectangle the world rectangle defining the enclosed oval
+	 * @param fillColor      the fill color (can be <code>null</code>).
+	 * @param lineColor      the line color (can be <code>null</code>).
+	 */
+	public static void drawWorldOval(Graphics g, IContainer container, Rectangle2D.Double worldRectangle,
+			Color fillColor, Color lineColor) {
+		drawWorldOval(g, container, worldRectangle, fillColor, lineColor, 1, LineStyle.SOLID);
+	}
 
 	/**
 	 * Draw a world rectangle with a solid, 1 pixel outline.
@@ -546,6 +597,19 @@ public class WorldGraphicsUtilities {
 		drawWorldRectangle(g, container, worldRectangle, fillColor, lineColor, 1, LineStyle.SOLID);
 	}
 
+	/**
+	 * Draw a world oval based on an IStyled object.
+	 * 
+	 * @param g              the graphics context.
+	 * @param container      the container on which it is rendered.
+	 * @param worldRectangle the world rectangle defining the enclosed oval
+	 * @param style          An IStyled object, such as an Item.
+	 */
+	public static void drawWorldOval(Graphics g, IContainer container, Rectangle2D.Double worldRectangle,
+			IStyled style) {
+		drawWorldOval(g, container, worldRectangle, style.getFillColor(), style.getLineColor(),
+				style.getLineWidth(), style.getLineStyle());
+	}
 	/**
 	 * Draw a world rectangle based on an IStyled object.
 	 * 

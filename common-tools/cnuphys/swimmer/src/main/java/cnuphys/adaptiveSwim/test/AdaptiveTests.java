@@ -16,7 +16,6 @@ import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
-import cnuphys.swimtest.SwimTest;
 
 public class AdaptiveTests {
 	
@@ -240,7 +239,7 @@ public class AdaptiveTests {
 		oldResult.printOut(System.out, "Z test (old)");
 		System.out.println(
 				String.format("[OLD] Adaptive time: %-7.3f",
-						((double) time) / 1000.));
+						(time) / 1000.));
 		
 		time = System.currentTimeMillis();
 		//new swimmer
@@ -260,7 +259,7 @@ public class AdaptiveTests {
 		newResult.printOut(System.out, "Z test (new)");
 		System.out.println(
 				String.format("[NEW] Adaptive time: %-7.3f",
-						((double) time) / 1000.));
+						(time) / 1000.));
 
 		System.out.println("Done with z-test");
 	}
@@ -418,7 +417,7 @@ public class AdaptiveTests {
 			oldResult.printOut(System.out, "Rho test (old)");
 			System.out.println(
 					String.format("Adaptive time: %-7.3f   avg good delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
-							((double) time) / 1000., sum / (num - badStatusCount), delMax, badStatusCount));
+							(time) / 1000., sum / (num - badStatusCount), delMax, badStatusCount));
 			System.out.println("Adaptive Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (RungeKuttaException e) {
@@ -468,7 +467,7 @@ public class AdaptiveTests {
 			newResult.printOut(System.out, "Rho test (new)");
 			System.out.println(
 					String.format("NEW Adaptive time: %-7.3f   avg good delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
-							((double) time) / 1000., sum / (num - badStatusCount), delMax, badStatusCount));
+							(time) / 1000., sum / (num - badStatusCount), delMax, badStatusCount));
 			System.out.println("NEW Adaptive Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (AdaptiveSwimException e) {
@@ -637,7 +636,7 @@ public class AdaptiveTests {
 			rResult.getTrajectory().print(System.out);
 			System.out.println(
 					String.format("Rho time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
-							((double) time) / 1000., sum / num, delMax, badStatusCount));
+							(time) / 1000., sum / num, delMax, badStatusCount));
 			System.out.println("Rho Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (AdaptiveSwimException e) {
@@ -687,7 +686,7 @@ public class AdaptiveTests {
 
 			System.out.println(
 					String.format("Cylinder time: %-7.3f   avg delta = %-9.5f  max delta = %-9.5f  badStatCnt = %d",
-							((double) time) / 1000., sum / num, delMax, badStatusCount));
+							(time) / 1000., sum / num, delMax, badStatusCount));
 			System.out.println("Cylinder Avg NS = " + (int) (((double) nStepTotal) / num) + "   MAX NS: " + nsMax + "\n");
 
 		} catch (AdaptiveSwimException e) {

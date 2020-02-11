@@ -40,7 +40,7 @@ import cnuphys.bCNU.view.BaseView;
  * 
  */
 @SuppressWarnings("serial")
-public class AllDCView extends CedView implements IAllDC {
+public class AllDCView extends CedView {
 
 	// for naming clones
 	private static int CLONE_COUNT = 0;
@@ -356,24 +356,5 @@ public class AllDCView extends CedView implements IAllDC {
 
 	}
 
-	/**
-	 * Get the underlying view
-	 * 
-	 * @return the underlying view
-	 */
-	@Override
-	public CedView getView() {
-		return this;
-	}
-
-	/**
-	 * Is this the standard alldc view?
-	 * 
-	 * @return <code>true/code> if this is the standard alldc view.
-	 */
-	@Override
-	public boolean isStandardAllDCView() {
-		return true;
-	}
 
 }

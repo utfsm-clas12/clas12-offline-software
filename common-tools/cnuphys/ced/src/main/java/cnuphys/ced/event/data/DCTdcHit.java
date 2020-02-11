@@ -14,6 +14,13 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	public short wire;
 	public byte superlayer; // 1..6
 	public byte layer6; // 1..6
+	
+	//if true, nnet used this hit
+	public boolean nnHit = false;
+	
+	//if nn used this hit, this is he nnet track id (-1 by default)
+	public byte nnTrackId =  -1;
+	
 
 	public int tdc = -1;
 
@@ -134,6 +141,13 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 		String tdcStr = tdcString();
 		if (tdcStr.length() > 3) {
 			feedbackStrings.add(_fbColor + tdcStr);
+		}
+		
+		if (nnHit) {
+			feedbackStrings.add(_fbColor + "marked by neural net, nn track Id " + nnTrackId);
+		}
+		else {
+			feedbackStrings.add(_fbColor + "not marked by neural net");
 		}
 
 		if (showNoise) {

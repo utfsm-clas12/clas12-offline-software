@@ -2,13 +2,10 @@ package cnuphys.splot.plot;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.UIManager;
 

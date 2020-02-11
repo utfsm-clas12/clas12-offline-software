@@ -1,6 +1,5 @@
 package cnuphys.adaptiveSwim;
 
-import cnuphys.magfield.FastMath;
 import cnuphys.rk4.ButcherTableau;
 import cnuphys.rk4.IDerivative;
 

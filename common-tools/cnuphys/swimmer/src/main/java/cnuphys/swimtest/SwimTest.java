@@ -35,7 +35,6 @@ import cnuphys.magfield.MagneticFieldChangeListener;
 import cnuphys.magfield.MagneticFieldInitializationException;
 import cnuphys.magfield.MagneticFields;
 import cnuphys.magfield.MagneticFields.FieldType;
-import cnuphys.rk4.IStopper;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.DefaultSwimStopper;
 import cnuphys.swim.SwimMenu;

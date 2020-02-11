@@ -64,11 +64,6 @@ public class ClasIoPresentBankPanel extends JPanel
 
 	// skip certain irrelevant banks
 	private boolean skip(String s) {
-		// if ("CLAS6EVENT::particle".equals(s)) {
-		// return true;
-		// } else if ("SIMEVENT::particle".equals(s)) {
-		// return true;
-		// }
 		return false;
 	}
 

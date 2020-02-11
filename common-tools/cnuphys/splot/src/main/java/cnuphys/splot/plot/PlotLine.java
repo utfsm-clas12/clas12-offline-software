@@ -1,12 +1,9 @@
 package cnuphys.splot.plot;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 
-import cnuphys.splot.style.LineStyle;
 import cnuphys.splot.style.Styled;
-import cnuphys.splot.style.SymbolType;
 
 /**
  * Just a straight line to be drawn on the plot, e.g. a y = 0 line

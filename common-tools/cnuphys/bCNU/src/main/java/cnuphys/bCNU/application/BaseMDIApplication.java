@@ -2,7 +2,6 @@ package cnuphys.bCNU.application;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Frame;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -11,7 +10,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Properties;
 
-import javax.swing.FocusManager;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 

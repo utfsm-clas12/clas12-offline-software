@@ -3,7 +3,6 @@ package cnuphys.adaptiveSwim;
 import cnuphys.adaptiveSwim.geometry.Cylinder;
 import cnuphys.adaptiveSwim.geometry.Line;
 import cnuphys.adaptiveSwim.geometry.Plane;
-import cnuphys.adaptiveSwim.geometry.Point;
 import cnuphys.adaptiveSwim.geometry.Sphere;
 import cnuphys.lund.GeneratedParticleRecord;
 import cnuphys.magfield.FastMath;
@@ -15,7 +14,6 @@ import cnuphys.rk4.ButcherTableau;
 import cnuphys.swim.DefaultDerivative;
 import cnuphys.swim.SectorDerivative;
 import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.Swimmer;
 
 /**
  * A swimmer for adaptive stepsize integrators. These swimmers are not thread safe. Every thread that needs an

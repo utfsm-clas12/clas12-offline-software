@@ -763,6 +763,34 @@ public class LundSupport {
 	 * @param id the id to look for
 	 * @return the object if found, or <code>null</code>
 	 */
+	public LundId get(int id, int charge) {
+		if (_lundIds == null) {
+			return null;
+		}
+		LundId testId = new LundId(null, null, id, 0, 0, 0);
+		int index = Collections.binarySearch(_lundIds, testId);
+
+		if (index >= 0) {
+			return _lundIds.get(index);
+		} else {
+			System.err.println("LundId not found for pid: " + id);
+//			(new Throwable()).printStackTrace();
+			if (charge == -1) {
+				return unknownMinus;
+			}
+			if (charge == 1) {
+				return unknownPlus;
+			}
+			return unknownNeutral;
+		}
+	}
+	
+	/**
+	 * Finds an LundId object based on the given particle id. Uses a binary search.
+	 * 
+	 * @param id the id to look for
+	 * @return the object if found, or <code>null</code>
+	 */
 	public LundId get(int id) {
 		if (_lundIds == null) {
 			return null;
@@ -773,11 +801,12 @@ public class LundSupport {
 		if (index >= 0) {
 			return _lundIds.get(index);
 		} else {
-//			System.err.println("LundId not found for pid: " + id);
+			System.err.println("LundId not found for pid: " + id);
 //			(new Throwable()).printStackTrace();
 			return null;
 		}
 	}
+
 
 	/**
 	 * Finds an LundId object based on the given particle id. Uses a binary search.

@@ -71,6 +71,7 @@ public class SwimTrajectory extends ArrayList<double[]> {
 	/**
 	 * Clear the trajectory
 	 */
+	@Override
 	public void clear() {
 		super.clear();
 		_computedBDL = false;

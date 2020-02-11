@@ -769,6 +769,7 @@ public class CentralZView extends CedView implements ChangeListener, ILabCoordin
 	 * @param z  the lab z in cm
 	 * @param wp the world point
 	 */
+	@Override
 	public void labToWorld(double x, double y, double z, Point2D.Double wp) {
 		wp.x = z;
 		wp.y = x * _cosphi + y * _sinphi;

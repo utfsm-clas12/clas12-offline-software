@@ -68,7 +68,7 @@ public class Plane {
 			return Double.NaN;
 		}
 
-		Point pmr = Vector.difference(_ro, line.getP0());
+		Point pmr = Point.difference(_ro, line.getP0());
 		double numer = pmr.dot(_norm);
 
 		double t = numer / ldotn;
@@ -121,6 +121,7 @@ public class Plane {
 		return new Plane(norm, p);
 	}
 
+	@Override
 	public String toString() {
 		double abcd[] = new double[4];
 		getABCD(abcd);

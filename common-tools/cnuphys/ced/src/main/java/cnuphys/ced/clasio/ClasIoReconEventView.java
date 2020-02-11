@@ -167,7 +167,7 @@ public class ClasIoReconEventView extends ClasIoTrajectoryInfoView {
 
 						}
 					} else {
-						lid = LundSupport.getInstance().get(pid[i]);
+						lid = LundSupport.getInstance().get(pid[i], charge[i]);
 					}
 
 				double xo = vx[i]; // cm

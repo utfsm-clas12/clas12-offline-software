@@ -6,7 +6,6 @@ import java.awt.event.KeyListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 

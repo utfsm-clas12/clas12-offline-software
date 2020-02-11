@@ -59,6 +59,7 @@ public class Vector extends Point {
 	 * @param y the y component
 	 * @param z the z component
 	 */
+	@Override
 	public void set(double x, double y, double z) {
 		this.x = x;
 		this.y = y;

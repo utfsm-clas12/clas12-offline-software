@@ -6,17 +6,13 @@
   * short-term project: Visualizing Femto-Scale Dynamics (proposal CNF19-09). 
   */
  
-import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -26,7 +22,6 @@ import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
-import cnuphys.bCNU.component.MagnifyWindow;
 import cnuphys.bCNU.dialog.TextDisplayDialog;
 import cnuphys.bCNU.log.Log;
 import cnuphys.bCNU.menu.FileMenu;
@@ -34,7 +29,6 @@ import cnuphys.bCNU.menu.MenuManager;
 import cnuphys.bCNU.util.Environment;
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.bCNU.util.PropertySupport;
-import cnuphys.bCNU.util.X11Colors;
 import cnuphys.bCNU.view.LogView;
 import cnuphys.bCNU.view.ViewManager;
 import cnuphys.bCNU.view.VirtualView;

@@ -2,7 +2,6 @@ package cnuphys.cnf.export;
 
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 

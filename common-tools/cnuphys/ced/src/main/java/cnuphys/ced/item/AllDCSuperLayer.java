@@ -10,8 +10,7 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.alldc.AllDCAccumView;
-import cnuphys.ced.cedview.alldc.IAllDC;
+
 import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseEventListener;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
@@ -21,6 +20,7 @@ import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
+import cnuphys.ced.frame.CedColors;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.noise.NoiseManager;
@@ -62,9 +62,6 @@ public class AllDCSuperLayer extends RectangleItem {
 	// the number of wires per layer
 	private int _numWires;
 
-	// the AllDC view this item lives on
-	private IAllDC _allDC;
-
 	// the parent view
 	private CedView _view;
 
@@ -93,12 +90,11 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * @param superLayer     the superLayer [0..5]
 	 * @param numWires       the number of wires per layer
 	 */
-	public AllDCSuperLayer(LogicalLayer layer, IAllDC allDC, Rectangle2D.Double worldRectangle, int sector,
+	public AllDCSuperLayer(LogicalLayer layer, CedView view, Rectangle2D.Double worldRectangle, int sector,
 			int superLayer, int numWires) {
 		super(layer, worldRectangle);
 		_worldRectangle = worldRectangle;
-		_allDC = allDC;
-		_view = _allDC.getView();
+		_view = view;
 		_numWires = numWires;
 
 		_style.setFillColor(Color.white);
@@ -211,7 +207,7 @@ public class AllDCSuperLayer extends RectangleItem {
 		if ((hits != null) && !hits.isEmpty()) {
 			for (DCTdcHit hit : hits) {
 				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
-					drawDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, wr);
+					drawDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.nnHit, wr);
 				}
 			}
 		}
@@ -283,10 +279,11 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * @param wire      the 1-based wire
 	 * @param noise     is this marked as a noise hit
 	 * @param pid       the gemc pid
+	 * @param nn        is this a hit also marked by nnet?
 	 * @param wr        workspace
 	 */
 	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
-			Rectangle2D.Double wr) {
+			boolean nnhit, Rectangle2D.Double wr) {
 
 		if (wire > GeoConstants.NUM_WIRE) {
 			String msg = "Bad wire number in drawGemcDCHit " + wire + " event number " + _eventManager.getEventNumber();
@@ -325,6 +322,13 @@ public class AllDCSuperLayer extends RectangleItem {
 		} else {
 			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, hitFill, hitLine);
 		}
+		
+		//draw hits marked by nn
+		
+		if (nnhit) {
+			WorldGraphicsUtilities.drawWorldOval(g, container, wr, CedColors.NN_COLOR, hitFill);
+		}
+		
 	}
 
 	/**
@@ -465,17 +469,10 @@ public class AllDCSuperLayer extends RectangleItem {
 
 			}
 
-			if (_allDC.isStandardAllDCView()) {
-
-				if (_view.isSingleEventMode()) {
-					singleEventFeedbackStrings(wire, layer, feedbackStrings);
-				} else {
-					accumulatedFeedbackStrings(wire, layer, feedbackStrings);
-				}
+			if (_view.isSingleEventMode()) {
+				singleEventFeedbackStrings(wire, layer, feedbackStrings);
 			} else {
-				if (_view instanceof AllDCAccumView) {
-					((AllDCAccumView) _view).augmentedFeedback(_sector, _superLayer, layer, wire, feedbackStrings);
-				}
+				accumulatedFeedbackStrings(wire, layer, feedbackStrings);
 			}
 
 		} // end contains

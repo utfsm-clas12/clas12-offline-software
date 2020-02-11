@@ -22,7 +22,6 @@ import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.cedview.CedView;
-import cnuphys.ced.cedview.alldc.AllDCAccumPanel;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.item.MagFieldItem;
@@ -67,12 +66,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 
 	/** Bit used to make phi slider have full 360 degree range */
 	public static final int PHI_SLIDER_BIG = 0400;
-
-	/** Bit used for accumulation only all dc panel */
-	public static final int ALLDC_ACCUM_ONLY = 01000;
 	
 	/** and adc threshold slider */
-	public static final int ADCTHRESHOLDSLIDER = 02000;
+	public static final int ADCTHRESHOLDSLIDER = 01000;
 
 	// the view parent
 	private CedView _view;
@@ -149,29 +145,6 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		add(component, BorderLayout.SOUTH);
 	}
 
-	// used only by the special accumulation only all dc view
-	private void addForAllDCAccumView(CedView view, JTabbedPane tabbedPane) {
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout(2, 2));
-
-		panel.setBorder(new CommonBorder("Visibility"));
-
-		// main panel
-		AllDCAccumPanel apan = new AllDCAccumPanel(view);
-		panel.add(apan, BorderLayout.CENTER);
-
-		// accumulation
-		_colorPanel = new ColorModelPanel(AccumulationManager.colorScaleModel, 160, "Relative Accumulation", 10,
-				_view.getMedianSetting());
-
-//		_colorPanel.getSlider().setEnabled(false);
-//		_colorPanel.getSlider().addChangeListener(this);
-
-		panel.add(_colorPanel, BorderLayout.SOUTH);
-
-		tabbedPane.add(panel, "display");
-
-	}
 
 	/**
 	 * Get the color scale model if there is one.
@@ -190,11 +163,6 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	private JTabbedPane addTabbedPane(CedView view, int controlPanelBits, int displayArrayBits) {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(Fonts.smallFont);
-
-		if (Bits.checkBit(controlPanelBits, ALLDC_ACCUM_ONLY)) {
-			addForAllDCAccumView(view, tabbedPane);
-			return tabbedPane;
-		}
 
 		// dc noise control
 		if (Bits.checkBit(controlPanelBits, NOISECONTROL)) {

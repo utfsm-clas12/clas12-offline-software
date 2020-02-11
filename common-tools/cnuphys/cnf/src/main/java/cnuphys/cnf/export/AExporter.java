@@ -2,14 +2,10 @@ package cnuphys.cnf.export;
 
 import java.io.File;
 
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-
 import org.jlab.io.base.DataEvent;
 
 import cnuphys.bCNU.util.FileUtilities;
 import cnuphys.cnf.event.EventManager;
-import cnuphys.cnf.frame.Def;
 
 public abstract class AExporter {
 	

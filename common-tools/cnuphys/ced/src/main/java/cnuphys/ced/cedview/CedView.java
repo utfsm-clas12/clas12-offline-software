@@ -432,6 +432,18 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showTB();
 	}
+	
+	/**
+	 * Convenience method global neural net data
+	 * 
+	 * @return <code>true</code> if we are to show neural net globally
+	 */
+	public boolean showNN() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showNN();
+	}
 
 	/**
 	 * Convenience method to see it we show the reconstructed clusters.

@@ -14,10 +14,6 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.lund.LundId;
 import cnuphys.lund.LundSupport;
 import cnuphys.lund.TrajectoryRowData;
-import cnuphys.rk4.RungeKuttaException;
-import cnuphys.swim.DefaultSwimStopper;
-import cnuphys.swim.SwimTrajectory;
-import cnuphys.swim.Swimmer;
 import cnuphys.swim.Swimming;
 
 /**

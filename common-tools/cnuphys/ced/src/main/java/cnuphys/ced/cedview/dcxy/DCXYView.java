@@ -169,7 +169,7 @@ public class DCXYView extends HexView {
 		_controlPanel = new ControlPanel(this,
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
 						+ ControlPanel.DRAWLEGEND,
-				DisplayBits.ACCUMULATION + DisplayBits.CROSSES + DisplayBits.FMTCROSSES + DisplayBits.GLOBAL_HB
+				DisplayBits.ACCUMULATION + DisplayBits.CROSSES + DisplayBits.FMTCROSSES + DisplayBits.GLOBAL_HB + DisplayBits.GLOBAL_NN
 						+ DisplayBits.GLOBAL_TB + DisplayBits.CVTTRACKS + DisplayBits.MCTRUTH + DisplayBits.SECTORCHANGE,
 				3, 5);
 

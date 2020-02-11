@@ -1,9 +1,6 @@
 package cnuphys.ced.event.data;
 
-import org.jlab.io.base.DataEvent;
-
 import cnuphys.ced.alldata.ColumnData;
-import cnuphys.ced.clasio.ClasIoEventManager;
 
 public class CVT {
 	

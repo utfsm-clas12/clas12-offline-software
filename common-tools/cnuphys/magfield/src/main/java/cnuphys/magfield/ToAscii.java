@@ -134,7 +134,7 @@ public class ToAscii {
 
 		
 		for (int ip = 0;  ip <= 360; ip += 2) {			
-			double p = (double)ip;
+			double p = ip;
 
 			System.out.println("phi = " + p);
 

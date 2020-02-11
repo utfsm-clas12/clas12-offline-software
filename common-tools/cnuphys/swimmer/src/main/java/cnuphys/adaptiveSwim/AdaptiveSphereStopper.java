@@ -58,6 +58,7 @@ public class AdaptiveSphereStopper extends AAdaptiveStopper {
 	 * @param snew the new value of s in meters
 	 * @param unew the new state vector
 	 */
+	@Override
 	protected void accept(double snew, double[] unew) {
 		super.accept(snew, unew);
 		

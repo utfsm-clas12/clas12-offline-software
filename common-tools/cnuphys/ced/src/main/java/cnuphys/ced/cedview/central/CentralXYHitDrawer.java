@@ -7,15 +7,12 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.Point2D;
 
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.ced.event.AccumulationManager;
-import cnuphys.ced.event.FeedbackRect;
 import cnuphys.ced.event.data.AdcHit;
 import cnuphys.ced.event.data.AdcHitList;
 import cnuphys.ced.event.data.BMT;
 import cnuphys.ced.event.data.CTOF;
-import cnuphys.ced.event.data.CVT;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.BST;
 import cnuphys.ced.event.data.BaseHit2;

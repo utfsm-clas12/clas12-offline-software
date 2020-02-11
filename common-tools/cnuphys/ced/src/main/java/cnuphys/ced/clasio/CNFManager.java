@@ -3,7 +3,6 @@ package cnuphys.ced.clasio;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jlab.io.base.DataEvent;

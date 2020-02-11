@@ -22,8 +22,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
-import com.jogamp.newt.util.MainThread;
-
 import cnuphys.bCNU.application.BaseMDIApplication;
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.component.MagnifyWindow;
@@ -33,7 +31,6 @@ import cnuphys.ced.alldata.graphics.DefinitionManager;
 import cnuphys.ced.ced3d.view.CentralView3D;
 import cnuphys.ced.ced3d.view.FTCalView3D;
 import cnuphys.ced.ced3d.view.ForwardView3D;
-import cnuphys.ced.cedview.alldc.AllDCAccumView;
 import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.cedview.allec.ECView;
 import cnuphys.ced.cedview.allpcal.PCALView;
@@ -121,7 +118,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private static String _geoVariation = "default";
 	
 	//ced release 
-	private static final String _release = "build 1.4.3";
+	private static final String _release = "build 1.4.4";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -167,7 +164,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 	// some views
 	private AllDCView _allDCView;
-	private AllDCAccumView _allDCAccumView;
 	private VirtualView _virtualView;
 	private ClasIoMonteCarloView _monteCarloView;
 	private ClasIoReconEventView _reconEventView;
@@ -291,9 +287,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 		_virtualView.moveTo(ecHistoGrid, 17);
 
 		_virtualView.moveTo(_allDCView, 3);
-		if (_experimental) {
-			_virtualView.moveTo(_allDCAccumView, 18);
-		}
 		_virtualView.moveTo(_eventView, 6, VirtualView.CENTER);
 		_virtualView.moveTo(_centralXYView, 2, VirtualView.BOTTOMLEFT);
 		_virtualView.moveTo(_centralZView, 2, VirtualView.UPPERRIGHT);
@@ -364,10 +357,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 
 		// add an alldc view and poosibly alldcaccumview
 		_allDCView = AllDCView.createAllDCView();
-
-		if (_experimental) {
-			_allDCAccumView = AllDCAccumView.createAllDCAccumView();
-		}
 
 		_tofView = TOFView.createTOFView();
 

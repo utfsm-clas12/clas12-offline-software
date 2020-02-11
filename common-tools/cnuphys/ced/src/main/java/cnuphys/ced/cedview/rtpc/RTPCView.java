@@ -15,7 +15,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -531,6 +530,7 @@ public class RTPCView extends CedXYView implements ChangeListener {
 	 * Some views (e.g., RTPC) have a threshold. Thay must override.
 	 * @return the adc threshold for viewing hits
 	 */
+	@Override
 	public int getAdcThreshold() {
 		return _controlPanel.getAdcThresholdSlider().getValue();
 	}

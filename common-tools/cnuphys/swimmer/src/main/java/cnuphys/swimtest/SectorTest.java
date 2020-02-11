@@ -13,10 +13,6 @@ import cnuphys.magfield.MagneticFields.FieldType;
 import cnuphys.rk4.RungeKuttaException;
 import cnuphys.swim.SwimTrajectory;
 import cnuphys.swim.Swimmer;
-import cnuphys.swimZ.SwimZ;
-import cnuphys.swimZ.SwimZException;
-import cnuphys.swimZ.SwimZResult;
-import cnuphys.swimZ.SwimZStateVector;
 
 public class SectorTest {
 

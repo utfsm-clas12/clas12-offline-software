@@ -38,7 +38,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.metal.MetalIconFactory;
 
 import cnuphys.splot.style.LineStyle;
-import cnuphys.splot.style.Styled;
 
 public class GraphicsUtilities {
 

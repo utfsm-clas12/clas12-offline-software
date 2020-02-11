@@ -1,7 +1,6 @@
 package cnuphys.adaptiveSwim;
 
 import cnuphys.adaptiveSwim.geometry.Plane;
-import cnuphys.magfield.FastMath;
 import cnuphys.swim.SwimTrajectory;
 
 /**

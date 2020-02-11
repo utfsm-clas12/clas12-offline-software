@@ -6,7 +6,6 @@ import bCNU3D.Support3D;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES3;
-import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 
 public class Cube extends Item3D {

@@ -15,7 +15,6 @@ import javax.swing.KeyStroke;
 import cnuphys.splot.edit.CurveEditorDialog;
 import cnuphys.splot.edit.DialogUtilities;
 import cnuphys.splot.pdata.DataSet;
-import cnuphys.splot.pdata.DataSetException;
 import cnuphys.splot.pdata.DataSetType;
 
 public class SplotMenus implements ActionListener {

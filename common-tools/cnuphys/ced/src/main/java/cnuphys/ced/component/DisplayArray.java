@@ -107,6 +107,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	/** Global show TB */
 	private static final String GLOBAL_TB_LABEL = "TB Data";
+	
+	/** Global show Neural Net data */
+	private static final String GLOBAL_NN_LABEL = "NN Data";
 
 	/** Global show ADC hits */
 	private static final String GLOBAL_ADC_HIT_LABEL = "ADC Hits";
@@ -122,6 +125,9 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 
 	// controls whether any TB data displayed
 	private AbstractButton _showTBButton;
+	
+	// controls whether any neural net data displayed
+    private AbstractButton _showNNButton;
 
 	// controls whether dc reconstructed Hits are displayed
 	private AbstractButton _dcHitsButton;
@@ -273,6 +279,11 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 		// global time based data
 		if (Bits.checkBit(bits, DisplayBits.GLOBAL_TB)) {
 			_showTBButton = add(GLOBAL_TB_LABEL, true, true, this, _buttonColor).getCheckBox();
+		}
+		
+		// global neural data
+		if (Bits.checkBit(bits, DisplayBits.GLOBAL_NN)) {
+			_showNNButton = add(GLOBAL_NN_LABEL, true, true, this, _buttonColor).getCheckBox();
 		}
 
 		// reonstructed crosses?
@@ -491,6 +502,15 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showTB() {
 		return (_showTBButton != null) && _showTBButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method global neural net based display
+	 * 
+	 * @return <code>true</code> if we are to show nn globally
+	 */
+	public boolean showNN() {
+		return (_showNNButton != null) && _showNNButton.isSelected();
+	}
 
 	/**
 	 * Convenience method to see if we show the dc HB reconstructed hits.
@@ -499,6 +519,15 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	 */
 	public boolean showDCHBHits() {
 		return showHB() && (_dcHitsButton != null) && _dcHitsButton.isSelected();
+	}
+	
+	/**
+	 * Convenience method to see if we show the dc neural net hits.
+	 * 
+	 * @return <code>true</code> if we are to show dc neural net hits.
+	 */
+	public boolean showDCNNHits() {
+		return showNN() && (_dcHitsButton != null) && _dcHitsButton.isSelected();
 	}
 
 	/**

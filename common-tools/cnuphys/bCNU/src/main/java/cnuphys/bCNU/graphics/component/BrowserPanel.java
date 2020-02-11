@@ -37,7 +37,8 @@ public class BrowserPanel extends JPanel implements HyperlinkListener  {
 		addSouth();
 		
 		ActionListener al = new ActionListener() {       
-	          public void actionPerformed(ActionEvent ae) {         
+	          @Override
+			public void actionPerformed(ActionEvent ae) {         
 	               try {           
 	                    String url = ae.getActionCommand().toLowerCase();           
 	                    if (url.startsWith("http://"))             

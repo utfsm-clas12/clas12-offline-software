@@ -5,7 +5,6 @@ import item3D.Axes3D;
 import java.awt.Color;
 import java.awt.Font;
 
-import bCNU3D.Panel3D;
 import cnuphys.ced.ced3d.view.CedView3D;
 import cnuphys.ced.geometry.BSTGeometry;
 import cnuphys.lund.X11Colors;
