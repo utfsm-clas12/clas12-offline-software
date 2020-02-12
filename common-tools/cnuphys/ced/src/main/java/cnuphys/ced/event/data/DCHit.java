@@ -14,10 +14,10 @@ public class DCHit {
 	/** The 1-based superlayer 1..6 */
 	public byte superlayer;
 
-	/** The 1-based sector 1..6 */
+	/** The 1-based layer 1..6 */
 	public byte layer;
 
-	/** The 1-based sector */
+	/** The 1-based wire */
 	public short wire;
 
 	/** id of the hit */

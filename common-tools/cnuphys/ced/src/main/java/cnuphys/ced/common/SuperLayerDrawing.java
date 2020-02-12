@@ -389,7 +389,7 @@ public class SuperLayerDrawing {
 	 * @param wire      1-based wire 1..112
 	 * @param location  location
 	 */
-	private void drawReconDCHit(Graphics g, IContainer container, Color hitFill, Color hitLine, int layer, int wire,
+	private void drawSingleDCHit(Graphics g, IContainer container, Color hitFill, Color hitLine, int layer, int wire,
 			Point location) {
 
 		// get the hexagon
@@ -433,18 +433,19 @@ public class SuperLayerDrawing {
 	}
 
 	/**
-	 * Draw a single dc hit
+	 * Draw a single reconstructed dc hit
 	 * 
-	 * @param g         the graphics context
-	 * @param container the rendering container
-	 * @param layer     1-based layer 1..6
-	 * @param wire      1-based wire 1..112
-	 * @param noise     is noise hit
+	 * @param g           the graphics context
+	 * @param container   the rendering container
+	 * @param fillColor   the fill clor
+	 * @param frameColor  the border color
+	 * @param hit         the hit to draw
+	 * @param isTimeBased hit based or time based?
 	 */
 	public void drawReconDCHitAndDOCA(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
 			boolean isTimeBased) {
 
-		drawReconDCHit(g, container, fillColor, frameColor, hit.layer, hit.wire, hit.getLocation());
+		drawSingleDCHit(g, container, fillColor, frameColor, hit.layer, hit.wire, hit.getLocation());
 
 		if (WorldGraphicsUtilities
 				.getMeanPixelDensity(_view.getContainer()) > SuperLayerDrawing.wireThreshold[_iSupl.superlayer()]) {
@@ -453,6 +454,20 @@ public class SuperLayerDrawing {
 		}
 
 	}
+	
+	/**
+	 * Draw a single raw dc hit (also used for NN overlays)
+	 * 
+	 * @param g           the graphics context
+	 * @param container   the rendering container
+	 * @param fillColor   the fill clor
+	 * @param frameColor  the border color
+	 * @param hit         the hit to draw
+	 */
+	public void drawRawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCTdcHit hit) {
+		drawSingleDCHit(g, container, fillColor, frameColor, hit.layer6, hit.wire, null);
+	}
+
 
 	/**
 	 * Obtain a crude outline of a sense wire layer

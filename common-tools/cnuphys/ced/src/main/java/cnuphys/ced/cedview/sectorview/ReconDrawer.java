@@ -3,6 +3,7 @@ package cnuphys.ced.cedview.sectorview;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.util.List;
 
@@ -16,11 +17,16 @@ import cnuphys.ced.event.data.ClusterList;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCHit;
 import cnuphys.ced.event.data.DCHitList;
+import cnuphys.ced.event.data.DCTdcHit;
+import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataDrawSupport;
 import cnuphys.ced.event.data.FTOF;
 import cnuphys.ced.event.data.Hit1;
 import cnuphys.ced.event.data.Hit1List;
 import cnuphys.ced.frame.CedColors;
+import cnuphys.lund.LundId;
+import cnuphys.lund.LundStyle;
+import cnuphys.lund.LundSupport;
 
 public class ReconDrawer extends SectorViewDrawer {
 
@@ -47,6 +53,11 @@ public class ReconDrawer extends SectorViewDrawer {
 		// DC HB and TB Hits
 		drawDCReconAndDOCA(g, container);
 
+		// neural net overlays
+		if (_view.showNN()) {
+			drawNeuralNetOverlays(g, container);
+		}
+
 		// Reconstructed FTOF hits
 		if (_view.showReconHits()) {
 			drawFTOFReconHits(g, container);
@@ -71,6 +82,23 @@ public class ReconDrawer extends SectorViewDrawer {
 
 	}
 
+	// draw neural net overlays
+	private void drawNeuralNetOverlays(Graphics g, IContainer container) {
+		DCTdcHitList hits = DC.getInstance().getTDCHits();
+		if ((hits != null) && !hits.isEmpty()) {
+
+			for (DCTdcHit hit : hits) {
+				if (hit.nnHit) {
+					if (_view.containsSector(hit.sector)) {
+						_view.drawDCRawHit(g, container, CedColors.NN_TRANS, Color.black, hit);				}
+				}
+			}
+		}
+	}
+	
+
+
+
 	// draw reconstructed clusters
 	private void drawClusters(Graphics g, IContainer container) {
 		drawClusterList(g, container, AllEC.getInstance().getClusters());
@@ -81,7 +109,7 @@ public class ReconDrawer extends SectorViewDrawer {
 		drawReconHitList(g, container, FTOF.getInstance().getHits());
 	}
 
-	// draw reconstructed DC hit based hits
+	// draw reconstructed DC hit Hit based and time based based hits
 	private void drawDCReconAndDOCA(Graphics g, IContainer container) {
 		if (_view.showHB()) {
 			drawDCHitList(g, container, CedColors.HB_COLOR, DC.getInstance().getHBHits(), false);
@@ -216,7 +244,7 @@ public class ReconDrawer extends SectorViewDrawer {
 
 		for (DCHit hit : hits) {
 			if (_view.containsSector(hit.sector)) {
-				_view.drawDCHit(g, container, fillColor, Color.black, hit, isTimeBased);
+				_view.drawDCReconHit(g, container, fillColor, Color.black, hit, isTimeBased);
 			}
 		}
 

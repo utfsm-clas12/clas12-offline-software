@@ -7,7 +7,7 @@ public class CedColors {
 
 	// doca's
 	public static final Color docaTruthLine = Color.blue;
-	public static final Color docaTruthFill = new Color(0, 0, 0, 40);
+	public static final Color docaTruthFill = new Color(0, 0, 0, 76);
 
 //	// track fit docas
 //	public static final Color tbDocaLine = Color.green;
@@ -46,12 +46,12 @@ public class CedColors {
 	public static final Color TB_DOCAFRAME = TB_COLOR.darker();
 	
 	// neural net based
-		public static final Color NN_COLOR = X11Colors.getX11Color("cyan");
-		public static final Color NN_TRANS = X11Colors.getX11Color("cyan", 240);
+		public static final Color NN_COLOR = X11Colors.getX11Color("medium sea green");
+		public static final Color NN_TRANS = X11Colors.getX11Color("medium sea green", 160);
 
 
 	// doca fills
-	public static final Color DOCA_COLOR = new Color(0, 255, 0, 60);
-	public static final Color TRKDOCA_COLOR = new Color(0, 0, 255, 60);
+	public static final Color DOCA_COLOR = new Color(0, 255, 0, 76);
+	public static final Color TRKDOCA_COLOR = new Color(0, 0, 255, 76);
 
 }

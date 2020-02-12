@@ -13,6 +13,7 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 import cnuphys.ced.common.ISuperLayer;
 import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.event.data.DCHit;
+import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.geometry.DCGeometry;
 import cnuphys.ced.geometry.GeometryManager;
 import cnuphys.bCNU.graphics.container.IContainer;
@@ -72,21 +73,35 @@ public class SectorSuperLayer extends PolygonItem implements ISuperLayer {
 	}
 
 	/**
-	 * Draw a single reconstructed dc hit
+	 * Draw a single reconstructed dc hit, either hit or time based
 	 * 
 	 * @param g          graphics context
 	 * @param container  drawing container
 	 * @param fillColor  cell fill color
 	 * @param frameColor cell frame color
-	 * @param layer      1-based layer 1..6
-	 * @param wire       1-based wire 1..112
-	 * @param trkDoca    doca in cm
+	 * @param hit        the reconstructed hit
+	 * @param isTimeBase  Hit based or time based?
 	 */
-	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
+	public void drawDCReconHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
 			boolean isTimeBased) {
 
 		_superlayerDrawer.drawReconDCHitAndDOCA(g, container, fillColor, frameColor, hit, isTimeBased);
 	}
+	
+	/**
+	 * Draw a single raw dc hit, also used for the neural net overlays
+	 * 
+	 * @param g          graphics context
+	 * @param container  drawing container
+	 * @param fillColor  cell fill color
+	 * @param frameColor cell frame color
+	 * @param hit        the reconstructed hit
+	 */
+	public void drawDCRawHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCTdcHit hit) {
+
+		_superlayerDrawer.drawRawDCHit(g, container, fillColor, frameColor, hit);
+	}
+
 
 	/**
 	 * Custom drawer for the item.

@@ -10,6 +10,8 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	private static final String _fbColor = "$Orange$";
 
 	public byte sector;
+	
+	/** The full layer range 1..36 */
 	public byte layer; // 1..36
 	public short wire;
 	public byte superlayer; // 1..6

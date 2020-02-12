@@ -13,8 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
+import java.awt.geom.Rectangle2D;import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +32,7 @@ import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCHit;
+import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BSTxyPanel;
 import cnuphys.ced.geometry.FTOFGeometry;
@@ -61,7 +61,6 @@ import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.format.DoubleFormat;
 import cnuphys.bCNU.graphics.GraphicsUtilities;
-import cnuphys.bCNU.graphics.SymbolDraw;
 import cnuphys.bCNU.graphics.container.IContainer;
 import cnuphys.bCNU.graphics.container.ScaleDrawer;
 import cnuphys.bCNU.graphics.style.LineStyle;
@@ -115,9 +114,6 @@ public class SectorView extends CedView implements ChangeListener {
 	// for naming clones
 	private static int CLONE_COUNT[] = { 0, 0, 0 };
 
-	// for special debug points
-	private static ArrayList<DebugPoint> _debugPoints = new ArrayList<DebugPoint>(10);
-
 	// superlayer (graphical) items. The first index [0..1] is for upper and
 	// lower sectors.
 	// the second is for for super layer 0..5debug
@@ -144,7 +140,7 @@ public class SectorView extends CedView implements ChangeListener {
 
 	// drawing reconstructed data
 	private ReconDrawer _reconDrawer;
-
+	
 	// the value of phi in degrees (-30 to 30) relative to midplane.
 	// Also some cached trig
 	// private double _phiRelMidPlane = 0.0;
@@ -192,10 +188,6 @@ public class SectorView extends CedView implements ChangeListener {
 		// Recon drawer
 		_reconDrawer = new ReconDrawer(this);
 
-		// debug points
-//		if (_debugPoints.isEmpty()) {
-//			_debugPoints.add(new DebugPoint(0, 4.257, 300.4));
-//		}
 	}
 
 	/**
@@ -553,7 +545,8 @@ public class SectorView extends CedView implements ChangeListener {
 
 				// draw reconstructed data
 				_reconDrawer.draw(g, container);
-
+				
+				
 				// draw bst panels
 				drawBSTPanels(g, container);
 
@@ -578,9 +571,6 @@ public class SectorView extends CedView implements ChangeListener {
 					_scaleDrawer.draw(g, container);
 				}
 
-				// secial debug points
-				drawDebugPoints(g, container);
-
 				// redraw segments
 				if (segmentsOnTop) {
 //					System.err.println("REDRAW SEGMENTS");
@@ -596,34 +586,6 @@ public class SectorView extends CedView implements ChangeListener {
 		getContainer().setAfterDraw(afterDraw);
 	}
 
-	// points used for debugging
-	private void drawDebugPoints(Graphics g, IContainer container) {
-		for (DebugPoint dp : _debugPoints) {
-			int sector = dp.sector();
-			switch (_displaySectors) {
-			case SECTORS14:
-				if ((sector == 1) || (sector == 4)) {
-					Point pp = dp.toLocal(container);
-					// System.err.println("DRAW DP AT " + pp);
-					SymbolDraw.drawCross(g, pp.x, pp.y, 8, Color.BLACK);
-				}
-				break;
-
-			case SECTORS25:
-				if ((sector == 2) || (sector == 5)) {
-
-				}
-				break;
-
-			case SECTORS36:
-				if ((sector == 3) || (sector == 6)) {
-
-				}
-				break;
-			}
-
-		}
-	}
 
 	/**
 	 * Get the display sectors which tell us which pair of sectors are being
@@ -926,6 +888,7 @@ public class SectorView extends CedView implements ChangeListener {
 			_mcHitDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 		}
 
+		//draws HB hits and segs, TB hits and segs, and nn overlays
 		_reconDrawer.vdrawFeedback(container, pp, wp, feedbackStrings, 0);
 
 	}
@@ -1490,20 +1453,37 @@ public class SectorView extends CedView implements ChangeListener {
 	}
 
 	/**
-	 * Draw a single wire. All indices are 1-based
+	 * Draw a recon hit from hit based or time based tracking
 	 * 
-	 * @param g
-	 * @param container
-	 * @param fillColor
-	 * @param frameColor
+	 * @param g the Graphics context
+	 * @param container the drawing container
+	 * @param fillColor the fill color
+	 * @param frameColor the border color
 	 */
-	public void drawDCHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
+	public void drawDCReconHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
 			boolean isTimeBased) {
 
 		SectorSuperLayer sectSL = _superLayers[(hit.sector < 4) ? 0 : 1][hit.superlayer - 1];
-		sectSL.drawDCHit(g, container, fillColor, frameColor, hit, isTimeBased);
+		sectSL.drawDCReconHit(g, container, fillColor, frameColor, hit, isTimeBased);
 
 	}
+	
+	/**
+	 * Draw a raw dc hit (and also used for NN overlays) from hit based or time based tracking
+	 * 
+	 * @param g the Graphics context
+	 * @param container the drawing container
+	 * @param fillColor the fill color
+	 * @param frameColor the border color
+	 * @param hit the  hit to  draw
+	 */
+	public void drawDCRawHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCTdcHit hit) {
+
+		SectorSuperLayer sectSL = _superLayers[(hit.sector < 4) ? 0 : 1][hit.superlayer - 1];
+		sectSL.drawDCRawHit(g, container, fillColor, frameColor, hit);
+
+	}
+
 
 	/**
 	 * Clone the view.
@@ -1530,41 +1510,6 @@ public class SectorView extends CedView implements ChangeListener {
 
 	}
 
-	class DebugPoint {
 
-		// LAB coordinates
-		private double phi; // deg
-		private double rho; // cm
-		private double z; // cm
-		private double x;
-		private double y;
-
-		public DebugPoint(double phi, double rho, double z) {
-			this.phi = phi;
-			this.rho = rho;
-			this.z = z;
-			double rphi = Math.toRadians(phi);
-			x = rho * Math.cos(rphi);
-			y = rho * Math.sin(rphi);
-		}
-
-		/**
-		 * get the sector 1..6
-		 * 
-		 * @return the sector 1..6
-		 */
-		public int sector() {
-			return GeometryManager.getSector(phi);
-		}
-
-		public Point toLocal(IContainer container) {
-			Point2D.Double wp = new Point2D.Double();
-			Point pp = new Point();
-			projectClasToWorld(x, y, z, projectionPlane, wp);
-			container.worldToLocal(pp, wp);
-			return pp;
-		}
-
-	}
 
 }

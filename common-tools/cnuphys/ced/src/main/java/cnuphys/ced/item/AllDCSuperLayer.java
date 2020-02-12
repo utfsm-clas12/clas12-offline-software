@@ -10,13 +10,15 @@ import java.util.List;
 import org.jlab.geom.prim.Point3D;
 
 import cnuphys.ced.cedview.CedView;
-
+import cnuphys.ced.cedview.alldc.AllDCView;
 import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.NoiseEventListener;
 //import cnuphys.ced.dcnoise.NoiseReductionParameters;
 //import cnuphys.ced.dcnoise.test.TestParameters;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
+import cnuphys.ced.event.data.DCHit;
+import cnuphys.ced.event.data.DCHitList;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -49,6 +51,8 @@ public class AllDCSuperLayer extends RectangleItem {
 
 	// font for label text
 	private static final Font labelFont = Fonts.commonFont(Font.PLAIN, 11);
+	
+	private Color _lastColor;
 
 	// the sector [1..6]
 	private int _sector;
@@ -63,7 +67,7 @@ public class AllDCSuperLayer extends RectangleItem {
 	private int _numWires;
 
 	// the parent view
-	private CedView _view;
+	private AllDCView _view;
 
 	// for hits cells
 	private static final Color _defaultHitCellFill = Color.red;
@@ -94,7 +98,7 @@ public class AllDCSuperLayer extends RectangleItem {
 			int superLayer, int numWires) {
 		super(layer, worldRectangle);
 		_worldRectangle = worldRectangle;
-		_view = view;
+		_view = (AllDCView)view;
 		_numWires = numWires;
 
 		_style.setFillColor(Color.white);
@@ -202,15 +206,57 @@ public class AllDCSuperLayer extends RectangleItem {
 		if (_view.showMasks()) {
 			drawMasks(g, container, parameters);
 		}
+					
+		// draw raw hits
+		if (_view.showRawHits()) {
+			DCTdcHitList hits = DC.getInstance().getTDCHits();
+			if ((hits != null) && !hits.isEmpty()) {
 
-		DCTdcHitList hits = DC.getInstance().getTDCHits();
-		if ((hits != null) && !hits.isEmpty()) {
-			for (DCTdcHit hit : hits) {
-				if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
-					drawDCHit(g, container, hit.layer6, hit.wire, hit.noise, -1, hit.nnHit, wr);
+				for (DCTdcHit hit : hits) {
+					if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
+						drawDCRawHit(g, container, hit.layer6, hit.wire, hit.noise, -1, wr);
+					}
 				}
 			}
 		}
+
+		// draw HB Hits
+		if (_view.showHBHits()) {
+			DCHitList hits = DC.getInstance().getHBHits();
+			if ((hits != null) && !hits.isEmpty()) {
+				for (DCHit hit : hits) {
+					if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
+						drawDCHit(g, container, hit.layer, hit.wire, wr, CedColors.HB_COLOR);
+					}
+				}
+			}
+		}
+
+		// draw TB Hits
+		if (_view.showTBHits()) {
+			DCHitList hits = DC.getInstance().getTBHits();
+			if ((hits != null) && !hits.isEmpty()) {
+				for (DCHit hit : hits) {
+					if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
+						drawDCHit(g, container, hit.layer, hit.wire, wr, CedColors.TB_COLOR);
+					}
+				}
+			}
+		}
+
+		// draw nn hits
+		if (_view.showNNHits()) {
+			DCTdcHitList hits = DC.getInstance().getTDCHits();
+			if ((hits != null) && !hits.isEmpty()) {
+
+				for (DCTdcHit hit : hits) {
+					if ((hit.sector == _sector) && (hit.superlayer == _superLayer) && hit.nnHit) {
+						drawDCNNHit(g, container, hit.layer6, hit.wire, wr);
+					}
+				}
+			}
+		}
+
 
 //		int hitCount = DC.hitCount();
 //		
@@ -275,18 +321,17 @@ public class AllDCSuperLayer extends RectangleItem {
 	 * 
 	 * @param g         the graphics context
 	 * @param container the rendering container
-	 * @param dcHit     a dc hit object
+	 * @param layer     a 1-based layer
 	 * @param wire      the 1-based wire
 	 * @param noise     is this marked as a noise hit
 	 * @param pid       the gemc pid
-	 * @param nn        is this a hit also marked by nnet?
 	 * @param wr        workspace
 	 */
-	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
-			boolean nnhit, Rectangle2D.Double wr) {
+	private void drawDCRawHit(Graphics g, IContainer container, int layer, int wire, boolean noise, int pid,
+			Rectangle2D.Double wr) {
 
 		if (wire > GeoConstants.NUM_WIRE) {
-			String msg = "Bad wire number in drawGemcDCHit " + wire + " event number " + _eventManager.getEventNumber();
+			String msg = "Bad wire number in drawDCHit " + wire + " event number " + _eventManager.getEventNumber();
 			Log.getInstance().warning(msg);
 			System.err.println(msg);
 			return;
@@ -323,13 +368,65 @@ public class AllDCSuperLayer extends RectangleItem {
 			WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, hitFill, hitLine);
 		}
 		
-		//draw hits marked by nn
-		
-		if (nnhit) {
-			WorldGraphicsUtilities.drawWorldOval(g, container, wr, CedColors.NN_COLOR, hitFill);
-		}
+		_lastColor = hitFill;
 		
 	}
+	
+
+	/**
+	 * Draw a single dc hit
+	 * 
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param layer     a 1-based layer
+	 * @param wire      the 1-based wire
+	 * @param noise     is this marked as a noise hit
+	 * @param pid       the gemc pid
+	 * @param wr        workspace
+	 */
+	private void drawDCHit(Graphics g, IContainer container, int layer, int wire, 
+			Rectangle2D.Double wr, Color color) {
+
+		if (wire > GeoConstants.NUM_WIRE) {
+			String msg = "Bad wire number in drawDCHit " + wire + " event number " + _eventManager.getEventNumber();
+			Log.getInstance().warning(msg);
+			System.err.println(msg);
+			return;
+		}
+
+
+		getCell(layer, wire, wr);
+		WorldGraphicsUtilities.drawWorldRectangle(g, container, wr, color, _defaultHitCellLine);
+		_lastColor  = color;
+	}
+	
+	/**
+	 * Draw a single nn marked hit
+	 * 
+	 * @param g         the graphics context
+	 * @param container the rendering container
+	 * @param dcHit     a dc hit object
+	 * @param wire      the 1-based wire
+	 * @param noise     is this marked as a noise hit
+	 * @param pid       the gemc pid
+	 * @param nn        is this a hit also marked by nnet?
+	 * @param wr        workspace
+	 */
+	private void drawDCNNHit(Graphics g, IContainer container, int layer, int wire, Rectangle2D.Double wr) {
+
+		if (wire > GeoConstants.NUM_WIRE) {
+			String msg = "Bad wire number in drawDCNNHit " + wire + " event number " + _eventManager.getEventNumber();
+			Log.getInstance().warning(msg);
+			System.err.println(msg);
+			return;
+		}
+
+		getCell(layer, wire, wr);
+
+
+		WorldGraphicsUtilities.drawWorldOval(g, container, wr, CedColors.NN_COLOR, _lastColor);
+	}
+
 
 	/**
 	 * Draw the masks showing the effect of the noise finding algorithm

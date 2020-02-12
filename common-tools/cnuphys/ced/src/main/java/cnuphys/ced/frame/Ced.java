@@ -118,7 +118,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private static String _geoVariation = "default";
 	
 	//ced release 
-	private static final String _release = "build 1.4.4";
+	private static final String _release = "build 1.4.45";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -132,8 +132,6 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	// using 3D?
 	private static boolean _use3D = true;
 
-	// experimental mode
-	private static boolean _experimental = false;
 
 	// event menu
 	private ClasIoEventMenu _eventMenu;
@@ -1266,10 +1264,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 				} else if (arg[i].contains("OLDDCGEO")) {
 					_useOldDCGeo = true;
 					System.err.println("Using Old DC Geometry");
-				} else if (arg[i].contains("EXP")) {
-					_experimental = true;
-					System.err.println("Experimental");
-				}
+				} 
 
 				i++;
 				done = (i >= len);

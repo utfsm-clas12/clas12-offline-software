@@ -122,7 +122,8 @@ public class AllDCView extends CedView {
 				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view, ControlPanel.NOISECONTROL + ControlPanel.DISPLAYARRAY
-				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND,
+				+ ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND
+				+ ControlPanel.ALLDCDISPLAYPANEL,
 				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH, 3, 5);
 		view.add(view._controlPanel, BorderLayout.EAST);
 
@@ -355,6 +356,41 @@ public class AllDCView extends CedView {
 		return view;
 
 	}
+	
+	/**
+	 * Display raw DC hits?
+	 * 
+	 * @return <code> if we should display raw hits
+	 */
+	public boolean showRawHits() {
+		return _controlPanel.getAllDCDisplayPanel().showRawHits();
+	}
 
+	/**
+	 * Display hit based hits?
+	 * 
+	 * @return <code> if we should display hit based hits
+	 */
+	public boolean showHBHits() {
+		return _controlPanel.getAllDCDisplayPanel().showHBHits();
+	}
+
+	/**
+	 * Display time based hits?
+	 * 
+	 * @return <code> if we should display hits
+	 */
+	public boolean showTBHits() {
+		return _controlPanel.getAllDCDisplayPanel().showTBHits();
+	}
+
+	/**
+	 * Display neural net marked hits?
+	 * 
+	 * @return <code> if we should display neural net marked hits
+	 */
+	public boolean showNNHits() {
+		return _controlPanel.getAllDCDisplayPanel().showNNHits();
+	}
 
 }

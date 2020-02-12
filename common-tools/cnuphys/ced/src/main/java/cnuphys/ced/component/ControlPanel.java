@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -22,6 +23,7 @@ import cnuphys.bCNU.util.Bits;
 import cnuphys.bCNU.util.Fonts;
 import cnuphys.bCNU.util.UnicodeSupport;
 import cnuphys.ced.cedview.CedView;
+import cnuphys.ced.cedview.alldc.AllDCDisplayPanel;
 import cnuphys.ced.cedview.central.CentralZView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.item.MagFieldItem;
@@ -69,6 +71,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	
 	/** and adc threshold slider */
 	public static final int ADCTHRESHOLDSLIDER = 01000;
+	
+	/** all dc display panel */
+	public static final int ALLDCDISPLAYPANEL = 02000;
 
 	// the view parent
 	private CedView _view;
@@ -102,6 +107,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 
 	// color model panel for accumulation
 	private ColorModelPanel _colorPanel;
+	
+	//only for all dc view
+	private AllDCDisplayPanel _allDCDisplayPanel;
 
 	/**
 	 * Create a view control panel
@@ -239,11 +247,23 @@ public class ControlPanel extends JPanel implements ChangeListener {
 
 
 		if (_displayArray != null) {
+			
 			JPanel sp = new JPanel();
-			sp.setLayout(new BorderLayout(2, 2));
+			sp.setLayout(new BoxLayout(sp, BoxLayout.Y_AXIS));
+			
+			
+//			JPanel sp = new JPanel();
+//			sp.setLayout(new BorderLayout(2, 2));
 
 			_displayArray.setBorder(new CommonBorder("Visibility"));
-			sp.add(_displayArray, BorderLayout.NORTH);
+			sp.add(_displayArray);
+//			sp.add(_displayArray, BorderLayout.NORTH);
+			
+			if (Bits.checkBit(controlPanelBits, ALLDCDISPLAYPANEL)) {
+				_allDCDisplayPanel = new AllDCDisplayPanel(_view);
+				sp.add(_allDCDisplayPanel);
+			}
+			
 			// accumulation
 			if (Bits.checkBit(controlPanelBits, ACCUMULATIONLEGEND)) {
 				_colorPanel = new ColorModelPanel(_view, AccumulationManager.colorScaleModel, 160,
@@ -252,12 +272,14 @@ public class ControlPanel extends JPanel implements ChangeListener {
 //				_colorPanel.getSlider().setEnabled(false);
 //				_colorPanel.getSlider().addChangeListener(this);
 
-				sp.add(_colorPanel, BorderLayout.CENTER);
+				sp.add(_colorPanel);
+//				sp.add(_colorPanel, BorderLayout.CENTER);
 			}
 			
 			//adc threshold
 			if (Bits.checkBit(controlPanelBits, ADCTHRESHOLDSLIDER)) {
-				sp.add(createAdcThresholdSlider(), BorderLayout.SOUTH);
+				sp.add(createAdcThresholdSlider());
+//				sp.add(createAdcThresholdSlider(), BorderLayout.SOUTH);
 			}
 
 			
@@ -505,6 +527,14 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		}
 
 		return _noisePanel.hideNoise();
+	}
+	
+	/**
+	 * Get the display panel used by the all dc view
+	 * @return the display panel used by the all dc view
+	 */
+	public AllDCDisplayPanel getAllDCDisplayPanel() {
+		return _allDCDisplayPanel;
 	}
 
 	@Override
