@@ -137,6 +137,31 @@
                 "type": "F"
             }, 
             {
+                "info": "last site stateVec in tilted sector x (in cm)", 
+                "name": "x", 
+                "type": "F"
+            }, 
+            {
+                "info": "last site stateVec in tilted sector y (in cm)", 
+                "name": "y", 
+                "type": "F"
+            }, 
+            {
+                "info": "last site stateVec in tilted sector z (in cm)", 
+                "name": "z", 
+                "type": "F"
+            }, 
+            {
+                "info": "last site stateVec in tilted sector tx (px/pz)", 
+                "name": "tx", 
+                "type": "F"
+            }, 
+            {
+                "info": "last site stateVec in tilted sector ty (py/pz)", 
+                "name": "ty", 
+                "type": "F"
+            }, 
+            {
                 "info": "id of first cross on track", 
                 "name": "Cross1_ID", 
                 "type": "S"

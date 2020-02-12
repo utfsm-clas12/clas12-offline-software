@@ -22,8 +22,13 @@
                 "type": "B"
             }, 
             {
-                "info": "ADC maximum", 
+                "info": "ADC integral from pulse fit", 
                 "name": "ADC", 
+                "type": "I"
+            }, 
+            {
+                "info": "ADC maximum", 
+                "name": "amplitude", 
                 "type": "I"
             }, 
             {

@@ -185,6 +185,16 @@
                 "info": "ID of cross in the track", 
                 "name": "Cross9_ID", 
                 "type": "S"
+            }, 
+            {
+                "info": "x offset  ", 
+                "name": "xb", 
+                "type": "F"
+            }, 
+            {
+                "info": "y offset  ", 
+                "name": "yb", 
+                "type": "F"
             }
         ], 
         "group": 20500, 

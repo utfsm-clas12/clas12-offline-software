@@ -6,7 +6,7 @@ public class CVT {
 	
 	/** the columns */
 	public short[] id;
-	public short[] detector;
+	public byte[] detector;
 	public byte[] sector;
 	public byte[] layer;
 	public float[] x; //cm
@@ -36,7 +36,7 @@ public class CVT {
 
 	public void fillData() {
 		id = ColumnData.getShortArray("CVTRec::Trajectory.id");
-		detector = ColumnData.getShortArray("CVTRec::Trajectory.detector");
+		detector = ColumnData.getByteArray("CVTRec::Trajectory.detector");
 		sector = ColumnData.getByteArray("CVTRec::Trajectory.sector");
 		layer = ColumnData.getByteArray("CVTRec::Trajectory.layer");
 		x = ColumnData.getFloatArray("CVTRec::Trajectory.x");

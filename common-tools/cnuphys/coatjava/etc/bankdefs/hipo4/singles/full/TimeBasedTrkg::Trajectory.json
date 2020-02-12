@@ -9,7 +9,7 @@
             {
                 "info": "id of the detector", 
                 "name": "detector", 
-                "type": "S"
+                "type": "B"
             }, 
             {
                 "info": "id of the layer", 

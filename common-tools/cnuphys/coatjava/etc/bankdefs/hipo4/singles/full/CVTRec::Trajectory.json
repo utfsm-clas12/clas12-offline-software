@@ -2,58 +2,68 @@
     {
         "entries": [
             {
-                "info": "ID", 
-                "name": "ID", 
+                "info": "id of the track", 
+                "name": "id", 
                 "type": "S"
             }, 
             {
-                "info": "Layer of intersection of Track ", 
-                "name": "LayerTrackIntersPlane", 
+                "info": "id of the detector", 
+                "name": "detector", 
                 "type": "B"
             }, 
             {
-                "info": "Sector of intersection of Track ", 
-                "name": "SectorTrackIntersPlane", 
+                "info": "id of the sector", 
+                "name": "sector", 
                 "type": "B"
             }, 
             {
-                "info": "x of intersection of Track ", 
-                "name": "XtrackIntersPlane", 
+                "info": "id of the layer", 
+                "name": "layer", 
+                "type": "B"
+            }, 
+            {
+                "info": "track x position at detector surface (cm)", 
+                "name": "x", 
                 "type": "F"
             }, 
             {
-                "info": "y of intersection of Track ", 
-                "name": "YtrackIntersPlane", 
+                "info": "track y position at detector surface (cm)", 
+                "name": "y", 
                 "type": "F"
             }, 
             {
-                "info": "z of intersection of Track ", 
-                "name": "ZtrackIntersPlane", 
+                "info": "track z position at detector surface (cm)", 
+                "name": "z", 
                 "type": "F"
             }, 
             {
-                "info": "Local phi of intersection of Track", 
-                "name": "PhiTrackIntersPlane", 
+                "info": "local phi at detector surface (rad)", 
+                "name": "phi", 
                 "type": "F"
             }, 
             {
-                "info": "Local theta of intersection of Track", 
-                "name": "ThetaTrackIntersPlane", 
+                "info": "local theta at detector surface (rad)", 
+                "name": "theta", 
                 "type": "F"
             }, 
             {
-                "info": "Local angle of intersection of Track with the module surface", 
-                "name": "trkToMPlnAngl", 
+                "info": "local angle with module surface (rad)", 
+                "name": "langle", 
                 "type": "F"
             }, 
             {
-                "info": "Estimated Centroid", 
-                "name": "CalcCentroidStrip", 
+                "info": "estimated strip centroid", 
+                "name": "centroid", 
+                "type": "F"
+            }, 
+            {
+                "info": "pathlength of the track from the track vertex to the detector surface (cm)", 
+                "name": "path", 
                 "type": "F"
             }
         ], 
         "group": 20500, 
-        "info": "reconstructed SVT straight tracks trajectory", 
+        "info": "Trajectory bank", 
         "item": 29, 
         "name": "CVTRec::Trajectory"
     }

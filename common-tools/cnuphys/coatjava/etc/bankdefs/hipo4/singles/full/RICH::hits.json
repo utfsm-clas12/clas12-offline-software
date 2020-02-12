@@ -27,29 +27,29 @@
                 "type": "S"
             }, 
             {
-                "info": "Hit idx", 
-                "name": "idx", 
-                "type": "S"
+                "info": "Hit x", 
+                "name": "x", 
+                "type": "F"
             }, 
             {
-                "info": "Hit idy", 
-                "name": "idy", 
-                "type": "S"
+                "info": "Hit y", 
+                "name": "y", 
+                "type": "F"
             }, 
             {
-                "info": "Hit glx", 
-                "name": "glx", 
-                "type": "S"
-            }, 
-            {
-                "info": "Hit gly", 
-                "name": "gly", 
-                "type": "S"
+                "info": "Hit z", 
+                "name": "z", 
+                "type": "F"
             }, 
             {
                 "info": "Hit time", 
                 "name": "time", 
-                "type": "S"
+                "type": "F"
+            }, 
+            {
+                "info": "Hit rawtime", 
+                "name": "rawtime", 
+                "type": "F"
             }, 
             {
                 "info": "Hit cluster", 
@@ -67,7 +67,7 @@
                 "type": "S"
             }
         ], 
-        "group": 22000, 
+        "group": 21800, 
         "info": "Reconstructed Hits in RICH", 
         "item": 21, 
         "name": "RICH::hits"

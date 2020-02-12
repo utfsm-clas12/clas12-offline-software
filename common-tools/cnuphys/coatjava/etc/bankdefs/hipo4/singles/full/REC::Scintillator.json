@@ -85,6 +85,11 @@
                 "info": "hit status", 
                 "name": "status", 
                 "type": "S"
+            }, 
+            {
+                "info": "Energy deposition per distance travelled (MeV/cm)", 
+                "name": "dedx", 
+                "type": "F"
             }
         ], 
         "group": 300, 

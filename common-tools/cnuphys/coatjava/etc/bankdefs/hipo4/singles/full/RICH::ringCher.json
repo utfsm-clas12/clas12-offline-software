@@ -17,6 +17,21 @@
                 "type": "S"
             }, 
             {
+                "info": "photon hit pmt", 
+                "name": "pmt", 
+                "type": "S"
+            }, 
+            {
+                "info": "photon hit anode", 
+                "name": "anode", 
+                "type": "S"
+            }, 
+            {
+                "info": "photon hit time", 
+                "name": "time", 
+                "type": "F"
+            }, 
+            {
                 "info": "photon path for analytic solution", 
                 "name": "apath", 
                 "type": "F"

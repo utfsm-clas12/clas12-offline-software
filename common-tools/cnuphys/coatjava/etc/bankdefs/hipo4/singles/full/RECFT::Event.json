@@ -2,9 +2,9 @@
     {
         "entries": [
             {
-                "info": "Event Category, if >0:  e-, e-p, e-pi+.....", 
-                "name": "EvCAT", 
-                "type": "S"
+                "info": "Undefined", 
+                "name": "category", 
+                "type": "L"
             }, 
             {
                 "info": "Event Start Time (ns)", 

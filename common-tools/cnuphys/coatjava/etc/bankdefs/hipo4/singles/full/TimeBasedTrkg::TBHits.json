@@ -82,6 +82,11 @@
                 "type": "F"
             }, 
             {
+                "info": "local angle (degr.) in tilted-sector system", 
+                "name": "Alpha", 
+                "type": "F"
+            }, 
+            {
                 "info": "t propagation along the wire (ns)", 
                 "name": "TProp", 
                 "type": "F"

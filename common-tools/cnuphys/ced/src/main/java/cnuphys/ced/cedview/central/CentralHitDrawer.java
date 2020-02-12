@@ -138,7 +138,7 @@ public abstract class CentralHitDrawer implements IDrawable {
 		float[] z = cvt.z;
 		
 		short[] id = cvt.id;
-		short[] detector = cvt.detector;
+		byte[] detector = cvt.detector;
 		byte[] sector = cvt.sector;
 		byte[] layer = cvt.layer;
 		

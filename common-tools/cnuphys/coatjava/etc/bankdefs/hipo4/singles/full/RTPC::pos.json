@@ -4,7 +4,7 @@
             {
                 "info": "step", 
                 "name": "step", 
-                "type": "F"
+                "type": "I"
             }, 
             {
                 "info": "time (ns)", 
@@ -35,6 +35,11 @@
                 "info": "phi (rad)", 
                 "name": "phi", 
                 "type": "F"
+            }, 
+            {
+                "info": "track id", 
+                "name": "tid", 
+                "type": "I"
             }
         ], 
         "group": 21900, 
