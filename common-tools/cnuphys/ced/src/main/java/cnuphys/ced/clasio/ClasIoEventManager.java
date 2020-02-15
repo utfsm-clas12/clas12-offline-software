@@ -13,15 +13,19 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
-import org.jlab.detector.decode.CLASDecoder;
+import org.jlab.detector.decode.CLASDecoder4;
+import org.jlab.io.base.DataBank;
 import org.jlab.io.base.DataEvent;
 import org.jlab.io.base.DataSource;
 import org.jlab.io.evio.EvioDataEvent;
 import org.jlab.io.evio.EvioETSource;
 import org.jlab.io.evio.EvioSource;
-import org.jlab.io.hipo.HipoDataBank;
 import org.jlab.io.hipo.HipoDataEvent;
 import org.jlab.io.hipo.HipoDataSource;
+import org.jlab.jnp.hipo4.data.Bank;
+import org.jlab.jnp.hipo4.data.Event;
+import org.jlab.jnp.hipo4.data.SchemaFactory;
+import org.jlab.utils.system.ClasUtilsFile;
 
 import cnuphys.bCNU.application.Desktop;
 import cnuphys.bCNU.dialog.DialogUtilities;
@@ -67,7 +71,8 @@ public class ClasIoEventManager {
 	public JButton _connectButton;
 
 	// decode evio to hipo
-	private CLASDecoder _decoder;
+	private CLASDecoder4 _decoder;
+	private SchemaFactory _schemaFactory;
 
 	// reset everytime hipo or evio file is opened
 	private int _eventIndex;
@@ -273,20 +278,6 @@ public class ClasIoEventManager {
 	 */
 	public DataSource getDataSource() {
 		return _dataSource;
-	}
-
-	/**
-	 * Get the HIPO decoder
-	 * 
-	 * @return the decoder
-	 */
-	public CLASDecoder getDecoder() {
-
-		if (_decoder == null) {
-			_decoder = new CLASDecoder();
-		}
-
-		return _decoder;
 	}
 
 	/**
@@ -734,6 +725,29 @@ public class ClasIoEventManager {
 		}
 	}
 
+	// decode an evio event to hipo
+	private HipoDataEvent decodeEvioToHipo(EvioDataEvent event) {
+				
+		if (_decoder == null) {
+	        _schemaFactory  =  new SchemaFactory();
+	        
+	        String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
+	        _schemaFactory.initFromDirectory(dir);
+	        
+			_decoder = new CLASDecoder4();
+		}
+
+		Event decodedEvent = _decoder.getDataEvent(event);
+		
+		Bank trigger = _decoder.createTriggerBank();
+        if(trigger != null) {
+        	decodedEvent.write(trigger);
+        }
+        
+        
+        return new HipoDataEvent(decodedEvent, _schemaFactory);
+	}
+
 	/**
 	 * Get the next event from the current compact reader
 	 * 
@@ -768,12 +782,9 @@ public class ClasIoEventManager {
 				_currentEvent = _dataSource.getNextEvent();
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
-					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
-					_currentEvent.appendBanks(trigger);
-
-					// System.err.println("Decoded to HIPO");
-					// _currentEvent.show();
+					
+					_currentEvent = decodeEvioToHipo((EvioDataEvent)_currentEvent);
+					
 					_eventIndex++;
 					ifPassSetEvent(_currentEvent, 0);
 				}
@@ -804,13 +815,15 @@ public class ClasIoEventManager {
 				_currentEvent = _dataSource.getNextEvent();
 
 				if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+					
+					_currentEvent = decodeEvioToHipo((EvioDataEvent)_currentEvent);
 
-					// decode the event from evio to hipo
-					_currentEvent = getDecoder().getDataEvent(_currentEvent);
-
-					// manually create trigger bank
-					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
-					_currentEvent.appendBanks(trigger);
+//					// decode the event from evio to hipo
+//					_currentEvent = getDecoder().getDataEvent(_currentEvent);
+//
+//					// manually create trigger bank
+//					HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
+//					_currentEvent.appendBanks(trigger);
 
 					_eventIndex++;
 					ifPassSetEvent(_currentEvent, 0);
@@ -902,7 +915,7 @@ public class ClasIoEventManager {
 		// break;
 		case HIPOFILE:
 			_eventIndex--;
-			System.err.println("EVENT INDEX: " + _eventIndex);
+//			System.err.println("EVENT INDEX: " + _eventIndex);
 			_currentEvent = _dataSource.getPreviousEvent();
 			break;
 
@@ -910,14 +923,15 @@ public class ClasIoEventManager {
 			_currentEvent = _dataSource.getPreviousEvent();
 			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
 
-				if (_decoder == null) {
-					_decoder = new CLASDecoder();
-				}
-				_eventIndex--;
-				_currentEvent = _decoder.getDataEvent(_currentEvent);
-
-				HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
-				_currentEvent.appendBanks(trigger);
+				_currentEvent = decodeEvioToHipo((EvioDataEvent)_currentEvent);
+//				if (_decoder == null) {
+//					_decoder = new CLASDecoder();
+//				}
+//				_eventIndex--;
+//				_currentEvent = _decoder.getDataEvent(_currentEvent);
+//
+//				HipoDataBank trigger = _decoder.createTriggerBank(_currentEvent);
+//				_currentEvent.appendBanks(trigger);
 			}
 			break; // end case eviofile
 
@@ -991,11 +1005,13 @@ public class ClasIoEventManager {
 		case EVIOFILE:
 			_currentEvent = _dataSource.gotoEvent(eventNumber);
 			if ((_currentEvent != null) && (_currentEvent instanceof EvioDataEvent)) {
+				
+				_currentEvent = decodeEvioToHipo((EvioDataEvent)_currentEvent);
 
-				if (_decoder == null) {
-					_decoder = new CLASDecoder();
-				}
-				_currentEvent = _decoder.getDataEvent(_currentEvent);
+//				if (_decoder == null) {
+//					_decoder = new CLASDecoder();
+//				}
+//				_currentEvent = _decoder.getDataEvent(_currentEvent);
 				_eventIndex = eventNumber;
 			}
 			break;
@@ -1132,8 +1148,16 @@ public class ClasIoEventManager {
 		_uniqueLundIds = null;
 
 		Ced.getCed().setEventFilteringLabel(isFilteringOn());
-
+						
 		_currentBanks = (_currentEvent == null) ? null : _currentEvent.getBankList();
+		
+//		if ((_currentBanks == null) || (_currentBanks.length < 1)) {
+//			System.err.println("no current banks in bank list");
+//		}
+//		else {
+//			System.err.println("found " + _currentBanks.length + " current banks in bank list");
+//		}
+		
 		if (_currentBanks != null) {
 			Arrays.sort(_currentBanks);
 		}

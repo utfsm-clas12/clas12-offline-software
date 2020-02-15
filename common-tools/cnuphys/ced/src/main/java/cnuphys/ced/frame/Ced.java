@@ -118,7 +118,7 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	private static String _geoVariation = "default";
 	
 	//ced release 
-	private static final String _release = "build 1.4.46b";
+	private static final String _release = "build 1.4.47";
 
 	// used for one time inits
 	private int _firstTime = 0;
@@ -132,6 +132,8 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	// using 3D?
 	private static boolean _use3D = true;
 
+	// the coat java clasdir
+	private static File _clasDir;
 
 	// event menu
 	private ClasIoEventMenu _eventMenu;
@@ -1116,6 +1118,14 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 	public static JFrame getFrame() {
 		return _instance;
 	}
+	
+	/**
+	 * Get the COAT Java clasdir
+	 * @return the COAT Java clasdir
+	 */
+	public static File getCLASDir() {
+		return _clasDir;
+	}
 
 	// this is so we can find json files
 	private static void initClas12Dir() throws IOException {
@@ -1127,28 +1137,28 @@ public class Ced extends BaseMDIApplication implements PropertyChangeListener, M
 			clas12dir = "coatjava";
 		}
 
-		File clasDir = new File(clas12dir);
+		_clasDir = new File(clas12dir);
 
-		if (clasDir.exists() && clasDir.isDirectory()) {
-			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+		if (_clasDir.exists() && _clasDir.isDirectory()) {
+			System.err.println("**** Found CLAS12DIR [" + _clasDir.getCanonicalPath() + "]");
 			System.setProperty("CLAS12DIR", clas12dir);
 			Log.getInstance().config("CLAS12DIR: " + clas12dir);
 			return;
 		} else {
-			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+			System.err.println("**** Did not find CLAS12DIR [" + _clasDir.getCanonicalPath() + "]");
 		}
 
 		String cwd = Environment.getInstance().getCurrentWorkingDirectory();
 		clas12dir = cwd + "/../../../../../cnuphys/coatjava";
-		clasDir = new File(clas12dir);
+		_clasDir = new File(clas12dir);
 
-		if (clasDir.exists() && clasDir.isDirectory()) {
-			System.err.println("**** Found CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+		if (_clasDir.exists() && _clasDir.isDirectory()) {
+			System.err.println("**** Found CLAS12DIR [" + _clasDir.getCanonicalPath() + "]");
 			System.setProperty("CLAS12DIR", clas12dir);
 			Log.getInstance().config("CLAS12DIR: " + clas12dir);
 			return;
 		} else {
-			System.err.println("**** Did not find CLAS12DIR [" + clasDir.getCanonicalPath() + "]");
+			System.err.println("**** Did not find CLAS12DIR [" + _clasDir.getCanonicalPath() + "]");
 		}
 
 		throw (new IOException("Could not locate the coatjava directory."));
