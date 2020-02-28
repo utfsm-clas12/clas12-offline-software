@@ -46,19 +46,19 @@ public class RTPCView extends CedXYView implements ChangeListener {
 	 * of -192mm to 192 mm and 96 divisions, so each division in (2*192)/96 = 4mm.
 	 * 
 	 * components are the phi divisions and will be the horizontal axis, with a physical
-	 * range of -180 to 180 deg and 180 divisions, so each division is 2 deg.
+	 * range of 0 to 360 deg and 180 divisions, so each division is 2 deg.
 	 */
 	
 	private static final double DELZ = 4.; //mm
 	private static final double DELPHI = 2.; //deg
 	private static final double ZMIN = -192;
-	private static final double PHIMIN = -180;
+	private static final double PHIMIN = 0;
 	private static final double ZMAX = 192;
-	private static final double PHIMAX = 180;
-	private static final double STRETCHZMIN = 1.005*ZMIN;
-	private static final double STRETCHPHIMIN = 1.005*PHIMIN;
-	private static final double STRETCHZMAX = 1.005*ZMAX;
-	private static final double STRETCHPHIMAX = 1.005*PHIMAX;
+	private static final double PHIMAX = 360;
+//	private static final double STRETCHZMIN = 1.005*ZMIN;
+//	private static final double STRETCHPHIMIN = 1.005*PHIMIN;
+//	private static final double STRETCHZMAX = 1.005*ZMAX;
+//	private static final double STRETCHPHIMAX = 1.005*PHIMAX;
 	
 	//the local screen rect
 	private Rectangle screenRect;
@@ -70,12 +70,14 @@ public class RTPCView extends CedXYView implements ChangeListener {
 	private static final String _baseTitle = "RTPC";
 
 	// units are 
-	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(STRETCHPHIMIN, STRETCHZMIN, 
-			(STRETCHPHIMAX - STRETCHPHIMIN), (STRETCHZMAX - STRETCHZMIN));
+//	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(STRETCHPHIMIN, STRETCHZMIN, 
+//			(STRETCHPHIMAX - STRETCHPHIMIN), (STRETCHZMAX - STRETCHZMIN));
+	
+	private static Rectangle2D.Double _defaultWorldRectangle = new Rectangle2D.Double(-10, -200, 380, 400);
 
 	/**
-	 * Create a FTCalXYView View
-	 * 
+	 * Create an RTPC view
+	 * @param keyVals the properties
 	 */
 	public RTPCView(Object... keyVals) {
 		super(keyVals);
@@ -83,9 +85,9 @@ public class RTPCView extends CedXYView implements ChangeListener {
 	
 
 	/**
-	 * Create a RTPC View view
+	 * Create an RTPC View view
 	 * 
-	 * @return a RTPC View View
+	 * @return an RTPC View View
 	 */
 	public static RTPCView createRTPCView() {
 		RTPCView view = null;
@@ -100,11 +102,18 @@ public class RTPCView extends CedXYView implements ChangeListener {
 		String title = _baseTitle + ((CLONE_COUNT == 0) ? "" : ("_(" + CLONE_COUNT + ")"));
 
 		// create the view
-		view = new RTPCView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, PropertySupport.WIDTH, width,
-				PropertySupport.HEIGHT, height, PropertySupport.LEFTMARGIN, LMARGIN, PropertySupport.TOPMARGIN, TMARGIN,
-				PropertySupport.RIGHTMARGIN, RMARGIN, PropertySupport.BOTTOMMARGIN, BMARGIN, PropertySupport.TOOLBAR,
-				true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS, PropertySupport.VISIBLE, true,
-				PropertySupport.TITLE, title, PropertySupport.STANDARDVIEWDECORATIONS, true);
+		view = new RTPCView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, 
+				PropertySupport.WIDTH, width,
+				PropertySupport.HEIGHT, height, 
+				PropertySupport.LEFTMARGIN, LMARGIN, 
+				PropertySupport.TOPMARGIN, TMARGIN,
+				PropertySupport.RIGHTMARGIN, RMARGIN, 
+				PropertySupport.BOTTOMMARGIN, BMARGIN, 
+				PropertySupport.TOOLBAR, true, 
+				PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS, 
+				PropertySupport.VISIBLE, true,
+				PropertySupport.TITLE, title, 
+				PropertySupport.STANDARDVIEWDECORATIONS, true);
 
 		view._controlPanel = new ControlPanel(view,
 				ControlPanel.DISPLAYARRAY + ControlPanel.FEEDBACK + ControlPanel.ACCUMULATIONLEGEND + ControlPanel.ADCTHRESHOLDSLIDER,
@@ -128,23 +137,20 @@ public class RTPCView extends CedXYView implements ChangeListener {
 			public void draw(Graphics g, IContainer container) {
 
 				Component component = container.getComponent();
-				Rectangle b = component.getBounds();
-
-				// ignore b.x and b.y as usual
-
-				b.x = 0;
-				b.y = 0;
+//				Rectangle b = component.getBounds();
+//
+//				// ignore b.x and b.y as usual
+//
+//				b.x = 0;
+//				b.y = 0;
 
 				screenRect = container.getInsetRectangle();
 				g.setColor(X11Colors.getX11Color("alice blue"));
 				g.fillRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
 
-				
-								
 				drawGrid(g, container, screenRect);
 				g.setColor(Color.black);
 				g.drawRect(screenRect.x, screenRect.y, screenRect.width, screenRect.height);
-
 			}
 
 			// draw the rtpc pad board grid
@@ -158,7 +164,7 @@ public class RTPCView extends CedXYView implements ChangeListener {
 				double ymin = wr.y;
 				double ymax =  wr.getMaxY();
 
-				g.setColor(Color.lightGray);
+				
 				Point p0 = new Point();
 				Point p1 = new Point();
 			
@@ -166,7 +172,10 @@ public class RTPCView extends CedXYView implements ChangeListener {
 				for (int i = 0; i <= RTPC.NUMLAYER; i++) {
 					double z = ZMIN + i*DELZ;
 					
+					
 					if ((z >= ymin) && (z <= ymax)) {
+						g.setColor((Math.abs(z) < 1) ? Color.gray : Color.lightGray);
+
 						container.worldToLocal(p0, Math.max(PHIMIN, xmin), z);
 						container.worldToLocal(p1, Math.min(PHIMAX, xmax), z);
 						g.drawLine(p0.x, p0.y, p1.x, p1.y);
@@ -178,7 +187,11 @@ public class RTPCView extends CedXYView implements ChangeListener {
 				// vertical lines
 				for (int i = 0; i <= RTPC.NUMCOMPONENT; i++) {
 					double phi = PHIMIN + i * DELPHI;
+					
+					
 					if ((phi >= xmin) && (phi <= xmax)) {
+						g.setColor((Math.abs(phi-180) < 1) ? Color.gray : Color.lightGray);
+
 						container.worldToLocal(p0, phi, Math.max(ZMIN, ymin));
 						container.worldToLocal(p1, phi, Math.min(ZMAX, ymax));
 						g.drawLine(p0.x, p0.y, p1.x, p1.y);

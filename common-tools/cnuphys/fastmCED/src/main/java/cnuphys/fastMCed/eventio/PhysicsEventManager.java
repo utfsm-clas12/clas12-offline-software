@@ -182,7 +182,7 @@ public class PhysicsEventManager {
 		return event;
 	}
 
-	// Parse the event, which will convert the PhysicsEvent int
+	// Parse the event, which will convert the PhysicsEvent into
 	// detector hits and load them into _currentParticleHits
 	private void parseEvent(PhysicsEvent event) {
 

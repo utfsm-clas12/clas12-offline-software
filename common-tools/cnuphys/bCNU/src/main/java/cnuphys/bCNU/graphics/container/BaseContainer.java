@@ -255,20 +255,17 @@ public class BaseContainer extends JComponent
 	 */
 	public boolean isOnScreen() {
 		if (_view == null) {
-//			System.err.println("null view");
 			return false;
 		}
 
 		JFrame jf = _view.getParentFrame();
 		if (jf == null) {
-//			System.err.println("null jframe for view " + _view.getTitle());
 			return false;
 		}
 
 		Dimension d = jf.getSize();
 		Rectangle pr = new Rectangle(0, 0, d.width, d.height);
 		Rectangle r = _view.getBounds();
-//		System.err.println("pr: " + pr + "  r: " + r);
 		return ((pr != null) && (r != null) && pr.intersects(r));
 	}
 
@@ -459,12 +456,7 @@ public class BaseContainer extends JComponent
 				System.err.println("Null pointer exception in BaseContainer worldToLocal pp = " + pp + "  wp = " + wp);
 				npe.printStackTrace();
 			}
-		} else {
-			// System.err.println("null world to local for " +
-			// _view.getTitle());
-			// Throwable t = new Throwable();
-			// t.printStackTrace();
-		}
+		} 
 	}
 
 	/**

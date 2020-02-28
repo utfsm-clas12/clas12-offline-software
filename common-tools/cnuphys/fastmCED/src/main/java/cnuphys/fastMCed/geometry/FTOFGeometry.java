@@ -35,8 +35,7 @@ public class FTOFGeometry {
 	private static String ftofNames[] = { "Panel 1A", "Panel 1B", "Panel 2" };
 
 	// TOF data provider
-	private static ConstantProvider tofDataProvider = GeometryFactory
-			.getConstants(org.jlab.detector.base.DetectorType.FTOF);
+	private static ConstantProvider _ftofDataProvider;
 
 	// only need sector 0
 	private static FTOFSector _clas_sector0;
@@ -75,8 +74,14 @@ public class FTOFGeometry {
 		System.out.println("\n=====================================");
 		System.out.println("===  FTOF Geometry Initialization ===");
 		System.out.println("=====================================");
+		
+		if (_ftofDataProvider == null) {
+			_ftofDataProvider= GeometryFactory
+						.getConstants(org.jlab.detector.base.DetectorType.FTOF);
+		}
 
-		_ftofDetector = (new FTOFFactory()).createDetectorCLAS(tofDataProvider);
+		
+		_ftofDetector = (new FTOFFactory()).createDetectorCLAS(_ftofDataProvider);
 
 		for (int sect = 0; sect < 6; sect++) {
 			FTOFSector ftofSector = _ftofDetector.getSector(sect);
