@@ -547,7 +547,7 @@ public class MagTests {
 
 		final JMenuItem test0Item = new JMenuItem("Timing Test Random Points");
 		final JMenuItem test1Item = new JMenuItem("Timing Test Along a Line");
-		final JMenuItem test4Item = new JMenuItem("Sameness Test");
+		final JMenuItem test4Item = new JMenuItem("Overlap/No overlap Sameness Test");
 		final JMenuItem test5Item = new JMenuItem("MathLib Test");
 		final JMenuItem threadItem = new JMenuItem("Thread Test");
 		final JMenuItem asciiTorusItem = new JMenuItem("Convert Torus to ASCII");

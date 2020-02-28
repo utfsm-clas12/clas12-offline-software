@@ -1331,7 +1331,7 @@ public class MagneticFields {
 	/**
 	 * Removes the overlap between the solenoid and the torus. It does this by
 	 * Adding the solenoid field to the torus field cutting of the solenoid in the
-	 * overlap region, then cutton off the solenoid at the min Z of the torus. This
+	 * overlap region, then cut off the solenoid at the min Z of the torus. This
 	 * is an experimental method and irreversible. In particular rescaling the torus
 	 * after doing this will cause the solenoid part of the overlap area to be
 	 * scaled too. Which is nonsense.
@@ -1370,6 +1370,8 @@ public class MagneticFields {
 
 				for (int nPhi = 0; nPhi < _torus.getQ1Coordinate().getNumPoints(); nPhi++) {
 					double phi = _torus.getQ1Coordinate().getValue(nPhi);
+					
+					System.err.println("PHI = " + phi);
 					double phiRad = Math.toRadians(phi);
 
 					double cosPhi = Math.cos(phiRad);
