@@ -69,19 +69,10 @@ public class NoiseTest extends JFrame {
 
 		detectorTest = new DetectorTest(parameters, 0.0, 0.0, bw, bh);
 
-		for (int i = 1; i <= 6; i++) {
-			double y = (i + 1.5) * (dy + height);
+		for (int i = 0; i < 6; i++) {
+			double y = -0.7 + (i + 1.5) * (3.2*dy + height);
 			detectorTest.addChamber(new Rectangle2D.Double(xmin, y, width, height));
 		}
-
-		// composite chamber
-		double y = 2 * dy;
-		detectorTest.addCompositeChamber(NoiseReductionParameters.LEFT_LEAN,
-				new Rectangle2D.Double(xmin, y, width, height));
-
-		y += (dy + height);
-		detectorTest.addCompositeChamber(NoiseReductionParameters.RIGHT_LEAN,
-				new Rectangle2D.Double(xmin, y, width, height));
 
 		add(detectorTest, BorderLayout.CENTER);
 
@@ -143,103 +134,6 @@ public class NoiseTest extends JFrame {
 		menu.add(detectorTest.getDisplayOptionMenu());
 		return menu;
 	}
-
-	private Frame getParentFrame(Component comp) {
-		return comp != null ? (Frame) SwingUtilities.getAncestorOfClass(Frame.class, comp) : null;
-	}
-
-	// /**
-	// * Create the test menu.
-	// *
-	// * @return the test menu.
-	// */
-	// private JMenu createTestMenu() {
-	// JMenu menu = new JMenu("Tests");
-	//
-	// final JMenuItem pnrTestItem = new
-	// JMenuItem("Percent Noise Removed vs. Noise Rate");
-	// final JMenuItem wireCountTestItem = new
-	// JMenuItem("Number of Wires vs. Time");
-	//
-	// final NoiseTest ntest = this;
-	//
-	// ActionListener al = new ActionListener() {
-	//
-	// @Override
-	// public void actionPerformed(ActionEvent e) {
-	//
-	//
-	// detectorTest.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	//
-	// Object source = e.getSource();
-	// int numEvent = 200000;
-	// int numRun = 6;
-	// TestParameters.setNoiseRate(0.03);
-	// //mstr suitable for Mathematica
-	// String mStr = "{";
-	// long counts[] = new long[4];
-	//
-	// if (source == pnrTestItem) {
-	// for (int i = 1; i < 11; i++) {
-	// TestParameters.setNoiseRate(0.01*i);
-	// for (int j = 0; j < counts.length; j++) {
-	// counts[j] = 0;
-	// }
-	//
-	// detectorTest.doNoiseTest(numEvent, counts);
-	// //order track hits, noise, removed noise, saved noise
-	// long noiseHits = counts[1];
-	// long noiseRemovedHits = counts[2];
-	// double percentRemoved = 100;
-	// if (noiseHits > 0) {
-	// percentRemoved = (100.0 * noiseRemovedHits)/(double)noiseHits;
-	// }
-	//
-	// String s = String.format("{%d, %-5.2f}, ", i, percentRemoved);
-	// mStr += s;
-	// System.err.println("percent removed: " + percentRemoved);
-	//
-	// } //end loop i
-	//
-	// } //end pnrTest
-	//
-	// else if (source == wireCountTestItem) {
-	// for (int j = 30; j < 151; j+=4) {
-	//
-	// TestParameters.setNumWire(j);
-	// double sumtime = 0;
-	// for (int i = 0; i < numRun; i++) {
-	// double ttime = detectorTest.doTimingTest2(numEvent);
-	// if (i > 0) {
-	// sumtime += ttime;
-	// }
-	// }
-	// sumtime /= (numRun - 1);
-	// System.err.println("NumWire: "
-	// + TestParameters.getNumWire() + " AVG TIME: "
-	// + sumtime);
-	// String s = String.format("{%d, %-5.2f}, ", TestParameters.getNumWire(),
-	// sumtime);
-	//
-	// mStr += s;
-	// }
-	// } //wire count test item
-	//
-	// mStr += "}";
-	// System.err.println(mStr);
-	// detectorTest.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	//
-	// } //end action performed
-	// }; //end new ActionListener
-	//
-	//
-	// pnrTestItem.addActionListener(al);
-	// wireCountTestItem.addActionListener(al);
-	// menu.add(pnrTestItem);
-	// menu.add(wireCountTestItem);
-	// return menu;
-	// }
-	//
 
 	/**
 	 * Create the event menu.

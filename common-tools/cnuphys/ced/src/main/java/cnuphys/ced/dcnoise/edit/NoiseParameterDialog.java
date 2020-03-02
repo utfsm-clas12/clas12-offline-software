@@ -59,12 +59,6 @@ public class NoiseParameterDialog extends JDialog {
 	// for specifying number of missing layers
 	private JComboBox _missingLayerComboBox;
 
-	// finding segments only
-	private JRadioButton segmentButton;
-
-	// finding tracks
-	private JRadioButton trackButton;
-
 	// copies used for editing
 	private NoiseReductionParameters _clonedParameters[];
 	private int _hotIndex = 0;
@@ -124,9 +118,6 @@ public class NoiseParameterDialog extends JDialog {
 		box.add(label);
 		box.add(Box.createVerticalStrut(6));
 
-		box.add(findTrackPanel());
-		box.add(Box.createVerticalStrut(6));
-
 		// add combo for selected superlayer
 		createSuperLayerComboBox();
 		_superLayerComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -156,35 +147,6 @@ public class NoiseParameterDialog extends JDialog {
 		add(Box.createHorizontalStrut(4), BorderLayout.WEST);
 	}
 
-	private JPanel findTrackPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 4, 4));
-
-		ButtonGroup bg = new ButtonGroup();
-
-		segmentButton = new JRadioButton("Superlayer Segments", !NoiseReductionParameters.lookForTracks());
-		trackButton = new JRadioButton("Tracks", NoiseReductionParameters.lookForTracks());
-
-		ActionListener al = new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				NoiseReductionParameters.setLookForTracks(trackButton.isSelected());
-				ClasIoEventManager.getInstance().reloadCurrentEvent();
-			}
-
-		};
-
-		segmentButton.addActionListener(al);
-		trackButton.addActionListener(al);
-
-		bg.add(segmentButton);
-		bg.add(trackButton);
-
-		panel.add(segmentButton);
-		panel.add(trackButton);
-		return panel;
-	}
 
 	// which superlayer selector
 	private void createSuperLayerComboBox() {

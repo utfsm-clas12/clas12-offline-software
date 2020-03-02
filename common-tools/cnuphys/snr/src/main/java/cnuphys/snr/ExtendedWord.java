@@ -329,10 +329,10 @@ public class ExtendedWord {
 	 * 
 	 * @return a string representation.
 	 */
-	@Override
-	public String toString() {
-		return binaryString();
-	}
+//	@Override
+//	public String toString() {
+//		return binaryString();
+//	}
 
 	/**
 	 * Return a binary string representation of a byte.

@@ -2,6 +2,7 @@ package cnuphys.snr.test;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -13,6 +14,8 @@ import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 
 public class ChamberTest {
+	
+	public static final Color[] missingColors = {Color.red, Color.orange, Color.yellow};
 
 	public static final Color maskFillLeft = new Color(255, 128, 0, 48);
 	public static final Color maskFillRight = new Color(0, 128, 255, 48);
@@ -22,6 +25,8 @@ public class ChamberTest {
 	protected Color lineColor = Color.gray;
 
 	private static final Font _smallFont = new Font("SanSerif", Font.BOLD, 9);
+	private static FontMetrics _fm;
+	
 	/**
 	 * The parent detector that presumably contains multiple chambers.
 	 */
@@ -79,9 +84,16 @@ public class ChamberTest {
 	 * @param local the local system
 	 */
 	public void draw(Graphics g, Rectangle2D.Double world, Rectangle local) {
+		
+		if (_fm == null) {
+			_fm = g.getFontMetrics(_smallFont);
+		}
 
 		Rectangle cell = new Rectangle();
 		drawCellOutlines(g, world, local, fillColor);
+		drawLeftSegmentOutline(g, world, local, fillColor);
+		drawRightSegmentOutline(g, world, local, fillColor);
+
 
 		drawString(g, world, local, _name, _boundary.x, _boundary.y + _boundary.height);
 
@@ -126,6 +138,10 @@ public class ChamberTest {
 				}
 			}
 		}
+		
+		//draw segment candidates
+		drawLeftSegmentCandidates(g, world, local);
+		drawRightSegmentCandidates(g, world, local);
 	}
 
 	protected void drawString(Graphics g, Rectangle2D.Double world, Rectangle local, String s, double wx, double wy) {
@@ -200,6 +216,116 @@ public class ChamberTest {
 		}
 
 	}
+	
+	/**
+	 * Draw the segment candidate indications
+	 * @param g
+	 * @param world
+	 * @param local
+	 * @param candidates
+	 */
+	protected void drawLeftSegmentCandidates(Graphics g, Rectangle2D.Double world, Rectangle local) {
+		
+		ExtendedWord candidates = _parameters.getLeftSegments();
+		
+		Rectangle cell = new Rectangle();
+		
+		for (int wire = 0; wire < _parameters.getNumWire(); wire++) {
+			if (candidates.checkBit(wire)) {
+				leftSegmentBounds(world, local, wire, cell);
+				
+				int nml = _parameters.missingLayersUsed(0, wire);
+				Color fc = missingColors[Math.min(nml, missingColors.length-1)];
+
+				
+				g.setColor(fc);
+				g.fillOval(cell.x, cell.y, cell.width, cell.height);
+				g.setColor(Color.blue);
+				g.drawOval(cell.x, cell.y, cell.width, cell.height);
+				
+				//System.err.println("NML: " + nml);
+			}
+		}
+	}
+	
+	/**
+	 * Draw the segment candidate indications
+	 * @param g
+	 * @param world
+	 * @param local
+	 * @param candidates
+	 */
+	protected void drawRightSegmentCandidates(Graphics g, Rectangle2D.Double world, Rectangle local) {
+		
+		ExtendedWord candidates = _parameters.getRightSegments();
+		
+		Rectangle cell = new Rectangle();
+		
+		for (int wire = 0; wire < _parameters.getNumWire(); wire++) {
+			if (candidates.checkBit(wire)) {
+				rightSegmentBounds(world, local, wire, cell);
+				
+				int nml = _parameters.missingLayersUsed(1, wire);
+				Color fc = missingColors[Math.min(nml, missingColors.length-1)];
+
+				
+				g.setColor(fc);
+				g.fillOval(cell.x, cell.y, cell.width, cell.height);
+				g.setColor(Color.blue);
+				g.drawOval(cell.x, cell.y, cell.width, cell.height);
+				
+				//System.err.println("NML: " + nml);
+			}
+		}
+	}
+	
+	//left segments drawn just below
+	protected void drawLeftSegmentOutline(Graphics g, Rectangle2D.Double world, Rectangle local, Color fc) {
+		Rectangle cell = new Rectangle();
+
+		for (int wire = 0; wire < _parameters.getNumWire(); wire++) {
+			leftSegmentBounds(world, local, wire, cell);
+			
+			if (fc != null) {
+				g.setColor(fc);
+				g.fillOval(cell.x, cell.y, cell.width, cell.height);
+			}
+
+			g.setColor(Color.blue);
+			g.drawOval(cell.x, cell.y, cell.width, cell.height);
+		}
+
+		g.setFont(_smallFont);
+		g.setColor(Color.black);
+		
+		String label = "L";
+		g.drawString(label, cell.x - _fm.stringWidth(label)-4, cell.y + (cell.height + _fm.getHeight())/2);
+	}
+	
+	//right segments drawn just below left segments
+	protected void drawRightSegmentOutline(Graphics g, Rectangle2D.Double world, Rectangle local, Color fc) {
+		Rectangle cell = new Rectangle();
+		
+		for (int wire = 0; wire < _parameters.getNumWire(); wire++) {
+			rightSegmentBounds(world, local, wire, cell);
+
+			if (fc != null) {
+				g.setColor(fc);
+				g.fillOval(cell.x, cell.y, cell.width, cell.height);
+			}
+
+			g.setColor(Color.blue);
+            g.drawOval(cell.x, cell.y, cell.width, cell.height);
+		}
+
+		g.setFont(_smallFont);
+		g.setColor(Color.black);
+		
+		String label = "R";
+		g.drawString(label, cell.x - _fm.stringWidth(label)-4, cell.y + (cell.height + _fm.getHeight())/2);
+	}
+	
+	
 
 	/**
 	 * Get the color for a hit
@@ -245,6 +371,36 @@ public class ChamberTest {
 		Rectangle2D.Double wr = new Rectangle2D.Double();
 		cellWorldBounds(layer, wire, wr);
 		TestSupport.toLocal(world, local, cell, wr);
+	}
+	
+	/**
+	 * Get the bounds for drawing whether there is a potential left segment here
+	 * @param world the world system.
+	 * @param local the local system.	 * @param layer the layer index [0..]
+	 * @param wire  the wire index [0..]
+	 * @param cell  the Rectangle that will be set to the cell boundary.
+	 */
+	protected void leftSegmentBounds(Rectangle2D.Double world, Rectangle local, int wire, Rectangle cell) {
+		cellBounds(world, local, -1, wire, cell);
+		cell.x += 1;
+		cell.y += 1;
+		cell.width -= 2;
+		cell.height -= 2;
+	}
+	
+	/**
+	 * Get the bounds for drawing whether there is a potential right segment here
+	 * @param world the world system.
+	 * @param local the local system.	 * @param layer the layer index [0..]
+	 * @param wire  the wire index [0..]
+	 * @param cell  the Rectangle that will be set to the cell boundary.
+	 */
+	protected void rightSegmentBounds(Rectangle2D.Double world, Rectangle local, int wire, Rectangle cell) {
+		cellBounds(world, local, -2, wire, cell);
+		cell.x += 1;
+		cell.y += 1;
+		cell.width -= 2;
+		cell.height -= 2;
 	}
 
 	/**
@@ -479,18 +635,11 @@ public class ChamberTest {
 		_parameters.createWorkSpace();
 		_parameters.setPackedData(data);
 		_parameters.removeNoise();
-
-		// System.err.println("\n LEFT: " + _parameters.getLeftSegments());
-		// System.err.println("RIGHT: " + _parameters.getRightSegments());
-		//
-		// stuff the corresponding layer in the composite chambers
-		_detectorTest.getCompositeChamber(NoiseReductionParameters.LEFT_LEAN).setCompositeLayerPackedData(index,
-				_parameters.getLeftSegments());
-		_detectorTest.getCompositeChamber(NoiseReductionParameters.RIGHT_LEAN).setCompositeLayerPackedData(index,
-				_parameters.getRightSegments());
-
 	}
 
+	/**
+	 * Mark the hit type for each hit
+	 */
 	public void markHits() {
 		// mark hits according to result
 		for (HitTest ht : hits) {

@@ -6,16 +6,16 @@ public class HitTest {
 		NOISE, TRACK, UNKNOWN
 	};
 
-	private int layer;
-	private int wire;
-	private HitType actualHitType;
-	private HitType computedHitType = HitType.UNKNOWN;
+	private int _layer;
+	private int _wire;
+	private HitType _actualHitType;
+	private HitType _computedHitType = HitType.UNKNOWN;
 
 	public HitTest(int layer, int wire, HitType actualHitType) {
 		super();
-		this.layer = layer;
-		this.wire = wire;
-		this.actualHitType = actualHitType;
+		_layer = layer;
+	    _wire = wire;
+		_actualHitType = actualHitType;
 	}
 
 	/**
@@ -24,7 +24,7 @@ public class HitTest {
 	 * @return the layer index [0..] of the hit.
 	 */
 	public int getLayer() {
-		return layer;
+		return _layer;
 	}
 
 	/**
@@ -33,7 +33,7 @@ public class HitTest {
 	 * @return the wire index [0..] of the hit.
 	 */
 	public int getWire() {
-		return wire;
+		return _wire;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class HitTest {
 	 *         computed hit type to check the analysis.
 	 */
 	public HitType getActualHitType() {
-		return actualHitType;
+		return _actualHitType;
 	}
 
 	/**
@@ -63,10 +63,10 @@ public class HitTest {
 	 *         UNKNOWN.
 	 */
 	public HitType getComputedHitType() {
-		return computedHitType;
+		return _computedHitType;
 	}
 
 	public void setComputedHitType(HitType computedHitType) {
-		this.computedHitType = computedHitType;
+		_computedHitType = computedHitType;
 	}
 }

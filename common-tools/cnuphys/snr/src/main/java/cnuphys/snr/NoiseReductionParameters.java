@@ -50,9 +50,9 @@ public class NoiseReductionParameters {
 	protected ExtendedWord copy[];
 
 	/**
-	 * A workspace used for storing an allocation of misses.
+	 * A workspace used for storing a reservoir of misses.
 	 */
-	protected ExtendedWord misses[];
+	protected ExtendedWord _misses[][];
 
 	/**
 	 * More workspace. This array has numLayers + 1 entries.
@@ -71,9 +71,9 @@ public class NoiseReductionParameters {
 	// flag that specifies whether the data have been analyzed
 	private boolean _analyzed = false;
 
-	// look for tracks (or just segments)
-	private static boolean _lookForTracks = false;
-
+	/**
+	 * Create the parameters used for SNR analysis
+	 */
 	public NoiseReductionParameters() {
 	}
 
@@ -127,29 +127,6 @@ public class NoiseReductionParameters {
 		return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
 	}
 
-	/**
-	 * Get a default set of parameters with CLAS-like numbers
-	 * 
-	 * @param option LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right
-	 *               benders
-	 * @return a default set of parameters
-	 */
-	public static NoiseReductionParameters getDefaultCompositeParameters(int option) {
-		int numLay = 6;
-		int numWire = 112;
-		int numMissing = 0;
-
-		if (option == LEFT_LEAN) {
-			int leftShifts[] = { 0, 8, 11, 14, 17, 20 };
-			int rightShifts[] = { 0, 0, 0, 0, 0, 0 };
-			return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
-		} else { // right benders
-			int leftShifts[] = { 0, 0, 0, 0, 0, 0 };
-			int rightShifts[] = { 0, 8, 11, 14, 17, 20 };
-			return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
-		}
-
-	}
 
 	/**
 	 * Get the number of layers per superlayer
@@ -196,13 +173,14 @@ public class NoiseReductionParameters {
 			_packedData = new ExtendedWord[_numLayer];
 			_rawData = new ExtendedWord[_numLayer];
 			copy = new ExtendedWord[_numLayer];
-			misses = new ExtendedWord[_numLayer];
+			_misses = new ExtendedWord[2][_numLayer];
 			workSpace = new ExtendedWord[_numLayer + 1];
 			for (int layer = 0; layer < _numLayer; layer++) {
 				_packedData[layer] = new ExtendedWord(_numWire);
 				_rawData[layer] = new ExtendedWord(_numWire);
 				copy[layer] = new ExtendedWord(_numWire);
-				misses[layer] = new ExtendedWord(_numWire);
+				_misses[LEFT_LEAN][layer] = new ExtendedWord(_numWire);
+				_misses[RIGHT_LEAN][layer] = new ExtendedWord(_numWire);
 				workSpace[layer] = new ExtendedWord(_numWire);
 			}
 			workSpace[_numLayer] = new ExtendedWord(_numWire); // one extra
@@ -310,7 +288,7 @@ public class NoiseReductionParameters {
 	 * Get the packed data arrays.
 	 * 
 	 * @return the packedData this may be raw or may have had the noise removed--use
-	 *         "is anaylyzed" to distinguish
+	 *         "is analyzed" to distinguish
 	 */
 	public ExtendedWord[] getPackedData() {
 		return _packedData;
@@ -388,7 +366,7 @@ public class NoiseReductionParameters {
 	 * 
 	 */
 	public void removeNoise() {
-
+		
 		// keep a copy of the raw data. Not needed but convenient.
 
 		for (int layer = 0; layer < _numLayer; layer++) {
@@ -396,8 +374,8 @@ public class NoiseReductionParameters {
 		}
 
 		// first find the left and then the right leaning segments
-		findPossibleSegments(this, LEFT_LEAN);
-		findPossibleSegments(this, RIGHT_LEAN);
+		findPossibleSegments(LEFT_LEAN);
+		findPossibleSegments(RIGHT_LEAN);
 
 		cleanFromSegments();
 		_analyzed = true;
@@ -406,8 +384,7 @@ public class NoiseReductionParameters {
 	// this creates the masks and .ANDS. them with the data
 	private void cleanFromSegments() {
 		// now remove the noise first. Set packedData[0] to contain overlap
-		// (union) of both
-		// sets of segments and its own hits.
+		// (union) of both sets of segments and its own hits.
 		// NOTE: the first layer (layer 0) NEVER has a layer shift.*/
 		ExtendedWord.bitwiseOr(leftSegments, rightSegments, copy[0]);
 		ExtendedWord.bitwiseAnd(_packedData[0], copy[0], _packedData[0]);
@@ -432,28 +409,6 @@ public class NoiseReductionParameters {
 		}
 	}
 
-	/**
-	 * Computes the intersection of this parameter set with another. This is only
-	 * used when "this" is an ordinary chamber and the other (passed in) is from a
-	 * composite chamber. In other words, this is where the second pass occurs.
-	 * 
-	 * @param opt           LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right
-	 *                      benders
-	 * @param compositeData this will be a "layer" from the composite detector after
-	 *                      it (the composite detector) has gone through its own
-	 *                      1-pass noise removal. What happens is those segments
-	 *                      from the real chamber that correspond to noise in the
-	 *                      composite chamber are removed and the real data is
-	 *                      refiltered (cleaned) from the reduced segments
-	 */
-	public void secondPass(int opt, ExtendedWord compositeData) {
-		if (opt == LEFT_LEAN) {
-			ExtendedWord.bitwiseAnd(leftSegments, compositeData, leftSegments);
-		} else { // RIGHT_LEAN
-			ExtendedWord.bitwiseAnd(rightSegments, compositeData, rightSegments);
-		}
-		cleanFromSegments();
-	}
 
 	/**
 	 * Find possible segments.
@@ -462,57 +417,56 @@ public class NoiseReductionParameters {
 	 * @param parameters the parameters and workspace.
 	 * @param direction  either left or right.
 	 */
-	private void findPossibleSegments(NoiseReductionParameters parameters, int direction) {
+	private void findPossibleSegments(int direction) {
 
 		// set misses to all 1's. That makes our "reservoir" of misses
-		for (int i = 0; i < parameters._allowedMissingLayers; i++) {
-			parameters.misses[i].fill();
+		for (int i = 0; i < _allowedMissingLayers; i++) {
+			_misses[direction][i].fill();
 		}
+		
+		
 
 		ExtendedWord segments = null;
 
 		// copy the data. Bleed based on lean. If looking for right leaners,
 		// bleed left to try to find a complete "vertical" segment. Similarly
-		// for
-		// left leaners--bleed right.
+		// for left leaners--bleed right.
 		// segments start out as copy of first layer.
 		if (direction == LEFT_LEAN) {
-			segments = parameters.leftSegments;
-			for (int i = 0; i < parameters.getNumLayer(); i++) {
-				ExtendedWord.copy(parameters._packedData[i], parameters.copy[i]);
-				parameters.copy[i].bleedRight(parameters._leftLayerShifts[i]);
+			segments = leftSegments;
+			for (int i = 0; i < _numLayer; i++) {
+				ExtendedWord.copy(_packedData[i], copy[i]);
+				copy[i].bleedRight(_leftLayerShifts[i]);
 			}
-			ExtendedWord.copy(parameters._packedData[0], segments);
+			ExtendedWord.copy(_packedData[0], segments);
 
 		} else { // right leaners
-			segments = parameters.rightSegments;
-			for (int i = 0; i < parameters.getNumLayer(); i++) {
-				ExtendedWord.copy(parameters._packedData[i], parameters.copy[i]);
-				parameters.copy[i].bleedLeft(parameters._rightLayerShifts[i]);
+			segments = rightSegments;
+			for (int i = 0; i < _numLayer; i++) {
+				ExtendedWord.copy(_packedData[i], copy[i]);
+				copy[i].bleedLeft(_rightLayerShifts[i]);
 			}
-			ExtendedWord.copy(parameters._packedData[0], segments);
+			ExtendedWord.copy(_packedData[0], segments);
 		}
 
 		// now .AND. the other layers, which have been shifted to accommodate
 		// the buckets
 		int numCheck = 0;
 
-		for (int i = 0; i < parameters.getNumLayer();) {
+		for (int i = 0; i < getNumLayer();) {
 			if (i > 0) {
-				ExtendedWord.bitwiseAnd(segments, parameters.copy[i], segments);
+				ExtendedWord.bitwiseAnd(segments, copy[i], segments);
 			}
 
 			// Now take missing layers into account. missingLayers
 			// is the max number of missing layers allowed. However
 			// there is no need to check more misses the layer that we
-			// are presently investigating.*
+			// are presently investigating.
 
-			if (++i < parameters._allowedMissingLayers) { /*
-															 * note from this step i is the "NEXT" layer
-															 */
+			if (++i < _allowedMissingLayers) { //note from this step i is the "NEXT" layer
 				numCheck = i;
 			} else {
-				numCheck = parameters._allowedMissingLayers;
+				numCheck = _allowedMissingLayers;
 			}
 
 			// note: numCheck is always > 0 unless a level shift is set
@@ -520,18 +474,43 @@ public class NoiseReductionParameters {
 			// be unnecessarily copied onto workspace[0] and back again.
 			// The algorithm still would work.
 
-			ExtendedWord.copy(segments, parameters.workSpace[0]);
+			ExtendedWord.copy(segments, workSpace[0]);
 			for (int j = 0; j < numCheck; j++) {
 
 				// first step: use whatever misses are left for this j
-				ExtendedWord.bitwiseOr(parameters.workSpace[j], parameters.misses[j], parameters.workSpace[j + 1]);
+				ExtendedWord.bitwiseOr(workSpace[j], _misses[direction][j], workSpace[j + 1]);
 
 				// second step: remove used up misses
-				ExtendedWord.bitwiseAnd(parameters.misses[j], parameters.workSpace[j], parameters.misses[j]);
+				ExtendedWord.bitwiseAnd(_misses[direction][j], workSpace[j], _misses[direction][j]);
+				
 			}
-			ExtendedWord.copy(parameters.workSpace[numCheck], segments);
+			ExtendedWord.copy(workSpace[numCheck], segments);
 
 		} /* end of layer loop */
+	}
+	
+	/**
+	 * Get the number of missing layers used to find a segment candidate
+	 * starting at the given wire in layer 1 (1..6)
+	 * @param wire the 0-based wire
+	 * @param direction left (0) or right (1)
+	 * @return the number of missing layers used at that position
+	 */
+	public int missingLayersUsed(int direction, int wire) {
+		int numUsed = 0;
+		
+		for (int lay = 0; lay < _allowedMissingLayers; lay++) {
+			ExtendedWord misses = _misses[direction][lay];
+			
+
+			if (misses.checkBit(wire)) {
+				return numUsed;
+			}
+			
+			numUsed++;
+		}
+		
+		return numUsed;
 	}
 
 	/**
@@ -600,29 +579,6 @@ public class NoiseReductionParameters {
 	 */
 	public int totalReducedHitCount() {
 		return (hitCount(_packedData));
-	}
-
-	/**
-	 * Check whether snr looks for tracks. If true, it will make a second pass using
-	 * composite detector. If false, it will stop at the segments-in-superlayers
-	 * level.
-	 * 
-	 * @return <code>true</code> if a second pass to look for tracks is used.
-	 */
-	public static boolean lookForTracks() {
-		return _lookForTracks;
-	}
-
-	/**
-	 * Set whether snr looks for tracks. If true, it will make a second pass using
-	 * composite detector. If false, it will stop at the segments-in-superlayers
-	 * level.
-	 * 
-	 * @param lookForTracks flag determining if a second pass to look for tracks is
-	 *                      used.
-	 */
-	public static void setLookForTracks(boolean lookForTracks) {
-		_lookForTracks = lookForTracks;
 	}
 
 }

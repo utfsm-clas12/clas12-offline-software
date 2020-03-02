@@ -58,9 +58,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	/** The chambers */
 	private Vector<ChamberTest> chambers = new Vector<ChamberTest>(10);
 
-	/** the composite chamber for right benders */
-	private CompositeChamber[] _compositeChamber = new CompositeChamber[2];
-
 	/**
 	 * The local system; always the bounds of the last draw.
 	 */
@@ -120,7 +117,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		add(status, BorderLayout.SOUTH);
 	}
 
-	/** Would fail in ced with only two composite chambers */
 	public void screwballEvent() {
 		clearTracks();
 		for (ChamberTest ct : chambers) {
@@ -177,22 +173,14 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			}
 			ct.loadBitData();
 			ct.removeNoise();
+			
 		}
-		// now remove the "noise" from the composite detectors in preparation
-		// for
-		// the second pass
-		_compositeChamber[NoiseReductionParameters.LEFT_LEAN].removeNoise();
-		_compositeChamber[NoiseReductionParameters.RIGHT_LEAN].removeNoise();
-
-		// pass 2. In
+		
 		for (ChamberTest ct : chambers) {
-			ct._parameters.secondPass(NoiseReductionParameters.LEFT_LEAN,
-					_compositeChamber[NoiseReductionParameters.LEFT_LEAN]._parameters.getPackedData(ct.index));
-			ct._parameters.secondPass(NoiseReductionParameters.RIGHT_LEAN,
-					_compositeChamber[NoiseReductionParameters.RIGHT_LEAN]._parameters.getPackedData(ct.index));
-			// graphical mark, not part of algorithm perse
+			// graphical mark, not part of algorithm pe se
 			ct.markHits();
 		}
+
 		repaint();
 	}
 
@@ -218,19 +206,8 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			ct.removeNoise();
 		}
 
-		// now remove the "noise" from the composite detectors in preparation
-		// for
-		// the second pass
-		_compositeChamber[NoiseReductionParameters.LEFT_LEAN].removeNoise();
-		_compositeChamber[NoiseReductionParameters.RIGHT_LEAN].removeNoise();
-
-		// pass 2. In
 		for (ChamberTest ct : chambers) {
-			ct._parameters.secondPass(NoiseReductionParameters.LEFT_LEAN,
-					_compositeChamber[NoiseReductionParameters.LEFT_LEAN]._parameters.getPackedData(ct.index));
-			ct._parameters.secondPass(NoiseReductionParameters.RIGHT_LEAN,
-					_compositeChamber[NoiseReductionParameters.RIGHT_LEAN]._parameters.getPackedData(ct.index));
-			// graphical mark, not part of algorithm perse
+			// graphical mark, not part of algorithm pe se
 			ct.markHits();
 		}
 
@@ -311,10 +288,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			}
 		}
 
-		// draw results composite chambers
-		_compositeChamber[0].draw(g, world, _local);
-		_compositeChamber[1].draw(g, world, _local);
-
 		// draw some text
 		g.setColor(Color.black);
 		g.setFont(_font);
@@ -342,33 +315,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		chambers.add(new ChamberTest(this, index, NoiseReductionParameters.getDefaultParameters(), boundary));
 	}
 
-	/**
-	 * This adds a left or right composite chamber. The layers in a composite
-	 * chamber will be the segments (left or right) in a corresponding
-	 * 
-	 * @param opt      LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right
-	 *                 benders
-	 * @param boundary the world boundary of the detector
-	 */
-	public void addCompositeChamber(int opt, Rectangle2D.Double boundary) {
-		if (opt == NoiseReductionParameters.LEFT_LEAN) {
-			_compositeChamber[0] = new CompositeChamber(this, "Composite Left Bending Segments",
-					NoiseReductionParameters.getDefaultCompositeParameters(0), boundary);
-		} else if (opt == NoiseReductionParameters.RIGHT_LEAN) {
-			_compositeChamber[1] = new CompositeChamber(this, "Composite Right Bending Segments",
-					NoiseReductionParameters.getDefaultCompositeParameters(1), boundary);
-		}
-	}
-
-	/**
-	 * Get the composite detector
-	 * 
-	 * @param opt LEFT_LEAN (0) for left benders, RIGHT_LEAN (1) for right benders
-	 * @return the corresponding composite detector
-	 */
-	public CompositeChamber getCompositeChamber(int opt) {
-		return _compositeChamber[opt];
-	}
 
 	/**
 	 * Update the status based on a pixel point
@@ -385,16 +331,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 				stringBuffer.append(" " + s);
 				break;
 			}
-		}
-
-		// check composite chambers
-		String s = _compositeChamber[0].feedback(pp, world, _local);
-		if (s != null) {
-			stringBuffer.append(" " + s);
-		}
-		s = _compositeChamber[1].feedback(pp, world, _local);
-		if (s != null) {
-			stringBuffer.append(" " + s);
 		}
 
 		updateStatus(stringBuffer.toString());
