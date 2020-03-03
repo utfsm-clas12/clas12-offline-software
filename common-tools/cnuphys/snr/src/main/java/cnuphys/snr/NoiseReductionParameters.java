@@ -16,54 +16,71 @@ public class NoiseReductionParameters {
 	private int _numWordsNeeded;
 
 	/** the number of layers per superlayer */
-	protected int _numLayer;
+	private int _numLayer;
 
 	/** the number of wires per layer */
-	protected int _numWire;
+	private int _numWire;
 
 	/** The number of missing layers allowed */
-	protected int _allowedMissingLayers;
+	private int _allowedMissingLayers;
 
 	/**
 	 * The shifts for left leaning tracks.
 	 */
-	protected int _leftLayerShifts[];
+	private int _leftLayerShifts[];
 
 	/**
 	 * The shifts for right leaning tracks.
 	 */
-	protected int _rightLayerShifts[];
+	private int _rightLayerShifts[];
 
 	/**
-	 * cumulative left segments. These are "results".
+	 * cumulative left segments. These are "results". When
+	 * analysis is complete, this will contain an on bit
+	 * at any location in layer 1 that is a potential start
+	 * of a left leaning segment.
 	 */
-	protected ExtendedWord leftSegments;
+	private ExtendedWord _leftSegments;
 
 	/**
-	 * cumulative right segments. These are "results".
+	 * cumulative right segments. These are "results". When
+	 * analysis is complete, this will contain an on bit
+	 * at any location in layer 1 that is a potential start
+	 * of a right leaning segment.
 	 */
-	protected ExtendedWord rightSegments;
+	private ExtendedWord _rightSegments;
 
 	/**
 	 * A workspace for a copy of the data.
 	 */
-	protected ExtendedWord copy[];
+	private ExtendedWord _copy[];
 
 	/**
-	 * A workspace used for storing a reservoir of misses.
+	 * A workspace used for storing a reservoir of misses. When
+	 * the analysis is done, this can be used to determine a quality
+	 * factor for the potential left segment, based on the number of
+	 * misses that had to be used.
 	 */
-	protected ExtendedWord _misses[][];
+	private ExtendedWord _leftMisses[];
+	
+	/**
+	 * A workspace used for storing a reservoir of misses. When
+	 * the analysis is done, this can be used to determine a quality
+	 * factor for the potential right segment, based on the number of
+	 * misses that had to be used.
+	 */
+	private ExtendedWord _rightMisses[];
 
 	/**
 	 * More workspace. This array has numLayers + 1 entries.
 	 */
-	protected ExtendedWord workSpace[];
+	private ExtendedWord _workSpace[];
 
 	/**
 	 * This is the actual data. Before noise reduction analysis is run, this
 	 * contains all the hits. After the analysis, the noise hits are removed.
 	 */
-	protected ExtendedWord _packedData[];
+	private ExtendedWord _packedData[];
 
 	// keep a copy of the raw data
 	private ExtendedWord _rawData[];
@@ -120,8 +137,6 @@ public class NoiseReductionParameters {
 		int numLay = 6;
 		int numWire = 112;
 		int numMissing = 2;
-//		int rightShifts[] = { 0, 1, 2, 2, 3, 3 };
-//		int leftShifts[] = { 0, 1, 2, 2, 3, 3 };
 		int rightShifts[] = { 0, 3, 4, 4, 5, 5 };
 		int leftShifts[] = { 0, 3, 4, 4, 5, 5 };
 		return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
@@ -167,33 +182,39 @@ public class NoiseReductionParameters {
 			_numWordsNeeded = needed;
 
 			// the segments
-			leftSegments = new ExtendedWord(_numWire);
-			rightSegments = new ExtendedWord(_numWire);
+			_leftSegments = new ExtendedWord(_numWire);
+			_rightSegments = new ExtendedWord(_numWire);
 
 			_packedData = new ExtendedWord[_numLayer];
 			_rawData = new ExtendedWord[_numLayer];
-			copy = new ExtendedWord[_numLayer];
-			_misses = new ExtendedWord[2][_numLayer];
-			workSpace = new ExtendedWord[_numLayer + 1];
+			_copy = new ExtendedWord[_numLayer];
+			_leftMisses = new ExtendedWord[_numLayer];
+			_rightMisses = new ExtendedWord[_numLayer];
+			_workSpace = new ExtendedWord[_allowedMissingLayers + 1];
+			
+			
 			for (int layer = 0; layer < _numLayer; layer++) {
 				_packedData[layer] = new ExtendedWord(_numWire);
 				_rawData[layer] = new ExtendedWord(_numWire);
-				copy[layer] = new ExtendedWord(_numWire);
-				_misses[LEFT_LEAN][layer] = new ExtendedWord(_numWire);
-				_misses[RIGHT_LEAN][layer] = new ExtendedWord(_numWire);
-				workSpace[layer] = new ExtendedWord(_numWire);
+				_copy[layer] = new ExtendedWord(_numWire);
+				_leftMisses[layer] = new ExtendedWord(_numWire);
+				_rightMisses[layer] = new ExtendedWord(_numWire);
 			}
-			workSpace[_numLayer] = new ExtendedWord(_numWire); // one extra
+
+			for (int i = 0; i <= _allowedMissingLayers; i++) {
+				_workSpace[i] = new ExtendedWord(_numWire);
+			}
+
 		}
 	}
 
 	/**
-	 * Checks whether a given wire has a noise hit. Only sensible if analysis ic
+	 * Checks whether a given wire has a noise hit. Only sensible if analysis is
 	 * complete.
 	 * 
 	 * @param layer the 0-based layer 0..5
 	 * @param wire  the 0-base wire 0..
-	 * @return true if this was a noise hit--i.e., it is in the raw data but anot
+	 * @return true if this was a noise hit--i.e., it is in the raw data but not
 	 *         the analyzed data
 	 */
 	public boolean isNoiseHit(int layer, int wire) {
@@ -214,8 +235,8 @@ public class NoiseReductionParameters {
 		for (int layer = 0; layer < _numLayer; layer++) {
 			_packedData[layer].clear();
 		}
-		leftSegments.clear();
-		rightSegments.clear();
+		_leftSegments.clear();
+		_rightSegments.clear();
 		_analyzed = false;
 	}
 
@@ -271,7 +292,7 @@ public class NoiseReductionParameters {
 	 * @return the left leaning segment staring wire positions.
 	 */
 	public ExtendedWord getLeftSegments() {
-		return leftSegments;
+		return _leftSegments;
 	}
 
 	/**
@@ -281,7 +302,7 @@ public class NoiseReductionParameters {
 	 * @return the right leaning segment staring wire positions.
 	 */
 	public ExtendedWord getRightSegments() {
-		return rightSegments;
+		return _rightSegments;
 	}
 
 	/**
@@ -333,15 +354,6 @@ public class NoiseReductionParameters {
 		_packedData[layer].setBit(wire);
 	}
 
-	/**
-	 * pack a hit
-	 * 
-	 * @param layer the 1-based layer
-	 * @param wire  the 1-based wire
-	 */
-	public void packHitOneBased(int layer, int wire) {
-		_packedData[layer - 1].setBit(wire - 1);
-	}
 
 	/**
 	 * Set new raw data. The analyzed flag is set to false.
@@ -377,6 +389,7 @@ public class NoiseReductionParameters {
 		findPossibleSegments(LEFT_LEAN);
 		findPossibleSegments(RIGHT_LEAN);
 
+		//now clean the data (remove the noise)
 		cleanFromSegments();
 		_analyzed = true;
 	}
@@ -386,8 +399,8 @@ public class NoiseReductionParameters {
 		// now remove the noise first. Set packedData[0] to contain overlap
 		// (union) of both sets of segments and its own hits.
 		// NOTE: the first layer (layer 0) NEVER has a layer shift.*/
-		ExtendedWord.bitwiseOr(leftSegments, rightSegments, copy[0]);
-		ExtendedWord.bitwiseAnd(_packedData[0], copy[0], _packedData[0]);
+		ExtendedWord.bitwiseOr(_leftSegments, _rightSegments, _copy[0]);
+		ExtendedWord.bitwiseAnd(_packedData[0], _copy[0], _packedData[0]);
 
 		// start loop at 1 since layer 0 never bled
 		for (int i = 1; i < _numLayer; i++) {
@@ -395,17 +408,17 @@ public class NoiseReductionParameters {
 			// copy segments onto a given layer and bleed to create left and
 			// right buckets
 
-			ExtendedWord.copy(leftSegments, copy[i]);
-			copy[i].bleedLeft(_leftLayerShifts[i]);
+			ExtendedWord.copy(_leftSegments, _copy[i]);
+			_copy[i].bleedLeft(_leftLayerShifts[i]);
 
-			ExtendedWord.copy(rightSegments, workSpace[0]);
-			workSpace[0].bleedRight(_rightLayerShifts[i]);
+			ExtendedWord.copy(_rightSegments, _workSpace[0]);
+			_workSpace[0].bleedRight(_rightLayerShifts[i]);
 
 			// combine left and right buckets
-			ExtendedWord.bitwiseOr(copy[i], workSpace[0], copy[i]);
+			ExtendedWord.bitwiseOr(_copy[i], _workSpace[0], _copy[i]);
 
 			// now get overlap of original data with buckets
-			ExtendedWord.bitwiseAnd(_packedData[i], copy[i], _packedData[i]);
+			ExtendedWord.bitwiseAnd(_packedData[i], _copy[i], _packedData[i]);
 		}
 	}
 
@@ -418,13 +431,13 @@ public class NoiseReductionParameters {
 	 * @param direction  either left or right.
 	 */
 	private void findPossibleSegments(int direction) {
+		
+		ExtendedWord misses[] = (direction == LEFT_LEAN) ? _leftMisses : _rightMisses;
 
 		// set misses to all 1's. That makes our "reservoir" of misses
 		for (int i = 0; i < _allowedMissingLayers; i++) {
-			_misses[direction][i].fill();
+			misses[i].fill();
 		}
-		
-		
 
 		ExtendedWord segments = null;
 
@@ -433,18 +446,18 @@ public class NoiseReductionParameters {
 		// for left leaners--bleed right.
 		// segments start out as copy of first layer.
 		if (direction == LEFT_LEAN) {
-			segments = leftSegments;
+			segments = _leftSegments;
 			for (int i = 0; i < _numLayer; i++) {
-				ExtendedWord.copy(_packedData[i], copy[i]);
-				copy[i].bleedRight(_leftLayerShifts[i]);
+				ExtendedWord.copy(_packedData[i], _copy[i]);
+				_copy[i].bleedRight(_leftLayerShifts[i]);
 			}
 			ExtendedWord.copy(_packedData[0], segments);
 
 		} else { // right leaners
-			segments = rightSegments;
+			segments = _rightSegments;
 			for (int i = 0; i < _numLayer; i++) {
-				ExtendedWord.copy(_packedData[i], copy[i]);
-				copy[i].bleedLeft(_rightLayerShifts[i]);
+				ExtendedWord.copy(_packedData[i], _copy[i]);
+				_copy[i].bleedLeft(_rightLayerShifts[i]);
 			}
 			ExtendedWord.copy(_packedData[0], segments);
 		}
@@ -455,7 +468,7 @@ public class NoiseReductionParameters {
 
 		for (int i = 0; i < getNumLayer();) {
 			if (i > 0) {
-				ExtendedWord.bitwiseAnd(segments, copy[i], segments);
+				ExtendedWord.bitwiseAnd(segments, _copy[i], segments);
 			}
 
 			// Now take missing layers into account. missingLayers
@@ -474,17 +487,17 @@ public class NoiseReductionParameters {
 			// be unnecessarily copied onto workspace[0] and back again.
 			// The algorithm still would work.
 
-			ExtendedWord.copy(segments, workSpace[0]);
+			ExtendedWord.copy(segments, _workSpace[0]);
 			for (int j = 0; j < numCheck; j++) {
 
 				// first step: use whatever misses are left for this j
-				ExtendedWord.bitwiseOr(workSpace[j], _misses[direction][j], workSpace[j + 1]);
+				ExtendedWord.bitwiseOr(_workSpace[j], misses[j], _workSpace[j + 1]);
 
 				// second step: remove used up misses
-				ExtendedWord.bitwiseAnd(_misses[direction][j], workSpace[j], _misses[direction][j]);
+				ExtendedWord.bitwiseAnd(misses[j], _workSpace[j], misses[j]);
 				
 			}
-			ExtendedWord.copy(workSpace[numCheck], segments);
+			ExtendedWord.copy(_workSpace[numCheck], segments);
 
 		} /* end of layer loop */
 	}
@@ -492,18 +505,18 @@ public class NoiseReductionParameters {
 	/**
 	 * Get the number of missing layers used to find a segment candidate
 	 * starting at the given wire in layer 1 (1..6)
+	 * @param direction LEFT_LEAN (0) or RIGHT_LEAN (1)
 	 * @param wire the 0-based wire
-	 * @param direction left (0) or right (1)
 	 * @return the number of missing layers used at that position
 	 */
 	public int missingLayersUsed(int direction, int wire) {
+		ExtendedWord misses[] = (direction == LEFT_LEAN) ? _leftMisses : _rightMisses;
+		
 		int numUsed = 0;
 		
-		for (int lay = 0; lay < _allowedMissingLayers; lay++) {
-			ExtendedWord misses = _misses[direction][lay];
-			
+		for (int lay = 0; lay < _allowedMissingLayers; lay++) {			
 
-			if (misses.checkBit(wire)) {
+			if (misses[lay].checkBit(wire)) {
 				return numUsed;
 			}
 			

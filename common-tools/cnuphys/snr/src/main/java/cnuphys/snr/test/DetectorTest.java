@@ -73,8 +73,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 */
 	private JLabel status;
 
-	// work point
-	private Point2D.Double _wp = new Point2D.Double();
 
 	// common font
 	private static Font _font = new Font("SanSerif", Font.BOLD, 10);
@@ -84,7 +82,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 */
 	private StringBuffer stringBuffer = new StringBuffer(512);
 
-	private NoiseReductionParameters _parameters;
 
 	/**
 	 * Create a test detector.
@@ -94,9 +91,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 * @param w
 	 * @param h
 	 */
-	public DetectorTest(NoiseReductionParameters parameters, double x, double y, double w, double h) {
-
-		_parameters = parameters;
+	public DetectorTest(double x, double y, double w, double h) {
 
 		world = new Rectangle2D.Double(x, y, w, h);
 		defaultWorld = new Rectangle2D.Double(x, y, w, h);
@@ -117,6 +112,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		add(status, BorderLayout.SOUTH);
 	}
 
+	// a screwball event
 	public void screwballEvent() {
 		clearTracks();
 		for (ChamberTest ct : chambers) {
@@ -194,16 +190,16 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		clearTracks();
 		generateTracks();
 
-		for (ChamberTest ct : chambers) {
-			ct.clearHits();
+		for (ChamberTest chamberTest : chambers) {
+			chamberTest.clearHits();
 
-			ct.generateNoise();
+			chamberTest.generateNoise();
 			for (TrackTest tt : tracks) {
-				ct.hitsFromTrack(tt);
+				chamberTest.hitsFromTrack(tt);
 			}
 
-			ct.loadBitData();
-			ct.removeNoise();
+			chamberTest.loadBitData();
+			chamberTest.removeNoise();
 		}
 
 		for (ChamberTest ct : chambers) {
@@ -243,7 +239,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			Point2D.Double wp0 = new Point2D.Double();
 			Point2D.Double wp1 = new Point2D.Double();
 			// wp0.y = world.y;
-			wp0.y = chambers.get(0)._boundary.getMinY();
+			wp0.y = chambers.get(0).boundary.getMinY();
 			wp1.y = world.y + world.height;
 
 			wp0.x = world.x + world.width / 2.0;

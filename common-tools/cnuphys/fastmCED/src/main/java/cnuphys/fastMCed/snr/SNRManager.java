@@ -11,8 +11,8 @@ import cnuphys.fastMCed.fastmc.AugmentedDetectorHit;
 import cnuphys.fastMCed.fastmc.ParticleHits;
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
+import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
-import cnuphys.snr.clas12.Clas12ThreeLevelAnalysis;
 
 public class SNRManager {
 
@@ -40,16 +40,13 @@ public class SNRManager {
 	private static SNRManager instance;
 
 	// The analysis package
-	private Clas12ThreeLevelAnalysis _noisePackage = new Clas12ThreeLevelAnalysis();
+	private Clas12NoiseAnalysis _noisePackage = new Clas12NoiseAnalysis();
 
 	// result container
 	private Clas12NoiseResult _noiseResults = new Clas12NoiseResult();
 
 	// private constructor
 	private SNRManager() {
-		// turn on (or off) SNR "composite" track finding
-		// default is off
-		NoiseReductionParameters.setLookForTracks(false);
 	}
 
 	/**

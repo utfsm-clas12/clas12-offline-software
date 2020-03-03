@@ -2,8 +2,6 @@ package cnuphys.snr.test;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,7 +18,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 
 import cnuphys.snr.NoiseReductionParameters;
 
@@ -29,7 +26,6 @@ public class NoiseTest extends JFrame {
 
 	private DetectorTest detectorTest;
 
-	private NoiseReductionParameters parameters = NoiseReductionParameters.getDefaultParameters();
 
 	/**
 	 * Constructor
@@ -57,6 +53,9 @@ public class NoiseTest extends JFrame {
 		double bw = 10.0;
 		double xmin = 0.15;
 		double width = bw - 2.0 * xmin;
+		
+		NoiseReductionParameters parameters = NoiseReductionParameters.getDefaultParameters();
+
 
 		double csize = width / parameters.getNumWire();
 
@@ -67,7 +66,7 @@ public class NoiseTest extends JFrame {
 		// space fopr two extra superlayer (left/right composite superlayers)
 		double bh = (6 + 2.5) * (dy + height) + dy;
 
-		detectorTest = new DetectorTest(parameters, 0.0, 0.0, bw, bh);
+		detectorTest = new DetectorTest(0.0, 0.0, bw, bh);
 
 		for (int i = 0; i < 6; i++) {
 			double y = -0.7 + (i + 1.5) * (3.2*dy + height);

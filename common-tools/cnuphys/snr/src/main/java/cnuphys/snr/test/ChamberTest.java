@@ -15,14 +15,14 @@ import cnuphys.snr.NoiseReductionParameters;
 
 public class ChamberTest {
 	
-	public static final Color[] missingColors = {Color.red, Color.orange, Color.yellow};
+	private static final Color[] _missingColors = {Color.red, Color.orange, Color.yellow};
 
-	public static final Color maskFillLeft = new Color(255, 128, 0, 48);
-	public static final Color maskFillRight = new Color(0, 128, 255, 48);
-	public static final Color almostTransparent = new Color(0, 0, 0, 16);
+	public static final Color _maskFillLeft = new Color(255, 128, 0, 48);
+	public static final Color _maskFillRight = new Color(0, 128, 255, 48);
+	public static final Color _almostTransparent = new Color(0, 0, 0, 16);
 
-	protected Color fillColor = new Color(244, 244, 244);
-	protected Color lineColor = Color.gray;
+	private Color _fillColor = new Color(244, 244, 244);
+	private Color _lineColor = Color.gray;
 
 	private static final Font _smallFont = new Font("SanSerif", Font.BOLD, 9);
 	private static FontMetrics _fm;
@@ -30,33 +30,34 @@ public class ChamberTest {
 	/**
 	 * The parent detector that presumably contains multiple chambers.
 	 */
-	protected DetectorTest _detectorTest;
+	private DetectorTest _detectorTest;
 
 	/**
 	 * A world coordinate rectangular boundary.
 	 */
-	protected Rectangle2D.Double _boundary;
+	public Rectangle2D.Double boundary;
 
 	/**
 	 * The name of the chamber.
 	 */
-	protected String _name;
+	private String _name;
 
 	/**
 	 * A collection of all the hits.
 	 */
-	protected Vector<HitTest> hits = new Vector<HitTest>(100);
+	private Vector<HitTest> _hits = new Vector<HitTest>(100);
 
 	/**
 	 * Parameters for testing noise reduction. chambers.
 	 */
-	protected NoiseReductionParameters _parameters;
+	private NoiseReductionParameters _parameters;
 
 	/**
-	 * Data in extended words for noise reduction
+	 * Raw data in extended words for noise reduction
 	 */
-	protected ExtendedWord data[];
+	private ExtendedWord _data[];
 
+	//chamber index
 	public int index;
 
 	/**
@@ -70,7 +71,7 @@ public class ChamberTest {
 			Rectangle2D.Double boundary) {
 		_detectorTest = detectorTest;
 		_name = "Superlayer " + (index + 1);
-		_boundary = boundary;
+		this.boundary = boundary;
 		_parameters = parameters;
 		this.index = index;
 		initializeSpace();
@@ -90,12 +91,12 @@ public class ChamberTest {
 		}
 
 		Rectangle cell = new Rectangle();
-		drawCellOutlines(g, world, local, fillColor);
-		drawLeftSegmentOutline(g, world, local, fillColor);
-		drawRightSegmentOutline(g, world, local, fillColor);
+		drawCellOutlines(g, world, local, _fillColor);
+		drawLeftSegmentOutline(g, world, local, _fillColor);
+		drawRightSegmentOutline(g, world, local, _fillColor);
 
 
-		drawString(g, world, local, _name, _boundary.x, _boundary.y + _boundary.height);
+		drawString(g, world, local, _name, boundary.x, boundary.y + boundary.height);
 
 		// mark segments
 
@@ -119,11 +120,11 @@ public class ChamberTest {
 		} // end analyzed
 
 		// draw hits
-		for (HitTest th : hits) {
+		for (HitTest th : _hits) {
 			cellBounds(world, local, th.getLayer(), th.getWire(), cell);
 			g.setColor(getHitColor(th));
 			g.fillRect(cell.x, cell.y, cell.width, cell.height);
-			g.setColor(lineColor);
+			g.setColor(_lineColor);
 			g.drawRect(cell.x, cell.y, cell.width, cell.height);
 
 			if (_detectorTest.getDisplayOption() == DetectorTest.DisplayOption.ANALYZED) {
@@ -144,7 +145,8 @@ public class ChamberTest {
 		drawRightSegmentCandidates(g, world, local);
 	}
 
-	protected void drawString(Graphics g, Rectangle2D.Double world, Rectangle local, String s, double wx, double wy) {
+	//draw a string
+	private void drawString(Graphics g, Rectangle2D.Double world, Rectangle local, String s, double wx, double wy) {
 		Point pp = new Point();
 		TestSupport.toLocal(world, local, pp, wx, wy);
 		g.setFont(_smallFont);
@@ -153,11 +155,11 @@ public class ChamberTest {
 	}
 
 	// Draw the mask
-	protected void drawMask(Graphics g, Rectangle2D.Double world, Rectangle local, int wire, int shifts[], int sign) {
+	private void drawMask(Graphics g, Rectangle2D.Double world, Rectangle local, int wire, int shifts[], int sign) {
 		if (sign == 1) {
-			g.setColor(maskFillLeft);
+			g.setColor(_maskFillLeft);
 		} else {
-			g.setColor(maskFillRight);
+			g.setColor(_maskFillRight);
 		}
 
 		Rectangle tr = new Rectangle();
@@ -202,7 +204,7 @@ public class ChamberTest {
 			g.fillRect(left, top, width, height);
 		}
 
-		g.setColor(lineColor);
+		g.setColor(_lineColor);
 		g.drawRect(left, top, width, height);
 
 		for (int wire = 0; wire < (_parameters.getNumWire() - 1); wire++) {
@@ -235,7 +237,7 @@ public class ChamberTest {
 				leftSegmentBounds(world, local, wire, cell);
 				
 				int nml = _parameters.missingLayersUsed(0, wire);
-				Color fc = missingColors[Math.min(nml, missingColors.length-1)];
+				Color fc = _missingColors[Math.min(nml, _missingColors.length-1)];
 
 				
 				g.setColor(fc);
@@ -266,7 +268,7 @@ public class ChamberTest {
 				rightSegmentBounds(world, local, wire, cell);
 				
 				int nml = _parameters.missingLayersUsed(1, wire);
-				Color fc = missingColors[Math.min(nml, missingColors.length-1)];
+				Color fc = _missingColors[Math.min(nml, _missingColors.length-1)];
 
 				
 				g.setColor(fc);
@@ -338,7 +340,7 @@ public class ChamberTest {
 
 		if (_detectorTest.getDisplayOption() == DetectorTest.DisplayOption.REALITY) {
 			if (ht.getActualHitType() == HitTest.HitType.NOISE) {
-				return noNoise ? almostTransparent : TestParameters.getRealityNoiseColor();
+				return noNoise ? _almostTransparent : TestParameters.getRealityNoiseColor();
 			}
 			if (ht.getActualHitType() == HitTest.HitType.TRACK) {
 				return TestParameters.getRealityTrackColor();
@@ -349,7 +351,7 @@ public class ChamberTest {
 			if (ht.getComputedHitType() == HitTest.HitType.TRACK && ht.getActualHitType() == HitTest.HitType.NOISE) {
 				return TestParameters.getSavedNoiseColor();
 			} else if (ht.getComputedHitType() == HitTest.HitType.NOISE) {
-				return noNoise ? almostTransparent : TestParameters.getAnalyzedNoiseColor();
+				return noNoise ? _almostTransparent : TestParameters.getAnalyzedNoiseColor();
 			} else if (ht.getComputedHitType() == HitTest.HitType.TRACK) {
 				return TestParameters.getAnalyzedTrackColor();
 			}
@@ -411,11 +413,11 @@ public class ChamberTest {
 	 * @param wr    will be set to the cell boundary.
 	 */
 	protected void cellWorldBounds(int layer, int wire, Rectangle2D.Double wr) {
-		double dy = _boundary.height / _parameters.getNumLayer();
-		double dx = _boundary.width / _parameters.getNumWire();
+		double dy = boundary.height / _parameters.getNumLayer();
+		double dx = boundary.width / _parameters.getNumWire();
 		// note layers counted from bottom, wires counted from right
-		double xmin = _boundary.x + _boundary.width - dx * (wire + 1);
-		double ymin = _boundary.y + dy * layer;
+		double xmin = boundary.x + boundary.width - dx * (wire + 1);
+		double ymin = boundary.y + dy * layer;
 		wr.setFrame(xmin, ymin, dx, dy);
 	}
 
@@ -428,12 +430,12 @@ public class ChamberTest {
 	 * @param wr      will be set to the cell range boundary.
 	 */
 	protected void cellRangeWorldBounds(int layer, int minwire, int maxwire, Rectangle2D.Double wr) {
-		double dy = _boundary.height / _parameters.getNumLayer();
-		double dx = _boundary.width / _parameters.getNumWire();
+		double dy = boundary.height / _parameters.getNumLayer();
+		double dx = boundary.width / _parameters.getNumWire();
 		int nc = maxwire - minwire + 1;
 		// note layers counted from bottom, wires counted from right
-		double xmin = _boundary.x + _boundary.width - dx * (maxwire + 1);
-		double ymin = _boundary.y + dy * layer;
+		double xmin = boundary.x + boundary.width - dx * (maxwire + 1);
+		double ymin = boundary.y + dy * layer;
 		wr.setFrame(xmin, ymin, nc * dx, dy);
 	}
 
@@ -444,10 +446,10 @@ public class ChamberTest {
 	 * @param wr    will be set to the layer boundary.
 	 */
 	protected void layerWorldBounds(int layer, Rectangle2D.Double wr) {
-		double dy = _boundary.height / _parameters.getNumLayer();
+		double dy = boundary.height / _parameters.getNumLayer();
 		// note layers counted from bottom
-		double ymin = _boundary.y + dy * layer;
-		wr.setFrame(_boundary.x, ymin, _boundary.width, dy);
+		double ymin = boundary.y + dy * layer;
+		wr.setFrame(boundary.x, ymin, boundary.width, dy);
 	}
 
 	/**
@@ -540,7 +542,7 @@ public class ChamberTest {
 	 */
 	public Rectangle getBounds(Rectangle2D.Double world, Rectangle local) {
 		Rectangle r = new Rectangle();
-		TestSupport.toLocal(world, local, r, _boundary);
+		TestSupport.toLocal(world, local, r, boundary);
 		return r;
 	}
 
@@ -556,7 +558,7 @@ public class ChamberTest {
 	public boolean contains(Point pp, Rectangle2D.Double world, Rectangle local) {
 		Point2D.Double wp = new Point2D.Double();
 		TestSupport.toWorld(world, local, pp, wp);
-		return _boundary.contains(wp);
+		return boundary.contains(wp);
 	}
 
 	/**
@@ -565,7 +567,7 @@ public class ChamberTest {
 	 * @return the rectangular boundary of the chamber in world coordinates.
 	 */
 	public Rectangle2D.Double getBoundary() {
-		return _boundary;
+		return boundary;
 	}
 
 	/**
@@ -579,7 +581,7 @@ public class ChamberTest {
 
 	public void forceHit(int layerOneBased, int wireOneBased) {
 		HitTest ht = createHit(layerOneBased - 1, wireOneBased - 1, HitTest.HitType.TRACK);
-		hits.add(ht);
+		_hits.add(ht);
 	}
 
 	/**
@@ -590,7 +592,7 @@ public class ChamberTest {
 			for (int wire = 0; wire < _parameters.getNumWire(); wire++) {
 				if (Math.random() < TestParameters.getNoiseRate()) {
 					HitTest ht = createHit(layer, wire, HitTest.HitType.NOISE);
-					hits.add(ht);
+					_hits.add(ht);
 				}
 			}
 
@@ -608,7 +610,7 @@ public class ChamberTest {
 				for (int w = minWire; w <= maxWire; w++) {
 					if (Math.random() > TestParameters.getProbBadWire()) {
 						HitTest ht = createHit(layer, w, HitTest.HitType.NOISE);
-						hits.add(ht);
+						_hits.add(ht);
 					}
 				}
 			} // layer loop
@@ -619,12 +621,12 @@ public class ChamberTest {
 	 * Load all the hits into the bit data for noise reduction.
 	 */
 	public void loadBitData() {
-		for (int i = 0; i < data.length; i++) {
-			data[i].clear();
+		for (int i = 0; i < _data.length; i++) {
+			_data[i].clear();
 		}
 
-		for (HitTest ht : hits) {
-			data[ht.getLayer()].setBit(ht.getWire());
+		for (HitTest ht : _hits) {
+			_data[ht.getLayer()].setBit(ht.getWire());
 		}
 	}
 
@@ -633,7 +635,7 @@ public class ChamberTest {
 	 */
 	public void removeNoise() {
 		_parameters.createWorkSpace();
-		_parameters.setPackedData(data);
+		_parameters.setPackedData(_data);
 		_parameters.removeNoise();
 	}
 
@@ -642,10 +644,10 @@ public class ChamberTest {
 	 */
 	public void markHits() {
 		// mark hits according to result
-		for (HitTest ht : hits) {
+		for (HitTest ht : _hits) {
 			int layer = ht.getLayer();
 			int wire = ht.getWire();
-			if (data[layer].checkBit(wire)) {
+			if (_data[layer].checkBit(wire)) {
 				ht.setComputedHitType(HitTest.HitType.TRACK);
 			} else {
 				ht.setComputedHitType(HitTest.HitType.NOISE);
@@ -670,12 +672,11 @@ public class ChamberTest {
 	 * Initialize space
 	 */
 	public void initializeSpace() {
-		System.err.println("Initializing Space for num wires: " + _parameters.getNumWire());
 
 		// space for bitwise data
-		data = new ExtendedWord[_parameters.getNumLayer()];
+		_data = new ExtendedWord[_parameters.getNumLayer()];
 		for (int i = 0; i < _parameters.getNumLayer(); i++) {
-			data[i] = new ExtendedWord(_parameters.getNumWire());
+			_data[i] = new ExtendedWord(_parameters.getNumWire());
 		}
 
 	}
@@ -689,7 +690,7 @@ public class ChamberTest {
 	 *         none.
 	 */
 	public HitTest findHit(int layer, int wire) {
-		for (HitTest ht : hits) {
+		for (HitTest ht : _hits) {
 			if ((ht.getLayer() == layer) && (ht.getWire() == wire)) {
 				return ht;
 			}
@@ -712,7 +713,7 @@ public class ChamberTest {
 
 		// intersects the overall boundary?
 
-		if (_boundary.intersectsLine(wp0.x, wp0.y, wp1.x, wp1.y)) {
+		if (boundary.intersectsLine(wp0.x, wp0.y, wp1.x, wp1.y)) {
 
 			Rectangle.Double wcell = new Rectangle.Double();
 			for (int layer = 0; layer < _parameters.getNumLayer(); layer++) {
@@ -727,12 +728,12 @@ public class ChamberTest {
 							// remove noise hit
 							HitTest ht = findHit(layer, wire);
 							if (ht != null) {
-								hits.remove(ht);
+								_hits.remove(ht);
 							}
 
 							if (Math.random() > TestParameters.getProbBadWire()) {
 								HitTest htnew = createHit(layer, wire, HitTest.HitType.TRACK);
-								hits.add(htnew);
+								_hits.add(htnew);
 							}
 						}
 					}
@@ -821,7 +822,7 @@ public class ChamberTest {
 	 * clear all the hits
 	 */
 	public void clearHits() {
-		hits.removeAllElements();
+		_hits.removeAllElements();
 	}
 
 	/**
@@ -839,13 +840,13 @@ public class ChamberTest {
 	 * @return the number of hits;
 	 */
 	public int getNumHits() {
-		return hits.size();
+		return _hits.size();
 	}
 
 	// get number of noise hits
 	public int getNumNoiseHits() {
 		int num = 0;
-		for (HitTest th : hits) {
+		for (HitTest th : _hits) {
 			if (th.getActualHitType() == HitTest.HitType.NOISE) {
 				num++;
 			}
@@ -856,7 +857,7 @@ public class ChamberTest {
 	// get number of noise hits not removed
 	public int getNumSavedNoiseHits() {
 		int num = 0;
-		for (HitTest th : hits) {
+		for (HitTest th : _hits) {
 			if (th.getComputedHitType() == HitTest.HitType.TRACK && th.getActualHitType() == HitTest.HitType.NOISE) {
 				num++;
 			}
@@ -866,7 +867,7 @@ public class ChamberTest {
 
 	public int getNumRemovedNoiseHits() {
 		int num = 0;
-		for (HitTest th : hits) {
+		for (HitTest th : _hits) {
 			if (th.getComputedHitType() != HitTest.HitType.TRACK && th.getActualHitType() == HitTest.HitType.NOISE) {
 				num++;
 			}
@@ -877,7 +878,7 @@ public class ChamberTest {
 	// get number of hits from segments
 	public int getNumTrackHits() {
 		int num = 0;
-		for (HitTest th : hits) {
+		for (HitTest th : _hits) {
 
 			if (th.getComputedHitType() == HitTest.HitType.TRACK && th.getActualHitType() == HitTest.HitType.TRACK) {
 				num++;
