@@ -4,13 +4,9 @@ import java.awt.Color;
 import java.util.Collections;
 import java.util.Vector;
 
-import cnuphys.bCNU.log.Log;
 import cnuphys.ced.alldata.ColumnData;
 
 public class AdcHitList extends Vector<AdcHit> {
-
-	// used to log erors
-	private String _error;
 
 	// for color scaling
 	private int _maxADC;
@@ -19,11 +15,12 @@ public class AdcHitList extends Vector<AdcHit> {
 		super();
 
 		byte[] sector = ColumnData.getByteArray(adcBankName + ".sector");
-		if ((sector == null) || (sector.length < 1)) {
+		int length = (sector == null) ? 0 : sector.length;
+
+		if (length < 1) {
 			return;
 		}
 
-		int length = 0;
 
 		byte[] layer = ColumnData.getByteArray(adcBankName + ".layer");
 		short[] component = ColumnData.getShortArray(adcBankName + ".component");
@@ -32,20 +29,8 @@ public class AdcHitList extends Vector<AdcHit> {
 		short[] ped = ColumnData.getShortArray(adcBankName + ".ped");
 		float[] time = ColumnData.getFloatArray(adcBankName + ".time");
 
-		String tstamp = adcBankName + ".timestamp";
-		long[] timestamp = ColumnData.getLongArray(tstamp);
-
-		length = checkArrays(sector, layer, component, order, ADC);
-		if (length < 0) {
-			Log.getInstance().warning("[" + adcBankName + "] " + _error);
-			return;
-		}
-		// check more
-		int clen = checkArrays(length, ped, time);
-		if (clen < 0) {
-			Log.getInstance().warning("[" + adcBankName + "] " + _error);
-			return;
-		}
+	//	String tstamp = adcBankName + ".timestamp";
+	//	long[] timestamp = ColumnData.getLongArray(tstamp);
 
 		// Step 1 build basic list
 		for (int index = 0; index < length; index++) {
@@ -72,12 +57,6 @@ public class AdcHitList extends Vector<AdcHit> {
 		for (AdcHit hit : this) {
 			_maxADC = Math.max(_maxADC, hit.averageADC());
 		}
-
-//		if (adcBankName.contains("HTCC")) {
-//			for (AdcHit hit : this) {
-//				System.out.println(hit);
-//			}
-//		}
 
 	}
 
@@ -122,69 +101,7 @@ public class AdcHitList extends Vector<AdcHit> {
 
 	}
 
-	// check arrays are not null and have same length
-	private int checkArrays(byte[] sector, byte[] layer, short[] component, byte[] order, int[] data) {
-		if ((sector == null) || (layer == null) || (component == null) || (order == null) || (data == null)) {
-			_error = "Unexpected null array when creating AdcHitList: " + "sector = null: " + (sector == null)
-					+ " layer = null: " + (layer == null) + " component = null: " + (component == null)
-					+ " order = null: " + (order == null) + " data (tdc or adc) == null: " + (data == null);
-			return -1;
-		}
 
-		if (sector.length < 1) {
-			_error = "Sector array has 0 length when creating AdcHitList";
-			return -1;
-		}
-
-		if (layer.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match layer length: " + layer.length
-					+ " when creating AdcHitList";
-			return -1;
-		}
-
-		if (component.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match component length: " + component.length
-					+ " when creating AdcHitList";
-			return -1;
-		}
-
-		if (order.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match order length: " + order.length
-					+ " when creating AdcHitList";
-			return -1;
-		}
-
-		if (data.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match data (tdc or adc) length: " + data.length
-					+ " when creating AdcHitList";
-			return -1;
-		}
-
-		return sector.length;
-	}
-
-	// check more arrays
-	private int checkArrays(int length, short[] ped, float[] time) {
-		if ((ped == null) || (time == null)) {
-			_error = "Unexpected null array when creating AdcHitList: " + "ped = null: " + (ped == null)
-					+ " time = null: " + (time == null);
-			return -1;
-		}
-
-		if (ped.length != length) {
-			_error = "Expected length: " + length + " does not match ped length: " + ped.length
-					+ " when creating AdcHitList";
-			return -1;
-		}
-
-		if (time.length != length) {
-			_error = "Expected length: " + length + " does not match time length: " + time.length
-					+ " when creating AdcHitList";
-			return -1;
-		}
-
-		return length;
-	}
 
 	/**
 	 * Find the index of a hit

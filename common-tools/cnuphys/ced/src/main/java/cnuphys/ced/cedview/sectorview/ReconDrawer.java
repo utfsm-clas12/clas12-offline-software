@@ -15,8 +15,10 @@ import cnuphys.ced.event.data.AllEC;
 import cnuphys.ced.event.data.Cluster;
 import cnuphys.ced.event.data.ClusterList;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.DCHit;
-import cnuphys.ced.event.data.DCHitList;
+import cnuphys.ced.event.data.DCCluster;
+import cnuphys.ced.event.data.DCClusterList;
+import cnuphys.ced.event.data.DCReconHit;
+import cnuphys.ced.event.data.DCReconHitList;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataDrawSupport;
@@ -111,10 +113,10 @@ public class ReconDrawer extends SectorViewDrawer {
 
 	// draw reconstructed DC hit Hit based and time based based hits
 	private void drawDCReconAndDOCA(Graphics g, IContainer container) {
-		if (_view.showHB()) {
+		if (_view.showDCHBHits()) {
 			drawDCHitList(g, container, CedColors.HB_COLOR, DC.getInstance().getHBHits(), false);
 		}
-		if (_view.showTB()) {
+		if (_view.showDCTBHits()) {
 			drawDCHitList(g, container, CedColors.TB_COLOR, DC.getInstance().getTBHits(), true);
 		}
 	}
@@ -171,18 +173,72 @@ public class ReconDrawer extends SectorViewDrawer {
 
 		// DC HB Recon Hits
 		if (_view.showDCHBHits()) {
-			DCHitList hits = DC.getInstance().getHBHits();
+			DCReconHitList hits = DC.getInstance().getHBHits();
+			DCClusterList clusters = DC.getInstance().getHBClusters();
+			
 			if ((hits != null) && !hits.isEmpty()) {
-				for (DCHit hit : hits) {
+				for (DCReconHit hit : hits) {
 					if (_view.containsSector(hit.sector)) {
 						if (hit.contains(screenPoint)) {
 							hit.getFeedbackStrings("HB", feedbackStrings);
+							
+							
+							//possibly have cluster info
+							short clusterId = hit.clusterID;
+							
+							if (clusterId > 0) {
+								DCCluster cluster = clusters.fromClusterId(clusterId);
+								
+								String str1;
+								if (cluster == null) {
+									str1 = String.format("$red$" + "HB clusterID %d", clusterId);
+								} else {
+									str1 = String.format("$red$" + "HB clusterID %d size %d", clusterId, cluster.size);
+								}
+								feedbackStrings.add(str1);
+							}
+							
 							return;
 						}
 					}
 				}
 			}
-		}
+		}  //show hb hits
+		
+		// DC TB Recon Hits
+		if (_view.showDCTBHits()) {
+			DCReconHitList hits = DC.getInstance().getTBHits();
+			DCClusterList clusters = DC.getInstance().getTBClusters();
+			
+			if ((hits != null) && !hits.isEmpty()) {
+				for (DCReconHit hit : hits) {
+					if (_view.containsSector(hit.sector)) {
+						if (hit.contains(screenPoint)) {
+							hit.getFeedbackStrings("TB", feedbackStrings);
+							
+							
+							//possibly have cluster info
+							short clusterId = hit.clusterID;
+							
+							if (clusterId > 0) {
+								DCCluster cluster = clusters.fromClusterId(clusterId);
+								
+								String str1;
+								if (cluster == null) {
+									str1 = String.format("$red$" + "TB clusterID %d", clusterId);
+								} else {
+									str1 = String.format("$red$" + "TB clusterID %d size %d", clusterId, cluster.size);
+								}
+								feedbackStrings.add(str1);
+							}
+							
+							return;
+						}
+					}
+				}
+			}
+		}  //show tb hits
+
 
 	}
 
@@ -237,12 +293,12 @@ public class ReconDrawer extends SectorViewDrawer {
 	}
 
 	// draw a reconstructed hit list
-	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCHitList hits, boolean isTimeBased) {
+	private void drawDCHitList(Graphics g, IContainer container, Color fillColor, DCReconHitList hits, boolean isTimeBased) {
 		if ((hits == null) || hits.isEmpty()) {
 			return;
 		}
 
-		for (DCHit hit : hits) {
+		for (DCReconHit hit : hits) {
 			if (_view.containsSector(hit.sector)) {
 				_view.drawDCReconHit(g, container, fillColor, Color.black, hit, isTimeBased);
 			}

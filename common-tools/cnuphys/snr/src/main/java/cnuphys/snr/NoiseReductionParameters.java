@@ -7,10 +7,16 @@ package cnuphys.snr;
  * @author heddle
  */
 public class NoiseReductionParameters {
+	
+	//the analysis level
+	private static SNRAnalysisLevel _analysisLevel = SNRAnalysisLevel.ONESTAGE;
 
 	// track leaning directions
 	public static final int LEFT_LEAN = 0;
 	public static final int RIGHT_LEAN = 1;
+	
+	//experimental stage 2 adjecency test
+	public static final int ADJACENCYTHRESHOLD = 4;
 
 	// number of words needed for the number of wires in a layer
 	private int _numWordsNeeded;
@@ -391,7 +397,34 @@ public class NoiseReductionParameters {
 
 		//now clean the data (remove the noise)
 		cleanFromSegments();
+		
+		if (_analysisLevel == SNRAnalysisLevel.TWOSTAGE) {
+			//run it twice
+			stage2Analysis();
+			stage2Analysis();
+			findPossibleSegments(LEFT_LEAN);
+			findPossibleSegments(RIGHT_LEAN);
+		}
+		
+		
+		
 		_analyzed = true;
+	}
+	
+	//experimental stage 2 uses the adjacency test
+	//to remove additional noise
+	private void stage2Analysis() {
+		System.err.println("Stage 2 analysis");
+		
+		for (int layer = 0; layer < _numLayer; layer++) {
+			for (int wire = 0; wire < _numWire; wire++) {
+				if (_packedData[layer].checkBit(wire)) {
+					if (computeAdjacency(layer, wire) < ADJACENCYTHRESHOLD) {
+						_packedData[layer].clearBit(wire);
+					}
+				}
+			}
+		}
 	}
 
 	// this creates the masks and .ANDS. them with the data
@@ -568,6 +601,7 @@ public class NoiseReductionParameters {
 		_allowedMissingLayers = allowedMissingLayers;
 	}
 
+	//get the total hit count all layers
 	private int hitCount(ExtendedWord data[]) {
 		int numBits = 0;
 		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
@@ -592,6 +626,64 @@ public class NoiseReductionParameters {
 	 */
 	public int totalReducedHitCount() {
 		return (hitCount(_packedData));
+	}
+	
+	/**
+	 * Set the analysis level
+	 * OneStage: the classic SNR noise analysis
+	 * TwoStage: the centers of mass are used to remove noise within the masks
+	 * but disjoint from the segment (hopefully). This might result in the loss
+	 * of the segment!
+	 * @param level new level
+	 */
+	public static void setSNRAnalysisLevel(SNRAnalysisLevel level) {
+		_analysisLevel = level;
+	}
+	
+	/**
+	 * Used in second stage analysis
+	 * @param layer the 0-based layer 0..5
+	 * @param wire  the 0-base wire 0..
+	 * @return the adjacency
+	 */
+	public int computeAdjacency(int layer, int wire) {
+		if (_packedData == null) {
+			return 0;
+		}
+
+		// if no hit, bail
+		if (_packedData[layer].checkBit(wire)) {
+			int adj = 0;
+
+			for (int tlay = 0; tlay < layer; tlay++) {
+				int del = layer - tlay;
+				int wiremin = Integer.max(0, wire - del);
+				int wiremax = Integer.min((_numWire - 1), wire + del);
+				for (int twire = wiremin; twire <= wiremax; twire++) {
+					if (_packedData[tlay].checkBit(twire)) {
+						adj++;
+					}
+				}
+			}
+
+			for (int tlay = (_numLayer-1); tlay > layer; tlay--) {
+				int del = tlay - layer;
+				int wiremin = Integer.max(0, wire - del);
+				int wiremax = Integer.min((_numWire - 1), wire + del);
+				for (int twire = wiremin; twire <= wiremax; twire++) {
+					if (_packedData[tlay].checkBit(twire)) {
+						adj++;
+					}
+				}
+			}
+
+			
+			return adj;
+		}
+		else {
+			return 0;
+		}
+		
 	}
 
 }

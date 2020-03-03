@@ -17,8 +17,8 @@ import cnuphys.ced.clasio.ClasIoEventManager;
 //import cnuphys.ced.dcnoise.test.TestParameters;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.DCHit;
-import cnuphys.ced.event.data.DCHitList;
+import cnuphys.ced.event.data.DCReconHit;
+import cnuphys.ced.event.data.DCReconHitList;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -222,9 +222,9 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		// draw HB Hits
 		if (_view.showHBHits()) {
-			DCHitList hits = DC.getInstance().getHBHits();
+			DCReconHitList hits = DC.getInstance().getHBHits();
 			if ((hits != null) && !hits.isEmpty()) {
-				for (DCHit hit : hits) {
+				for (DCReconHit hit : hits) {
 					if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
 						drawDCHit(g, container, hit.layer, hit.wire, wr, CedColors.HB_COLOR);
 					}
@@ -234,9 +234,9 @@ public class AllDCSuperLayer extends RectangleItem {
 
 		// draw TB Hits
 		if (_view.showTBHits()) {
-			DCHitList hits = DC.getInstance().getTBHits();
+			DCReconHitList hits = DC.getInstance().getTBHits();
 			if ((hits != null) && !hits.isEmpty()) {
-				for (DCHit hit : hits) {
+				for (DCReconHit hit : hits) {
 					if ((hit.sector == _sector) && (hit.superlayer == _superLayer)) {
 						drawDCHit(g, container, hit.layer, hit.wire, wr, CedColors.TB_COLOR);
 					}

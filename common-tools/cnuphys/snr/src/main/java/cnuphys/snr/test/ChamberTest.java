@@ -140,9 +140,20 @@ public class ChamberTest {
 			}
 		}
 		
+	}
+	
+	/**
+	 * Draw the chamber.
+	 * 
+	 * @param g     the Graphics context.
+	 * @param world the world system
+	 * @param local the local system
+	 */
+	public void drawAfter(Graphics g, Rectangle2D.Double world, Rectangle local) {
 		//draw segment candidates
 		drawLeftSegmentCandidates(g, world, local);
 		drawRightSegmentCandidates(g, world, local);
+		
 	}
 
 	//draw a string
@@ -496,17 +507,10 @@ public class ChamberTest {
 			}
 		}
 
-		if ((layer >= 0) && (wire >= 0)) {
-			HitTest ht = findHit(layer, wire);
-			if (ht == null) {
-				sb.append("[No Hit] ");
-			} else {
-				sb.append("  Reality: " + ht.getActualHitType() + "  Computed: " + ht.getComputedHitType());
-			}
-		}
 
 		// occupancy
-		sb.append(String.format("  #hits %d occ %4.1f%%", getNumHits(), 100.0 * getOccupancy()));
+		
+		sb.append(String.format("  #hits %d Occ %4.1f%%  RedOcc %4.1f%%", getNumHits(), 100.0 * getOccupancy(),   100.0 * getReducedOccupancy()));
 
 		// allowed missing layers
 		sb.append("  Missing Layers Allowed " + _parameters.getAllowedMissingLayers());
@@ -514,6 +518,19 @@ public class ChamberTest {
 		// layers shifts
 		sb.append(shiftString("  Left Shifts", _parameters.getLeftLayerShifts()));
 		sb.append(shiftString("  Right Shifts", _parameters.getRightLayerShifts()));
+		
+		if ((layer >= 0) && (wire >= 0)) {
+			HitTest ht = findHit(layer, wire);
+			if (ht == null) {
+				sb.append("\n [No Hit] ");
+			} else {
+				sb.append("\n Reality: " + ht.getActualHitType() + "  Computed: " + ht.getComputedHitType());
+			}
+			
+			int adjacency = _parameters.computeAdjacency(layer, wire);
+			sb.append(" Adjacency: " + adjacency);
+		}
+
 
 		return sb.toString();
 	}
@@ -590,7 +607,7 @@ public class ChamberTest {
 	public void generateNoise() {
 		for (int layer = 0; layer < _parameters.getNumLayer(); layer++) {
 			for (int wire = 0; wire < _parameters.getNumWire(); wire++) {
-				if (Math.random() < TestParameters.getNoiseRate()) {
+				if (DetectorTest.getRandom().nextDouble() < TestParameters.getNoiseRate()) {
 					HitTest ht = createHit(layer, wire, HitTest.HitType.NOISE);
 					_hits.add(ht);
 				}
@@ -599,16 +616,16 @@ public class ChamberTest {
 		}
 
 		// add a blob?
-		if (Math.random() < TestParameters.getProbBlob()) {
+		if (DetectorTest.getRandom().nextDouble() < TestParameters.getProbBlob()) {
 			int blobSize = TestParameters.getBlobSize();
 
 			// random central wire
-			int ranWire = (int) (_parameters.getNumWire() * Math.random());
+			int ranWire = (int) (_parameters.getNumWire() * DetectorTest.getRandom().nextDouble());
 			for (int layer = 0; layer < _parameters.getNumLayer(); layer++) {
 				int minWire = Math.max(0, ranWire - blobSize);
 				int maxWire = Math.min(_parameters.getNumWire() - 1, ranWire + blobSize);
 				for (int w = minWire; w <= maxWire; w++) {
-					if (Math.random() > TestParameters.getProbBadWire()) {
+					if (DetectorTest.getRandom().nextDouble() > TestParameters.getProbBadWire()) {
 						HitTest ht = createHit(layer, w, HitTest.HitType.NOISE);
 						_hits.add(ht);
 					}
@@ -731,7 +748,7 @@ public class ChamberTest {
 								_hits.remove(ht);
 							}
 
-							if (Math.random() > TestParameters.getProbBadWire()) {
+							if (DetectorTest.getRandom().nextDouble() > TestParameters.getProbBadWire()) {
 								HitTest htnew = createHit(layer, wire, HitTest.HitType.TRACK);
 								_hits.add(htnew);
 							}
@@ -826,13 +843,23 @@ public class ChamberTest {
 	}
 
 	/**
-	 * Get the fractional occupancy of this chamber.
+	 * Get the fractional raw occupancy of this chamber.
 	 * 
 	 * @return the fractional occupancy of this chamber.
 	 */
 	public double getOccupancy() {
 		return ((double) getNumHits() / getTotalNumWires());
 	}
+	
+	/**
+	 * Get the fractional cleaned occupancy of this chamber.
+	 * 
+	 * @return the fractional occupancy of this chamber.
+	 */
+	public double getReducedOccupancy() {
+		return ((double) (getNumHits()-this.getNumRemovedNoiseHits()) / getTotalNumWires());
+	}
+
 
 	/**
 	 * Get the total number of hits.

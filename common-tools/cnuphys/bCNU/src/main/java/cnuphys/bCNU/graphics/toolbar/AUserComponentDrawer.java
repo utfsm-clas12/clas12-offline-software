@@ -83,7 +83,7 @@ public abstract class AUserComponentDrawer extends DrawableAdapter {
 			int yc = b.height / 2;
 
 			_yeven = yc - _fh / 2;
-			_yodd = yc + _fh / 2;
+			_yodd = 2 + yc + _fh / 2;
 		}
 
 		if (numMC == 0) {

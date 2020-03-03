@@ -15,14 +15,15 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 import cnuphys.snr.NoiseReductionParameters;
 
@@ -71,7 +72,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	/**
 	 * For a status line feedback string.
 	 */
-	private JLabel status;
+	private JTextArea _status;
 
 
 	// common font
@@ -81,6 +82,9 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 * Used for creating the feedback label.
 	 */
 	private StringBuffer stringBuffer = new StringBuffer(512);
+
+	private static long _seed = 364785861L;
+	private static Random _rand;
 
 
 	/**
@@ -92,6 +96,8 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 * @param h
 	 */
 	public DetectorTest(double x, double y, double w, double h) {
+		
+		_rand = new Random(_seed);
 
 		world = new Rectangle2D.Double(x, y, w, h);
 		defaultWorld = new Rectangle2D.Double(x, y, w, h);
@@ -105,13 +111,22 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		_display.addMouseMotionListener(this);
 		_display.addMouseListener(this);
 
-		status = new JLabel("                                               ");
+		_status = new JTextArea(3, 200);
+		_status.setEditable(false);
 
 		setLayout(new BorderLayout(4, 4));
 		add(_display, BorderLayout.CENTER);
-		add(status, BorderLayout.SOUTH);
+		add(_status, BorderLayout.SOUTH);
 	}
 
+	/**
+	 * Get the shared random number generator
+	 * @return the shared random number generator
+	 */
+	public static Random getRandom() {
+		return _rand;
+	}
+	
 	// a screwball event
 	public void screwballEvent() {
 		clearTracks();
@@ -223,7 +238,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	public void generateTracks() {
 		// get num tracks
 
-		double rand = Math.random();
+		double rand = _rand.nextDouble();
 
 		int numTrack = 0;
 		double probTracks[] = TestParameters.getProbTracks();
@@ -243,11 +258,11 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			wp1.y = world.y + world.height;
 
 			wp0.x = world.x + world.width / 2.0;
-			double dx = 0.5 * world.width * (1.0 - 2.0 * Math.random());
+			double dx = 0.5 * world.width * (1.0 - 2.0 * _rand.nextDouble());
 			wp0.x = wp0.x + dx;
 
 			double thetaMax = Math.toRadians(TestParameters.getThetaMax());
-			double ang = thetaMax * (1.0 - 2.0 * Math.random());
+			double ang = thetaMax * (1.0 - 2.0 * _rand.nextDouble());
 			wp1.x = wp0.x + world.height * Math.tan(ang);
 
 			tracks.add(new TrackTest(wp0, wp1));
@@ -282,6 +297,11 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			for (TrackTest tt : tracks) {
 				tt.draw(g, world, _local);
 			}
+		}
+		
+		// draw more on the chambers
+		for (ChamberTest ct : chambers) {
+			ct.drawAfter(g, world, _local);
 		}
 
 		// draw some text
@@ -338,7 +358,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 * @param s the new status string.
 	 */
 	private void updateStatus(String s) {
-		status.setText(s);
+		_status.setText(s);
 	}
 
 	@Override

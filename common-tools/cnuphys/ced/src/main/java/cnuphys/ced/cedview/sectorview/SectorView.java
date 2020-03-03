@@ -31,7 +31,7 @@ import cnuphys.ced.common.SuperLayerDrawing;
 import cnuphys.ced.component.ControlPanel;
 import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.DCHit;
+import cnuphys.ced.event.data.DCReconHit;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.frame.Ced;
 import cnuphys.ced.geometry.BSTxyPanel;
@@ -1460,7 +1460,7 @@ public class SectorView extends CedView implements ChangeListener {
 	 * @param fillColor the fill color
 	 * @param frameColor the border color
 	 */
-	public void drawDCReconHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
+	public void drawDCReconHit(Graphics g, IContainer container, Color fillColor, Color frameColor, DCReconHit hit,
 			boolean isTimeBased) {
 
 		SectorSuperLayer sectSL = _superLayers[(hit.sector < 4) ? 0 : 1][hit.superlayer - 1];

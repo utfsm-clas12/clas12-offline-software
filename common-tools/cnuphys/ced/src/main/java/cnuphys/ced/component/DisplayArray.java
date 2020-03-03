@@ -538,6 +538,24 @@ public class DisplayArray extends CheckBoxArray implements ItemListener {
 	public boolean showDCTBHits() {
 		return showTB() && (_dcHitsButton != null) && _dcHitsButton.isSelected();
 	}
+	
+	/**
+	 * Convenience method to see if we show the dc HB reconstructed clusters.
+	 * 
+	 * @return <code>true</code> if we are to show dc HB reconstructed clusters.
+	 */
+	public boolean showDCHBClusters() {
+		return showHB() && showClusters();
+	}
+	
+	/**
+	 * Convenience method to see if we show the dc TB reconstructed clusters.
+	 * 
+	 * @return <code>true</code> if we are to show dc TB reconstructed clusters.
+	 */
+	public boolean showDCTBClusters() {
+		return showTB() && showClusters();
+	}
 
 	/**
 	 * Convenience method to see if we show the reconstructed segments.

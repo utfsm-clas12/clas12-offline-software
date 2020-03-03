@@ -69,7 +69,7 @@ public class TestParameters {
 	private static double probBadWire = 0.05;
 
 	/** Probability of a blob in a superlayer (chamber) */
-	private static double probBlob = 0.2;
+	private static double probBlob = 0.;
 
 	/** size of a blob */
 	private static int blobSize = 2;

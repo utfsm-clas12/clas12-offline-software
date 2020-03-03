@@ -14,10 +14,17 @@ public class DC extends DetectorData {
 	private DCTdcHitList _tdcHits = new DCTdcHitList();
 
 	// HB reconstructed hits
-	private DCHitList _hbHits;
+	private DCReconHitList _hbHits;
 
 	// TB reconstructed hits
-	private DCHitList _tbHits;
+	private DCReconHitList _tbHits;
+	
+	// HB reconstructed clusters
+	private DCClusterList _hbClusters;
+
+	// TB reconstructed clusters
+	private DCClusterList _tbClusters;
+
 
 	// singleton
 	private static DC _instance;
@@ -36,19 +43,34 @@ public class DC extends DetectorData {
 
 	@Override
 	public void newClasIoEvent(DataEvent event) {
+		//the base tdc hits
 		_tdcHits = new DCTdcHitList();
+		
+		//the reconstructed hits, HB and TB
 		try {
-			_hbHits = new DCHitList("HitBasedTrkg::HBHits");
-//			System.err.println("HB HIT COUNT = " + ((_hbHits == null) ? 0 : _hbHits.size()));
+			_hbHits = new DCReconHitList("HitBasedTrkg::HBHits");
 		} catch (EventDataException e) {
 			_hbHits = null;
 			e.printStackTrace();
 		}
 		try {
-			_tbHits = new DCHitList("TimeBasedTrkg::TBHits");
-//			System.err.println("TB HIT COUNT = " + ((_tbHits == null) ? 0 : _tbHits.size()));
+			_tbHits = new DCReconHitList("TimeBasedTrkg::TBHits");
 		} catch (EventDataException e) {
 			_tbHits = null;
+			e.printStackTrace();
+		}
+		
+		//the clusters
+		try {
+			_hbClusters = new DCClusterList("HitBasedTrkg::HBClusters");
+		} catch (EventDataException e) {
+			_hbClusters = null;
+			e.printStackTrace();
+		}
+		try {
+			_tbClusters = new DCClusterList("TimeBasedTrkg::TBClusters");
+		} catch (EventDataException e) {
+			_tbClusters = null;
 			e.printStackTrace();
 		}
 
@@ -81,7 +103,7 @@ public class DC extends DetectorData {
 	 * 
 	 * @return the hit based hit list
 	 */
-	public DCHitList getHBHits() {
+	public DCReconHitList getHBHits() {
 		return _hbHits;
 	}
 
@@ -90,8 +112,26 @@ public class DC extends DetectorData {
 	 * 
 	 * @return the time based hit list
 	 */
-	public DCHitList getTBHits() {
+	public DCReconHitList getTBHits() {
 		return _tbHits;
+	}
+	
+	/**
+	 * Get the hit based cluster list
+	 * 
+	 * @return the hit based cluster list
+	 */
+	public DCClusterList getHBClusters() {
+		return _hbClusters;
+	}
+
+	/**
+	 * Get the time based cluster list
+	 * 
+	 * @return the time based cluster list
+	 */
+	public DCClusterList getTBClusters() {
+		return _tbClusters;
 	}
 
 	/**

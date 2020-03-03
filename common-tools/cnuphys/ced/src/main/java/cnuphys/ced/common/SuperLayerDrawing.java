@@ -25,7 +25,7 @@ import cnuphys.bCNU.util.X11Colors;
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.event.AccumulationManager;
 import cnuphys.ced.event.data.DC;
-import cnuphys.ced.event.data.DCHit;
+import cnuphys.ced.event.data.DCReconHit;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.ced.event.data.DataSupport;
@@ -442,7 +442,7 @@ public class SuperLayerDrawing {
 	 * @param hit         the hit to draw
 	 * @param isTimeBased hit based or time based?
 	 */
-	public void drawReconDCHitAndDOCA(Graphics g, IContainer container, Color fillColor, Color frameColor, DCHit hit,
+	public void drawReconDCHitAndDOCA(Graphics g, IContainer container, Color fillColor, Color frameColor, DCReconHit hit,
 			boolean isTimeBased) {
 
 		drawSingleDCHit(g, container, fillColor, frameColor, hit.layer, hit.wire, hit.getLocation());
@@ -698,7 +698,7 @@ public class SuperLayerDrawing {
 	 * @param wire      the 1-based wire 1..112
 	 * @param doca2d    the doca in mm
 	 */
-	public void drawDOCA(Graphics g, IContainer container, DCHit hit, boolean isTimeBased) {
+	public void drawDOCA(Graphics g, IContainer container, DCReconHit hit, boolean isTimeBased) {
 
 		float docas[] = { -1, -1 };
 		Color frameColor;

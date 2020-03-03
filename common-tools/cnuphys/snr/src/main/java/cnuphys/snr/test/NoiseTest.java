@@ -20,6 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import cnuphys.snr.NoiseReductionParameters;
+import cnuphys.snr.SNRAnalysisLevel;
 
 @SuppressWarnings("serial")
 public class NoiseTest extends JFrame {
@@ -191,6 +192,9 @@ public class NoiseTest extends JFrame {
 	 */
 	public static void main(String args[]) {
 
+		//use 2-stage analysis
+		NoiseReductionParameters.setSNRAnalysisLevel(SNRAnalysisLevel.TWOSTAGE);
+		
 		final NoiseTest noiseTest = new NoiseTest();
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {

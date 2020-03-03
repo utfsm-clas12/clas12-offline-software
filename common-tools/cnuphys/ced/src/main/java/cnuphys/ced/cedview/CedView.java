@@ -642,6 +642,31 @@ public abstract class CedView extends BaseView implements IFeedbackProvider, Swi
 		}
 		return _controlPanel.getDisplayArray().showDCTBHits();
 	}
+	
+	/**
+	 * Convenience method to see if we show the dc HB reconstructed clusters.
+	 * 
+	 * @return <code>true</code> if we are to show dc HB reconstructed clusters.
+	 */
+	public boolean showDCHBClusters() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCHBClusters();
+	}
+	
+	/**
+	 * Convenience method to see if we show the dc TB reconstructed clusters.
+	 * 
+	 * @return <code>true</code> if we are to show dc TB reconstructed clusters.
+	 */
+	public boolean showDCTBClusters() {
+		if ((_controlPanel == null) || (_controlPanel.getDisplayArray() == null)) {
+			return false;
+		}
+		return _controlPanel.getDisplayArray().showDCTBClusters();
+	}
+
 
 	/**
 	 * Should we draw hit based segments

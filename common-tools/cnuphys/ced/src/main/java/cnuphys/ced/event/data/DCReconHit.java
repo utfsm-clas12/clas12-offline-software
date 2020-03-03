@@ -3,7 +3,12 @@ package cnuphys.ced.event.data;
 import java.awt.Point;
 import java.util.List;
 
-public class DCHit {
+/**
+ * These are reconstructed (HB or TB) hits
+ * @author heddle
+ *
+ */
+public class DCReconHit {
 
 	// used for mouse over feedback
 	private Point _screenLocation = new Point();
@@ -37,14 +42,17 @@ public class DCHit {
 
 	/** DOCA in cm */
 	public float doca;
+	
+	/** cluster Id */
+	public short clusterID;
 
 	/**
 	 * @param sector the 1-based sector
 	 * @param layer  the 1-based layer 1..6
 	 * @param wire   the 1-based wire
 	 */
-	public DCHit(byte sector, byte superlayer, byte layer, short wire, short id, short status, byte lr, int tdc,
-			float trkDoca, float doca) {
+	public DCReconHit(byte sector, byte superlayer, byte layer, short wire, short id, short status, byte lr, int tdc,
+			float trkDoca, float doca, short clusterID) {
 		this.sector = sector;
 		this.superlayer = superlayer;
 		this.layer = layer;
@@ -55,6 +63,7 @@ public class DCHit {
 		this.tdc = tdc;
 		this.trkDoca = trkDoca;
 		this.doca = doca;
+		this.clusterID = clusterID;
 	}
 
 	/**
@@ -74,9 +83,9 @@ public class DCHit {
 
 		String hitStr2;
 		if (trkDoca < 0.) {
-			hitStr2 = String.format("status %d  lr %d  tdc %d  (no doca)", status, lr, tdc);
+			hitStr2 = String.format(prefix + " status %d  lr %d  tdc %d  (no doca)", status, lr, tdc);
 		} else {
-			hitStr2 = String.format("status %d  lr %d  tdc %d  doca %6.2f mm", status, lr, tdc, 10 * trkDoca);
+			hitStr2 = String.format(prefix + " status %d  lr %d  tdc %d  doca %6.2f mm", status, lr, tdc, 10 * trkDoca);
 		}
 		v.add("$red$" + hitStr2);
 	}

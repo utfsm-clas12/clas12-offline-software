@@ -71,6 +71,18 @@ public class ExtendedWord {
 		int b = bit % WORDSIZE;
 		words[wordIndex] = setBit(words[wordIndex], b);
 	}
+	
+	/**
+	 * Clear the bit at a given location
+	 * 
+	 * @param bit the bit to clear.
+	 */
+	public void clearBit(int bit) {
+		int wordIndex = bit / WORDSIZE;
+		int b = bit % WORDSIZE;
+		words[wordIndex] = clearBit(words[wordIndex], b);
+	}
+
 
 	/**
 	 * Check if a given bit is on,
@@ -329,10 +341,10 @@ public class ExtendedWord {
 	 * 
 	 * @return a string representation.
 	 */
-//	@Override
-//	public String toString() {
-//		return binaryString();
-//	}
+	@Override
+	public String toString() {
+		return binaryString();
+	}
 
 	/**
 	 * Return a binary string representation of a byte.
@@ -388,6 +400,19 @@ public class ExtendedWord {
 		bits |= (1L << bit);
 		return bits;
 	}
+	
+	/**
+	 * clearBit clears the given control bit.
+	 * 
+	 * @param bits The long that holds the bits.
+	 * @param bit  the bit to clear.
+	 * @return The modified bits.
+	 */
+	private static long clearBit(long bits, int bit) {
+		bits &= ~(1L << bit);
+		return bits;
+	}
+
 
 	/**
 	 * Get the underlying words
