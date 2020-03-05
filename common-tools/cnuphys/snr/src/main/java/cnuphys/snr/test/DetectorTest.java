@@ -3,6 +3,7 @@ package cnuphys.snr.test;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -110,8 +111,11 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		};
 		_display.addMouseMotionListener(this);
 		_display.addMouseListener(this);
+		
+	//	_display.setPreferredSize(new Dimension(1000, 1000));
 
-		_status = new JTextArea(3, 200);
+		_status = new JTextArea(5, 200);
+		_status.setFont(new Font("SanSerif", Font.BOLD, 9));
 		_status.setEditable(false);
 
 		setLayout(new BorderLayout(4, 4));
@@ -363,8 +367,6 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 
 	@Override
 	public void mouseDragged(MouseEvent mouseEvent) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

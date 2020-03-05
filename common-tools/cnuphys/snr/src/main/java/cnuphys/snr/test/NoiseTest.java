@@ -25,7 +25,7 @@ import cnuphys.snr.SNRAnalysisLevel;
 @SuppressWarnings("serial")
 public class NoiseTest extends JFrame {
 
-	private DetectorTest detectorTest;
+	private DetectorTest _detectorTest;
 
 
 	/**
@@ -43,8 +43,9 @@ public class NoiseTest extends JFrame {
 
 		addComponents();
 
-		setSize(1200, 900);
-		setLocation(200, 100);
+		setSize(1200, 1100);
+		//pack();
+		setLocation(200, 80);
 	};
 
 	/**
@@ -65,16 +66,16 @@ public class NoiseTest extends JFrame {
 		double dy = height / 6;
 
 		// space fopr two extra superlayer (left/right composite superlayers)
-		double bh = (6 + 2.5) * (dy + height) + dy;
+		double bh = 8.5 * (dy + height) + dy;
 
-		detectorTest = new DetectorTest(0.0, 0.0, bw, bh);
+		_detectorTest = new DetectorTest(0.0, 0.0, bw, bh);
 
 		for (int i = 0; i < 6; i++) {
-			double y = -0.7 + (i + 1.5) * (3.2*dy + height);
-			detectorTest.addChamber(new Rectangle2D.Double(xmin, y, width, height));
+			double y = -0.6 + (i + 1.5) * (3.2*dy + height);
+			_detectorTest.addChamber(new Rectangle2D.Double(xmin, y, width, height));
 		}
 
-		add(detectorTest, BorderLayout.CENTER);
+		add(_detectorTest, BorderLayout.CENTER);
 
 		addMenus();
 	}
@@ -131,7 +132,7 @@ public class NoiseTest extends JFrame {
 	 */
 	private JMenu createOptionMenu() {
 		JMenu menu = new JMenu("Options");
-		menu.add(detectorTest.getDisplayOptionMenu());
+		menu.add(_detectorTest.getDisplayOptionMenu());
 		return menu;
 	}
 
@@ -150,7 +151,7 @@ public class NoiseTest extends JFrame {
 		nextItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				detectorTest.nextEvent(true);
+				_detectorTest.nextEvent(true);
 			}
 		});
 
@@ -160,7 +161,7 @@ public class NoiseTest extends JFrame {
 		sbitem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				detectorTest.screwballEvent();
+				_detectorTest.screwballEvent();
 				;
 			}
 		});
@@ -203,5 +204,7 @@ public class NoiseTest extends JFrame {
 				noiseTest.setVisible(true);
 			}
 		});
+		
+		
 	}
 }

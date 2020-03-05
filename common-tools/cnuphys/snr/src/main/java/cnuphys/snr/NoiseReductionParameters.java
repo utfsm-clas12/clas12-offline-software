@@ -1,5 +1,7 @@
 package cnuphys.snr;
 
+import java.util.ArrayList;
+
 /**
  * All the parameters needed for noise reduction. Each superlayer should have
  * its own object. Now should be thread safe.
@@ -15,10 +17,7 @@ public class NoiseReductionParameters {
 	public static final int LEFT_LEAN = 0;
 	public static final int RIGHT_LEAN = 1;
 	
-	//experimental stage 2 adjecency test
-	public static final int ADJACENCYTHRESHOLD = 4;
 
-	// number of words needed for the number of wires in a layer
 	private int _numWordsNeeded;
 
 	/** the number of layers per superlayer */
@@ -93,6 +92,14 @@ public class NoiseReductionParameters {
 
 	// flag that specifies whether the data have been analyzed
 	private boolean _analyzed = false;
+	
+	//experimental stage 2 adjecency test
+	private int _adjacencyThreshold = 4;
+	
+	//experimental stage2 clusters
+	private ArrayList<Cluster> _leftClusters;
+	private ArrayList<Cluster> _rightClusters;
+
 
 	/**
 	 * Create the parameters used for SNR analysis
@@ -101,7 +108,7 @@ public class NoiseReductionParameters {
 	}
 
 	/**
-	 * Create a NoiseReductionParameter using defaults for the number of
+	 * Create a NoiseReductionParameter using CLAS12 defaults for the number of
 	 * superlayers, layers and wires
 	 * 
 	 * @param allowedMissingLayers the number of missing layers permitted.
@@ -148,6 +155,27 @@ public class NoiseReductionParameters {
 		return new NoiseReductionParameters(numLay, numWire, numMissing, leftShifts, rightShifts);
 	}
 
+	/**
+	 * Get the adjacency threshold, used in stage 2 analysis
+	 * where we look for clusters. This is used to remove additional
+	 * noise in the vicinity of segments that do not pass a connectedness
+	 * test.
+	 * @return the adjacency threshold
+	 */
+	public int getAdjacencyThreshold() {
+		return _adjacencyThreshold;
+	}
+	
+	/**
+	 * Set the adjacency threshold, used in stage 2 analysis
+	 * where we look for clusters. This is used to remove additional
+	 * noise in the vicinity of segments that do not pass a connectedness
+	 * test.
+	 * @param adjacencyThreshold hte new threshold
+	 */
+	public void setAdjacencyThreshold(int adjacencyThreshold) {
+		_adjacencyThreshold = adjacencyThreshold;
+	}
 
 	/**
 	 * Get the number of layers per superlayer
@@ -404,6 +432,10 @@ public class NoiseReductionParameters {
 			stage2Analysis();
 			findPossibleSegments(LEFT_LEAN);
 			findPossibleSegments(RIGHT_LEAN);
+			
+			//find cluster candidates
+			findClusters();
+
 		}
 		
 		
@@ -419,13 +451,89 @@ public class NoiseReductionParameters {
 		for (int layer = 0; layer < _numLayer; layer++) {
 			for (int wire = 0; wire < _numWire; wire++) {
 				if (_packedData[layer].checkBit(wire)) {
-					if (computeAdjacency(layer, wire) < ADJACENCYTHRESHOLD) {
+					if (computeAdjacency(layer, wire) < _adjacencyThreshold) {
 						_packedData[layer].clearBit(wire);
 					}
 				}
 			}
 		}
+		
+		
 	}
+	
+	//find the clusters
+	private void findClusters() {
+		//step 1, 
+		
+		if (_leftClusters == null) {
+			_leftClusters = new ArrayList<>();
+			_rightClusters = new ArrayList<>();
+		}
+		else {
+			_leftClusters.clear();
+			_rightClusters.clear();
+		}
+		
+		//left clusters
+		if (!_leftSegments.isZero()) {
+			boolean connected = false;
+			Cluster currentCluster = null;
+			for (int wire = 0; wire < _numWire; wire++) {
+				if (_leftSegments.checkBit(wire)) {
+					if (!connected) { //create a new one
+						currentCluster = new Cluster(_numLayer, LEFT_LEAN);
+						_leftClusters.add(currentCluster);
+						connected = true;
+					}
+					currentCluster.addSegmentStart(wire, missingLayersUsed(LEFT_LEAN, wire));
+				} //end wire was hit (checkBit)
+				else {
+					connected = false;
+				}
+			}
+		}
+		
+		//right clusters
+		if (!_rightSegments.isZero()) {
+			boolean connected = false;
+			Cluster currentCluster = null;
+			for (int wire = (_numWire-1); wire >=0; wire--) {
+				if (_rightSegments.checkBit(wire)) {
+					if (!connected) { //create a new one
+						currentCluster = new Cluster(_numLayer, RIGHT_LEAN);
+						_rightClusters.add(currentCluster);
+						connected = true;
+					}
+					currentCluster.addSegmentStart(wire, missingLayersUsed(RIGHT_LEAN, wire));
+				} //end wire was hit (checkBit)
+				else {
+					connected = false;
+				}
+			}
+		}
+
+		
+		
+		//prune and split clusters
+		
+	}
+	
+	/**
+	 * Get the list of left leaning clusters
+	 * @return left leaning clusters
+	 */
+	public ArrayList<Cluster> getLeftClusters() {
+		return _leftClusters;
+	}
+	
+	/**
+	 * Get the list of right leaning clusters
+	 * @return right leaning clusters
+	 */
+	public ArrayList<Cluster> getRightClusters() {
+		return _rightClusters;
+	}
+
 
 	// this creates the masks and .ANDS. them with the data
 	private void cleanFromSegments() {
@@ -588,7 +696,7 @@ public class NoiseReductionParameters {
 	 */
 	private double getOccupancy(ExtendedWord data[]) {
 		int numBits = hitCount(data);
-		int numWires = GeoConstants.NUM_LAYER * GeoConstants.NUM_WIRE;
+		int numWires = _numLayer * _numWire;
 		return ((double) numBits) / numWires;
 	}
 
@@ -604,7 +712,7 @@ public class NoiseReductionParameters {
 	//get the total hit count all layers
 	private int hitCount(ExtendedWord data[]) {
 		int numBits = 0;
-		for (int layer = 0; layer < GeoConstants.NUM_LAYER; layer++) {
+		for (int layer = 0; layer < _numLayer; layer++) {
 			numBits += data[layer].bitCount();
 		}
 		return numBits;

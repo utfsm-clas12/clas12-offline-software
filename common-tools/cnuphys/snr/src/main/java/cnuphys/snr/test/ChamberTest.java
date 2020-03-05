@@ -8,8 +8,10 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 import java.util.Vector;
 
+import cnuphys.snr.Cluster;
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 
@@ -531,6 +533,15 @@ public class ChamberTest {
 			sb.append(" Adjacency: " + adjacency);
 		}
 
+		List<Cluster> leftClusters = _parameters.getLeftClusters();
+		List<Cluster> rightClusters = _parameters.getRightClusters();
+
+		if (leftClusters != null) {
+			sb.append("\nL Clusters [" + leftClusters.size() + "] " + _parameters.getLeftSegments());
+		} 
+		if (rightClusters != null) {
+			sb.append("\nR Clusters [" + rightClusters.size() + "] " + _parameters.getRightSegments());
+		}
 
 		return sb.toString();
 	}

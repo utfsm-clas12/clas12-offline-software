@@ -28,12 +28,12 @@ public class ExtendedWord {
 	/**
 	 * Used for workspace for bleed left
 	 */
-	protected ExtendedWord leftWorkSpace;
+//	protected ExtendedWord leftWorkSpace;
 
 	/**
 	 * Used for workspace for bleed right
 	 */
-	protected ExtendedWord rightWorkSpace;
+//	protected ExtendedWord rightWorkSpace;
 
 	/**
 	 * Creates an extended word made up of an array of longs. Note that in JAVA a
@@ -333,33 +333,33 @@ public class ExtendedWord {
 	 * 
 	 * @param n the number of bits to bleed right.
 	 */
-	public synchronized void bleedRight(int n) {
-		if (rightWorkSpace == null) {
-			rightWorkSpace = new ExtendedWord();
-			rightWorkSpace.words = new long[words.length];
-		}
-
-		ExtendedWord.copy(this, rightWorkSpace);
-
-		if (n < 4) {
-			for (int j = 0; j < n; j++) {
-				rightWorkSpace.shiftRight(1);
-				ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
-			}
-			return;
-		}
-
-		int m = (n + 1) / 2;
-		int k = n - m;
-
-		for (int j = 0; j < m; j++) {
-			rightWorkSpace.shiftRight(1);
-			ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
-		}
-
-		ExtendedWord.copy(this, rightWorkSpace);
-		rightWorkSpace.shiftRight(k);
-		ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
+	public synchronized void OLDbleedRight(int n) {
+//		if (rightWorkSpace == null) {
+//			rightWorkSpace = new ExtendedWord();
+//			rightWorkSpace.words = new long[words.length];
+//		}
+//
+//		ExtendedWord.copy(this, rightWorkSpace);
+//
+//		if (n < 4) {
+//			for (int j = 0; j < n; j++) {
+//				rightWorkSpace.shiftRight(1);
+//				ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
+//			}
+//			return;
+//		}
+//
+//		int m = (n + 1) / 2;
+//		int k = n - m;
+//
+//		for (int j = 0; j < m; j++) {
+//			rightWorkSpace.shiftRight(1);
+//			ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
+//		}
+//
+//		ExtendedWord.copy(this, rightWorkSpace);
+//		rightWorkSpace.shiftRight(k);
+//		ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
 
 	}
 	
@@ -368,7 +368,7 @@ public class ExtendedWord {
 	 * 
 	 * @param n the number of bits to bleed left.
 	 */
-	public synchronized void newBleedLeft(int n) {
+	public synchronized void bleedLeft(int n) {
 		
 		int bleedAmount = 1;
 		while (n > 0) {
@@ -385,7 +385,7 @@ public class ExtendedWord {
 	 * 
 	 * @param n the number of bits to bleed right.
 	 */
-	public synchronized void newBleedRight(int n) {
+	public synchronized void bleedRight(int n) {
 		
 		int bleedAmount = 1;
 		while (n > 0) {
@@ -404,33 +404,33 @@ public class ExtendedWord {
 	 * 
 	 * @param n the number of bits to bleed left.
 	 */
-	public synchronized void bleedLeft(int n) {
-		if (leftWorkSpace == null) {
-			leftWorkSpace = new ExtendedWord();
-			leftWorkSpace.words = new long[words.length];
-		}
-
-		ExtendedWord.copy(this, leftWorkSpace);
-
-		if (n < 4) {
-			for (int j = 0; j < n; j++) {
-				leftWorkSpace.shiftLeft(1);
-				ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
-			}
-			return;
-		}
-
-		int m = (n + 1) / 2;
-		int k = n - m;
-
-		for (int j = 0; j < m; j++) {
-			leftWorkSpace.shiftLeft(1);
-			ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
-		}
-
-		ExtendedWord.copy(this, leftWorkSpace);
-		leftWorkSpace.shiftLeft(k);
-		ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
+	public synchronized void OLDbleedLeft(int n) {
+//		if (leftWorkSpace == null) {
+//			leftWorkSpace = new ExtendedWord();
+//			leftWorkSpace.words = new long[words.length];
+//		}
+//
+//		ExtendedWord.copy(this, leftWorkSpace);
+//
+//		if (n < 4) {
+//			for (int j = 0; j < n; j++) {
+//				leftWorkSpace.shiftLeft(1);
+//				ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
+//			}
+//			return;
+//		}
+//
+//		int m = (n + 1) / 2;
+//		int k = n - m;
+//
+//		for (int j = 0; j < m; j++) {
+//			leftWorkSpace.shiftLeft(1);
+//			ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
+//		}
+//
+//		ExtendedWord.copy(this, leftWorkSpace);
+//		leftWorkSpace.shiftLeft(k);
+//		ExtendedWord.bitwiseOr(this, leftWorkSpace, this);
 	}
 
 	/**
@@ -790,82 +790,82 @@ public class ExtendedWord {
 	}
 	
 	private static void bleedTest() {
-		Random rand = new Random();
-		ExtendedWord ew = randomWord(112, rand, 0.1f);
-		
-		int bleedAmount = 5;
-		
-		ExtendedWord ewCopy = new ExtendedWord(112);
-		copy(ew, ewCopy);
-
-//		System.err.println("     ew = " + ew);
-		ew.bleedLeft(bleedAmount);
-//		System.err.println("    *ew = " + ew);
-
-//		System.err.println(" ewCopy = " + ewCopy);
-		ewCopy.newBleedLeft(bleedAmount);
-//		System.err.println("*ewCopy = " + ewCopy);
-		
-		if (ew.equals(ewCopy)) {
-	//		System.err.println("The two results are equal");
-		}
-		else {
-			System.err.println("ERROR The two results are not equal");	
-			System.exit(1);
-		}
+//		Random rand = new Random();
+//		ExtendedWord ew = randomWord(112, rand, 0.1f);
+//		
+//		int bleedAmount = 5;
+//		
+//		ExtendedWord ewCopy = new ExtendedWord(112);
+//		copy(ew, ewCopy);
+//
+////		System.err.println("     ew = " + ew);
+//		ew.bleedLeft(bleedAmount);
+////		System.err.println("    *ew = " + ew);
+//
+////		System.err.println(" ewCopy = " + ewCopy);
+//		ewCopy.newBleedLeft(bleedAmount);
+////		System.err.println("*ewCopy = " + ewCopy);
+//		
+//		if (ew.equals(ewCopy)) {
+//	//		System.err.println("The two results are equal");
+//		}
+//		else {
+//			System.err.println("ERROR The two results are not equal");	
+//			System.exit(1);
+//		}
 		
 	}
 	
 	private static void bleedTimingTest() {
-		//prime pump
-		
-		for (int i = 0; i < 1000; i++) {
-			bleedTest();
-		}
-		
-		long seed = 34635591;
-		int bleedAmount = 5;
-		int num = 1000000;
-		float hitProb = 0.1f;
-		
-		ExtendedWord ewOld[] = new ExtendedWord[num];
-		ExtendedWord ewNew[] = new ExtendedWord[num];
-
-		
-		//create words
-		Random rand = new Random(seed);
-		for (int i = 0; i < num; i++) {
-			ewOld[i] = randomWord(112, rand, hitProb);
-			ewNew[i] = new ExtendedWord(112);
-			copy(ewOld[i], ewNew[i]);
-		}
-		
-		long time = System.currentTimeMillis();
-		
-		for (int i = 0; i < num; i++) {
-			ewNew[i].newBleedRight(bleedAmount);
-		}
-		
-		System.err.println("New Time: " + (System.currentTimeMillis() - time));
-
-		time = System.currentTimeMillis();
-		
-		for (int i = 0; i < num; i++) {
-			ewOld[i].bleedRight(bleedAmount);
-		}
-		
-		System.err.println("Old Time: " + (System.currentTimeMillis() - time));
-		
-		
-		
-		//equatity check
-		for (int i = 0; i < num; i++) {
-			if (!ewOld[i].equals(ewNew[i])) {
-				System.err.println("Equality test FAILED for i = " + i);
-			}
-		}
-
-		System.err.println("Passed timing equality test");
+//		//prime pump
+//		
+//		for (int i = 0; i < 1000; i++) {
+//			bleedTest();
+//		}
+//		
+//		long seed = 34635591;
+//		int bleedAmount = 5;
+//		int num = 1000000;
+//		float hitProb = 0.1f;
+//		
+//		ExtendedWord ewOld[] = new ExtendedWord[num];
+//		ExtendedWord ewNew[] = new ExtendedWord[num];
+//
+//		
+//		//create words
+//		Random rand = new Random(seed);
+//		for (int i = 0; i < num; i++) {
+//			ewOld[i] = randomWord(112, rand, hitProb);
+//			ewNew[i] = new ExtendedWord(112);
+//			copy(ewOld[i], ewNew[i]);
+//		}
+//		
+//		long time = System.currentTimeMillis();
+//		
+//		for (int i = 0; i < num; i++) {
+//			ewNew[i].newBleedRight(bleedAmount);
+//		}
+//		
+//		System.err.println("New Time: " + (System.currentTimeMillis() - time));
+//
+//		time = System.currentTimeMillis();
+//		
+//		for (int i = 0; i < num; i++) {
+//			ewOld[i].bleedRight(bleedAmount);
+//		}
+//		
+//		System.err.println("Old Time: " + (System.currentTimeMillis() - time));
+//		
+//		
+//		
+//		//equatity check
+//		for (int i = 0; i < num; i++) {
+//			if (!ewOld[i].equals(ewNew[i])) {
+//				System.err.println("Equality test FAILED for i = " + i);
+//			}
+//		}
+//
+//		System.err.println("Passed timing equality test");
 	}
 	
 	/**
