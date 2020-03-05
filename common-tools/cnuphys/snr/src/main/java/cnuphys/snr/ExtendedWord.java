@@ -60,6 +60,25 @@ public class ExtendedWord {
 	public ExtendedWord(long words[]) {
 		this.words = words;
 	}
+	
+	/**
+	 * Test for equality with another word
+	 * @param ew the test word
+	 * @return <code>true</code> if the two words have the same value
+	 */
+	public boolean equals(ExtendedWord ew) {
+		if (words.length != ew.words.length) {
+			return false;
+		}
+		
+		for (int i = 0; i < words.length; i++) {
+			if (words[i] != ew.words[i]) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 
 	/**
 	 * Set the bit at a given location
@@ -229,6 +248,61 @@ public class ExtendedWord {
 			}
 		}
 	}
+	
+	/**
+	 * Shift the extended word right and or with self. 
+	 * CURRENT LIMITATION: can only shift up to 64
+	 * bits.
+	 * 
+	 * @param n the number of places to shift.
+	 */
+	public ExtendedWord shiftRightAndOr(int n) {
+		int len = words.length;
+		int nm1 = len - 1;
+
+		int complementShift = WORDSIZE - n;
+
+		for (int i = 0; i < len; i++) {
+			words[i] = words[i] | (words[i] >>>= n);
+
+			/* now must account for boundaries, except for last word */
+
+			if (i < nm1) {
+				long temp = words[i + 1] << complementShift;
+				words[i] |= temp;
+			}
+		}
+		
+		return this;
+	}
+
+	
+	/**
+	 * Shift the extended word right and or with self. 
+	 * CURRENT LIMITATION: can only shift up to 64
+	 * bits.
+	 * 
+	 * @param n the number of places to shift.
+	 */
+	public ExtendedWord shiftLeftAndOr(int n) {
+		int len = words.length;
+		int nm1 = len - 1;
+
+		int complementShift = WORDSIZE - n;
+
+		for (int i = nm1; i >= 0; i--) {
+			words[i] = words[i] | (words[i] << n);
+
+			/* now must account for boundaries, except for last word */
+
+			if (i >0) {
+				long temp = words[i - 1] >>> complementShift;
+				words[i] |= temp;
+			}
+		}
+		
+		return this;
+	}
 
 	/**
 	 * Shift the extended word left. CURRENT LIMITATION: can only shift up to 64
@@ -255,9 +329,9 @@ public class ExtendedWord {
 	}
 
 	/**
-	 * Bleed the specified number of bits left.
+	 * Bleed the specified number of bits right.
 	 * 
-	 * @param n the number of bits to bleed left.
+	 * @param n the number of bits to bleed right.
 	 */
 	public synchronized void bleedRight(int n) {
 		if (rightWorkSpace == null) {
@@ -288,6 +362,42 @@ public class ExtendedWord {
 		ExtendedWord.bitwiseOr(this, rightWorkSpace, this);
 
 	}
+	
+	/**
+	 * Bleed the specified number of bits left.
+	 * 
+	 * @param n the number of bits to bleed left.
+	 */
+	public synchronized void newBleedLeft(int n) {
+		
+		int bleedAmount = 1;
+		while (n > 0) {
+			shiftLeftAndOr(bleedAmount);
+			n = n - bleedAmount;
+			
+			bleedAmount = Integer.min(n, 2*bleedAmount);
+			
+		}
+	}
+	
+	/**
+	 * Bleed the specified number of bits right.
+	 * 
+	 * @param n the number of bits to bleed right.
+	 */
+	public synchronized void newBleedRight(int n) {
+		
+		int bleedAmount = 1;
+		while (n > 0) {
+			shiftRightAndOr(bleedAmount);
+			n = n - bleedAmount;
+			
+			bleedAmount = Integer.min(n, 2*bleedAmount);
+			
+		}
+	}
+
+
 
 	/**
 	 * Bleed the specified number of bits left.
@@ -332,6 +442,7 @@ public class ExtendedWord {
 		StringBuffer sb = new StringBuffer(WORDSIZE * words.length);
 		for (int i = words.length - 1; i >= 0; i--) {
 			sb.append(binaryString(words[i]));
+			sb.append(" ");
 		}
 		return sb.toString();
 	}
@@ -621,16 +732,30 @@ public class ExtendedWord {
 		return new String(buffer, i, 65 - i);
 
 	}
+	
+	/**
+	 * Create a random word
+	 * @param bitsNeeded the number of bits needeed
+	 * @param rand the random number generator
+	 * @param setProb the probability that w bit will be set
+	 * @return a random word
+	 */
+	public static ExtendedWord randomWord(int bitsNeeded, Random rand, float setProb) {
+		ExtendedWord ew = new ExtendedWord(bitsNeeded);
+		for (int bit = 0; bit < WORDSIZE * ew.words.length; bit++) {
+			float nextRand = rand.nextFloat();
+			if (nextRand < setProb) {
+				ew.setBit(bit);
+			}
+		}
+	    return ew;
+	}
 
-	public static void main(String arg[]) {
-		ExtendedWord a = new ExtendedWord(112);
-		ExtendedWord b = new ExtendedWord(112);
-
+	//test the hashing
+	private static void hashTest() {
 		Random rand = new Random();
-		a.words[0] = rand.nextLong();
-		a.words[1] = rand.nextLong();
-		b.words[0] = rand.nextLong();
-		b.words[1] = rand.nextLong();
+		ExtendedWord a = randomWord(112, rand, 0.5f);
+		ExtendedWord b = randomWord(112, rand, 0.5f);
 
 		String ahash = a.hashKey();
 		String bhash = b.hashKey();
@@ -662,7 +787,101 @@ public class ExtendedWord {
 		System.err.println("a62 = " + a62);
 		System.err.println("  b = " + b);
 		System.err.println("b62 = " + b62);
+	}
+	
+	private static void bleedTest() {
+		Random rand = new Random();
+		ExtendedWord ew = randomWord(112, rand, 0.1f);
+		
+		int bleedAmount = 5;
+		
+		ExtendedWord ewCopy = new ExtendedWord(112);
+		copy(ew, ewCopy);
 
+//		System.err.println("     ew = " + ew);
+		ew.bleedLeft(bleedAmount);
+//		System.err.println("    *ew = " + ew);
+
+//		System.err.println(" ewCopy = " + ewCopy);
+		ewCopy.newBleedLeft(bleedAmount);
+//		System.err.println("*ewCopy = " + ewCopy);
+		
+		if (ew.equals(ewCopy)) {
+	//		System.err.println("The two results are equal");
+		}
+		else {
+			System.err.println("ERROR The two results are not equal");	
+			System.exit(1);
+		}
+		
+	}
+	
+	private static void bleedTimingTest() {
+		//prime pump
+		
+		for (int i = 0; i < 1000; i++) {
+			bleedTest();
+		}
+		
+		long seed = 34635591;
+		int bleedAmount = 5;
+		int num = 1000000;
+		float hitProb = 0.1f;
+		
+		ExtendedWord ewOld[] = new ExtendedWord[num];
+		ExtendedWord ewNew[] = new ExtendedWord[num];
+
+		
+		//create words
+		Random rand = new Random(seed);
+		for (int i = 0; i < num; i++) {
+			ewOld[i] = randomWord(112, rand, hitProb);
+			ewNew[i] = new ExtendedWord(112);
+			copy(ewOld[i], ewNew[i]);
+		}
+		
+		long time = System.currentTimeMillis();
+		
+		for (int i = 0; i < num; i++) {
+			ewNew[i].newBleedRight(bleedAmount);
+		}
+		
+		System.err.println("New Time: " + (System.currentTimeMillis() - time));
+
+		time = System.currentTimeMillis();
+		
+		for (int i = 0; i < num; i++) {
+			ewOld[i].bleedRight(bleedAmount);
+		}
+		
+		System.err.println("Old Time: " + (System.currentTimeMillis() - time));
+		
+		
+		
+		//equatity check
+		for (int i = 0; i < num; i++) {
+			if (!ewOld[i].equals(ewNew[i])) {
+				System.err.println("Equality test FAILED for i = " + i);
+			}
+		}
+
+		System.err.println("Passed timing equality test");
+	}
+	
+	/**
+	 * Main program for testing
+	 * @param arg
+	 */
+	public static void main(String arg[]) {
+		// hashTest();
+
+		int num = 100000;
+		for (int i = 0; i < num; i++) {
+			bleedTest();
+		}
+		System.err.println("Tested " + num + " successfully");
+		
+		bleedTimingTest();
 	}
 
 }
