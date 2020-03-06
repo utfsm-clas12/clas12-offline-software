@@ -22,6 +22,8 @@ public class Cluster {
 	/** the direction, 0 for left, 1 for right */
 	public int direction;
 	
+	private double _slope = Double.NaN;
+	
 	/**
 	 * @param numLayers the number of layers, for CLAS12 6
 	 * @param direction the direction, 0 for left, 1 for right
@@ -72,8 +74,64 @@ public class Cluster {
 
 	}
 	
+	/**
+	 * String representation
+	 * @return a String representation of the cluster
+	 */
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer(1024);
+		
+		sb.append(segmentStartList + " ");
+		sb.append("{");
+		for (WireList wl : wireLists) {
+			if (wl != null) {
+				sb.append(wl + " ");
+			}
+		}
+		sb.append("}  ");
+		
+		if (Double.isNaN(_slope)) {
+			computeSlope();
+		}
+		sb.append(String.format(" M: %5.2f ", _slope));
+		return sb.toString();
+	}
+	
 	public void packData(NoiseReductionParameters params) {
 		
+	}
+	
+	private double getSlope() {
+		return _slope;
+	}
+	
+	/**
+	 * This computes slope a line using the layer as the X value and the 
+	 * average wire number as the Y so a slope of 0 looks "vetical".
+	 * We do it this way to avoid the possibility of an infinite slope.
+	 */
+	public void computeSlope() {
+		double sumx = 0;
+		double sumy = 0;
+		double sumxy = 0;
+		double sumx2 = 0;
+		
+		int n = 0;
+		for (int layer = 0; layer < numLayers; layer++) {
+			double avgWire = wireLists[layer].averageWirePosition();
+			if (!Double.isNaN(avgWire)) {
+				n++;
+				sumx += layer;
+				sumy += avgWire;
+				sumxy += layer*avgWire;
+				sumx2 += (layer*layer);
+			}
+		}
+		
+		if (n >0) {
+			_slope = (n*sumxy- sumx*sumy)/(n*sumx2 -sumx*sumx);
+		}
 	}
 	
 

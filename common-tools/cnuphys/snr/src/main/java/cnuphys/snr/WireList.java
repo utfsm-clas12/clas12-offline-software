@@ -29,7 +29,8 @@ public class WireList extends ArrayList<Integer> {
 	}
 	
 	/**
-	 *  A string representation
+	 *  A string representation.  Note wires are zero-based,
+	 *  but we print them out 1-based. Ugh. 
 	 */
 	@Override
 	public String toString() {
@@ -39,13 +40,30 @@ public class WireList extends ArrayList<Integer> {
 		if (!isEmpty()) {
 			int len = size();
 			for (int i = 0; i < len - 1; i++) {
-				sb.append(get(i) + " ");
+				sb.append((get(i)+1) + " "); //print 1-based
 			}
-			sb.append(sb.append(get(len-1)));
+			sb.append(get(len-1)+1); //print 1-based
 		}
 
 		sb.append("]");
 		return sb.toString();
+	}
+	
+	/**
+	 * Get the average wire position (zero-based)
+	 * @return the average wire position
+	 */
+	public double averageWirePosition() {
+		if (isEmpty()) {
+			return Double.NaN;
+		}
+		
+		double sum = 0;
+		for (int wire : this) {
+			sum += wire;
+		}
+		
+		return sum/size();
 	}
 	
 

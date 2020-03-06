@@ -41,6 +41,9 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 * Display the tracks
 	 */
 	private boolean displayTrack = true;
+	
+	/** the event number */
+	private int _eventNumber = 0;
 
 	/**
 	 * A list of simulated tracks.
@@ -206,6 +209,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 */
 
 	public void nextEvent(boolean repaint) {
+		_eventNumber++;
 		clearTracks();
 		generateTracks();
 
@@ -317,7 +321,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		String rStr = "  #hits: " + numTrackHits + " #noise: " + numNoiseHits + " #remNoise: " + numRemovedNoiseHits
 				+ " #savedNoise: " + numSavedNoiseHits;
 
-		g.drawString(message + rStr, 6, fm.getHeight() - 2);
+		g.drawString("Event: " + _eventNumber + "   " + message + rStr, 6, fm.getHeight() - 2);
 
 	}
 

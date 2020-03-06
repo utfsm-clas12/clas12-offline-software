@@ -3,8 +3,14 @@ package cnuphys.snr.test;
 import java.awt.Color;
 
 public class TestParameters {
+	
+	/** used to show left clusters */
+	public static boolean showLeftClusters;
+	
+	/** used to show right clusters */
+	public static boolean showRightClusters;
 
-	/** used to "show clead data */
+	/** used to "show clean data */
 	public static boolean noiseOff;
 
 	/**

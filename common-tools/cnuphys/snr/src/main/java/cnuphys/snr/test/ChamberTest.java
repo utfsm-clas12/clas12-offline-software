@@ -4,21 +4,29 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Vector;
 
 import cnuphys.snr.Cluster;
+import cnuphys.snr.ClusterFinder;
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 
 public class ChamberTest {
 	
 	private static final Color[] _missingColors = {Color.red, Color.orange, Color.yellow};
+	
+	private static final Color _leftClusterColor = new Color(46, 139, 87);
+	private static final Color _rightClusterColor = new Color(70, 130, 180);
 
+	
 	public static final Color _maskFillLeft = new Color(255, 128, 0, 48);
 	public static final Color _maskFillRight = new Color(0, 128, 255, 48);
 	public static final Color _almostTransparent = new Color(0, 0, 0, 16);
@@ -156,6 +164,51 @@ public class ChamberTest {
 		drawLeftSegmentCandidates(g, world, local);
 		drawRightSegmentCandidates(g, world, local);
 		
+		if (TestParameters.showLeftClusters) {
+			System.err.println("drawing left clusters");
+			
+			ClusterFinder cf = _parameters.getClusterFinder();
+			if (cf != null) {
+				drawClusters(g, world, local, cf.getLeftClusters(), _leftClusterColor);
+			}
+		}
+		
+		if (TestParameters.showRightClusters) {
+			System.err.println("drawing right clusters");
+			
+			ClusterFinder cf = _parameters.getClusterFinder();
+			if (cf != null) {
+				drawClusters(g, world, local, cf.getRightClusters(), _rightClusterColor);
+			}
+		}
+
+		
+	}
+	
+	private void drawClusters(Graphics g, Rectangle2D.Double world, Rectangle local, List<Cluster>clusters, Color color) {
+
+		Rectangle cell = new Rectangle();
+		Graphics2D g2 = (Graphics2D)g;
+		
+		
+		for (Cluster cluster : clusters) {
+			Area area = new Area();
+
+			for (int lay = 0; lay < _parameters.getNumLayer(); lay++) {
+				for (int wire : cluster.wireLists[lay]) {
+					cellBounds(world, local, lay, wire, cell);
+					area.add(new Area(cell));
+				}
+			}
+			
+			if (!area.isEmpty()) {
+				g2.setColor(color);
+				g2.fill(area);
+				g2.setColor(Color.black);
+				g2.draw(area);
+			}
+
+		}
 	}
 
 	//draw a string
@@ -533,14 +586,22 @@ public class ChamberTest {
 			sb.append(" Adjacency: " + adjacency);
 		}
 
-		List<Cluster> leftClusters = _parameters.getLeftClusters();
-		List<Cluster> rightClusters = _parameters.getRightClusters();
+		if (_parameters.getClusterFinder() != null) {
+			List<Cluster> leftClusters = _parameters.getClusterFinder().getLeftClusters();
+			List<Cluster> rightClusters = _parameters.getClusterFinder().getRightClusters();
 
-		if (leftClusters != null) {
-			sb.append("\nL Clusters [" + leftClusters.size() + "] " + _parameters.getLeftSegments());
-		} 
-		if (rightClusters != null) {
-			sb.append("\nR Clusters [" + rightClusters.size() + "] " + _parameters.getRightSegments());
+			if (leftClusters != null) {
+				sb.append("\nL Clusters [" + leftClusters.size() + "] ");
+				for (Cluster cluster : leftClusters) {
+					sb.append("    " + cluster);
+				}
+			}
+			if (rightClusters != null) {
+				sb.append("\nR Clusters [" + rightClusters.size() + "] ");
+				for (Cluster cluster : rightClusters) {
+					sb.append("    " + cluster);
+				}
+			}
 		}
 
 		return sb.toString();

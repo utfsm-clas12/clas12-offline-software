@@ -24,5 +24,29 @@ public class SegmentStartList extends ArrayList<SegmentStart> {
 	public void add(int wire, int numMissing) {
 		add(new SegmentStart(wire, numMissing));
 	}
+	
+	/**
+	 *  A string representation. Note wires are zero-based,
+	 *  but we print them out 1-based. Ugh. 
+	 */
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer(128);
+		sb.append("<");
 
+		if (!isEmpty()) {
+			int len = size();
+			for (int i = 0; i < len; i++) {
+				SegmentStart ss = get(i);
+				sb.append(ss.wire+1);
+				
+				if (i < (len-1)) {
+					sb.append(" ");
+				}
+			}
+		}
+
+		sb.append(">");
+		return sb.toString();
+	}
 }

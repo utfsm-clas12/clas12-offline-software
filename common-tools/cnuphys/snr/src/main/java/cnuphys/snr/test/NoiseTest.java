@@ -91,6 +91,8 @@ public class NoiseTest extends JFrame {
 		// menubar.add(createTestMenu());
 
 		addCleanHotSpot(menubar);
+		addLeftClusterHotSpot(menubar);
+		addRightClusterHotSpot(menubar);
 		setJMenuBar(menubar);
 	}
 
@@ -124,6 +126,69 @@ public class NoiseTest extends JFrame {
 
 		clean.addMouseListener(ml);
 	}
+	
+	private void addLeftClusterHotSpot(JMenuBar menubar) {
+		menubar.add(Box.createHorizontalStrut(40));
+		final JLabel left = new JLabel(" Show Left Clusters ");
+		left.setOpaque(true);
+		left.setBackground(Color.darkGray);
+		left.setForeground(Color.cyan);
+		left.setBorder(BorderFactory.createEtchedBorder());
+		menubar.add(left);
+
+		MouseAdapter ml = new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent me) {
+				left.setBackground(Color.darkGray);
+				left.setForeground(Color.yellow);
+				TestParameters.showLeftClusters = true;
+				repaint();
+			}
+
+			@Override
+			public void mouseExited(MouseEvent me) {
+				left.setBackground(Color.darkGray);
+				left.setForeground(Color.cyan);
+				TestParameters.showLeftClusters = false;
+				repaint();
+			}
+
+		};
+
+		left.addMouseListener(ml);
+	}
+	
+	private void addRightClusterHotSpot(JMenuBar menubar) {
+		menubar.add(Box.createHorizontalStrut(40));
+		final JLabel right = new JLabel(" Show Right Clusters ");
+		right.setOpaque(true);
+		right.setBackground(Color.darkGray);
+		right.setForeground(Color.cyan);
+		right.setBorder(BorderFactory.createEtchedBorder());
+		menubar.add(right);
+
+		MouseAdapter ml = new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent me) {
+				right.setBackground(Color.darkGray);
+				right.setForeground(Color.yellow);
+				TestParameters.showRightClusters = true;
+				repaint();
+			}
+
+			@Override
+			public void mouseExited(MouseEvent me) {
+				right.setBackground(Color.darkGray);
+				right.setForeground(Color.cyan);
+				TestParameters.showRightClusters = false;
+				repaint();
+			}
+
+		};
+
+		right.addMouseListener(ml);
+	}
+
 
 	/**
 	 * Create the option menu.

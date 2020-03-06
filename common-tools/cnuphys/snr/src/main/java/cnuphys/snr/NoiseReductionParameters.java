@@ -1,7 +1,5 @@
 package cnuphys.snr;
 
-import java.util.ArrayList;
-
 /**
  * All the parameters needed for noise reduction. Each superlayer should have
  * its own object. Now should be thread safe.
@@ -41,7 +39,7 @@ public class NoiseReductionParameters {
 	 * at any location in layer 1 that is a potential start
 	 * of a left leaning segment.
 	 */
-	private ExtendedWord _leftSegments;
+	protected ExtendedWord leftSegments;
 
 	/**
 	 * cumulative right segments. These are "results". When
@@ -49,7 +47,7 @@ public class NoiseReductionParameters {
 	 * at any location in layer 1 that is a potential start
 	 * of a right leaning segment.
 	 */
-	private ExtendedWord _rightSegments;
+	protected ExtendedWord rightSegments;
 
 	/**
 	 * A workspace used for storing a reservoir of misses. When
@@ -91,11 +89,10 @@ public class NoiseReductionParameters {
 	private boolean _analyzed = false;
 	
 	//experimental stage 2 adjecency test
-	private int _adjacencyThreshold = 4;
+	private int _adjacencyThreshold = 5;
 	
-	//experimental stage2 clusters
-	private ArrayList<Cluster> _leftClusters;
-	private ArrayList<Cluster> _rightClusters;
+	//experimental stage2 cluster finder
+	private ClusterFinder _clusterFinder;
 
 
 	/**
@@ -135,6 +132,7 @@ public class NoiseReductionParameters {
 		_allowedMissingLayers = allowedMissingLayers;
 		_leftLayerShifts = leftLayerShifts.clone();
 		_rightLayerShifts = rightLayerShifts.clone();
+		
 		createWorkSpace();
 	}
 
@@ -213,8 +211,8 @@ public class NoiseReductionParameters {
 			_numWordsNeeded = needed;
 
 			// the segments
-			_leftSegments = new ExtendedWord(_numWire);
-			_rightSegments = new ExtendedWord(_numWire);
+			leftSegments = new ExtendedWord(_numWire);
+			rightSegments = new ExtendedWord(_numWire);
 
 			_rawData = new ExtendedWord[_numLayer];
 			_cleanData = new ExtendedWord[_numLayer];
@@ -268,8 +266,8 @@ public class NoiseReductionParameters {
 		for (int layer = 0; layer < _numLayer; layer++) {
 			_rawData[layer].clear();
 		}
-		_leftSegments.clear();
-		_rightSegments.clear();
+		leftSegments.clear();
+		rightSegments.clear();
 		_analyzed = false;
 	}
 
@@ -325,7 +323,7 @@ public class NoiseReductionParameters {
 	 * @return the left leaning segment staring wire positions.
 	 */
 	public ExtendedWord getLeftSegments() {
-		return _leftSegments;
+		return leftSegments;
 	}
 
 	/**
@@ -335,7 +333,7 @@ public class NoiseReductionParameters {
 	 * @return the right leaning segment staring wire positions.
 	 */
 	public ExtendedWord getRightSegments() {
-		return _rightSegments;
+		return rightSegments;
 	}
 
 
@@ -393,7 +391,10 @@ public class NoiseReductionParameters {
 			findPossibleSegments(RIGHT_LEAN);
 			
 			//find cluster candidates
-			findClusters();
+			if (_clusterFinder == null) {
+				_clusterFinder = new ClusterFinder(this);
+			}
+			_clusterFinder.findClusters();
 		}
 		
 		_analyzed = true;
@@ -418,7 +419,7 @@ public class NoiseReductionParameters {
 	//experimental stage 2 uses the adjacency test
 	//to remove additional noise
 	private void stage2Analysis() {
-		System.err.println("Stage 2 analysis");
+//		System.err.println("Stage 2 analysis");
 		
 		for (int layer = 0; layer < _numLayer; layer++) {
 			for (int wire = 0; wire < _numWire; wire++) {
@@ -432,78 +433,7 @@ public class NoiseReductionParameters {
 		
 		
 	}
-	
-	//find the clusters
-	private void findClusters() {
-		
-		if (_leftClusters == null) {
-			_leftClusters = new ArrayList<>();
-			_rightClusters = new ArrayList<>();
-		}
-		else {
-			_leftClusters.clear();
-			_rightClusters.clear();
-		}
-		
-		//left clusters
-		if (!_leftSegments.isZero()) {
-			boolean connected = false;
-			Cluster currentCluster = null;
-			for (int wire = 0; wire < _numWire; wire++) {
-				if (_leftSegments.checkBit(wire)) {
-					if (!connected) { //create a new one
-						currentCluster = new Cluster(_numLayer, LEFT_LEAN);
-						_leftClusters.add(currentCluster);
-						connected = true;
-					}
-					currentCluster.addSegmentStart(wire, missingLayersUsed(LEFT_LEAN, wire));
-				} //end wire was hit (checkBit)
-				else {
-					connected = false;
-				}
-			}
-		}
-		
-		//right clusters
-		if (!_rightSegments.isZero()) {
-			boolean connected = false;
-			Cluster currentCluster = null;
-			for (int wire = (_numWire-1); wire >=0; wire--) {
-				if (_rightSegments.checkBit(wire)) {
-					if (!connected) { //create a new one
-						currentCluster = new Cluster(_numLayer, RIGHT_LEAN);
-						_rightClusters.add(currentCluster);
-						connected = true;
-					}
-					currentCluster.addSegmentStart(wire, missingLayersUsed(RIGHT_LEAN, wire));
-				} //end wire was hit (checkBit)
-				else {
-					connected = false;
-				}
-			}
-		}
 
-		
-		
-		//prune and split clusters
-		
-	}
-	
-	/**
-	 * Get the list of left leaning clusters
-	 * @return left leaning clusters
-	 */
-	public ArrayList<Cluster> getLeftClusters() {
-		return _leftClusters;
-	}
-	
-	/**
-	 * Get the list of right leaning clusters
-	 * @return right leaning clusters
-	 */
-	public ArrayList<Cluster> getRightClusters() {
-		return _rightClusters;
-	}
  
 	//d = a & (Left | Right)
 	private void aAndLeftOrRight(ExtendedWord a, ExtendedWord left, ExtendedWord right, ExtendedWord d) {
@@ -533,14 +463,54 @@ public class NoiseReductionParameters {
 		// (union) of both sets of segments and its own hits.
 		// NOTE: the first layer (layer 0) NEVER has a layer shift.*/
 		
-		aAndLeftOrRight(_rawData[0], _leftSegments, _rightSegments, _cleanData[0]);
+		aAndLeftOrRight(_rawData[0], leftSegments, rightSegments, _cleanData[0]);
 		
 		
 		// start loop at 1 since layer 0 never bled
 		for (int lay = 1; lay < _numLayer; lay++) {
-			rawAndSegBledLeft(_rawData[lay], _leftSegments, _leftLayerShifts[lay], _leftClean);
-			rawAndSegBledRight(_rawData[lay], _rightSegments, _rightLayerShifts[lay], _rightClean);
+			rawAndSegBledLeft(_rawData[lay], leftSegments, _leftLayerShifts[lay], _leftClean);
+			rawAndSegBledRight(_rawData[lay], rightSegments, _rightLayerShifts[lay], _rightClean);
 			ExtendedWord.bitwiseOr(_leftClean, _rightClean, _cleanData[lay]);
+		}
+	}
+	
+	/**
+	 * Get the maximum shift for a given direction. It is assumed that
+	 * this is in the shift for the last layer.
+	 * @param direction either left (0) or right (1)
+	 * @return the maximum shift for a given direction
+	 */
+	public int maxShift(int direction) {
+		return (direction == LEFT_LEAN) ? _leftLayerShifts[_numLayer-1] : _rightLayerShifts[_numLayer-1];
+	}
+
+	/**
+	 * Add wires that are in the masks of the clean data corresponding to a given
+	 * wire (segment candidate start), layer, and direction
+	 * @param layer the 0 based layer, for CLAS12 [0..5]
+	 * @param wire the 0 based wire, for CLAS12 [0..111]
+	 * @param direction either left (0) or right (1)
+	 * @param list the list to add to
+	 */
+	public void addHitsInMask(int layer, int wire, int direction, WireList list) {
+		
+		if (direction == LEFT_LEAN) {
+			int shift = _leftLayerShifts[layer];
+			int maxWire = Integer.min(_numWire-1, wire+shift);
+			for (int tw = wire; tw <= maxWire; tw++) {
+				if (_cleanData[layer].checkBit(tw)) {
+					list.add(tw);
+				}
+			}
+		}
+		else {
+			int shift = _rightLayerShifts[layer];
+			int minWire = Integer.max(0, wire-shift);
+			for (int tw = wire; tw >= minWire; tw--) {
+				if (_cleanData[layer].checkBit(tw)) {
+					list.add(tw);
+				}
+			}
 		}
 	}
 
@@ -567,11 +537,11 @@ public class NoiseReductionParameters {
 		// copy the data. Bleed based on lean. If looking for right leaners,
 		// bled left data.
 		if (direction == LEFT_LEAN) {
-			segments = _leftSegments;
+			segments = leftSegments;
 			bledData = _bledRightData;
 
 		} else { // right leaners use bled left data
-			segments = _rightSegments;
+			segments = rightSegments;
 			bledData = _bledLeftData;
 		}
 		
@@ -706,6 +676,15 @@ public class NoiseReductionParameters {
 	}
 	
 	/**
+	 * Get the cluster finder
+	 * @return ther cluster finder
+	 */
+	public ClusterFinder getClusterFinder() {
+		return _clusterFinder;
+	}
+	
+	
+	/**
 	 * Used in second stage analysis. Adjaceny counts that are within "del"
 	 * from the given wire, where del is 1 for the layer the wire is
 	 * in an increases by 1 for every layer as you move up or down. Thus
@@ -723,8 +702,9 @@ public class NoiseReductionParameters {
 		if (_cleanData[layer].checkBit(wire)) {
 			int adj = 0;
 
+			//layers below
 			for (int tlay = 0; tlay < layer; tlay++) {
-				int del = layer - tlay;
+				int del = layer - tlay + 1;
 				int wiremin = Integer.max(0, wire - del);
 				int wiremax = Integer.min((_numWire - 1), wire + del);
 				for (int twire = wiremin; twire <= wiremax; twire++) {
@@ -734,8 +714,9 @@ public class NoiseReductionParameters {
 				}
 			}
 
+			//layers above
 			for (int tlay = (_numLayer-1); tlay > layer; tlay--) {
-				int del = tlay - layer;
+				int del = tlay - layer + 1;
 				int wiremin = Integer.max(0, wire - del);
 				int wiremax = Integer.min((_numWire - 1), wire + del);
 				for (int twire = wiremin; twire <= wiremax; twire++) {
@@ -744,6 +725,21 @@ public class NoiseReductionParameters {
 					}
 				}
 			}
+			
+			//same layer
+			int wirePlus = wire+1;
+			int wireMinus = wire-1;
+			if (wirePlus < _numWire) {
+				if (_cleanData[layer].checkBit(wirePlus)) {
+					adj++;
+				}
+			}
+			if (wireMinus >= 0) {
+				if (_cleanData[layer].checkBit(wireMinus)) {
+					adj++;
+				}
+			}
+
 
 			
 			return adj;
