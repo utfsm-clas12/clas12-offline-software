@@ -29,14 +29,10 @@ public class NoiseReductionParameters {
 	/** The number of missing layers allowed */
 	private int _allowedMissingLayers;
 
-	/**
-	 * The shifts for left leaning tracks.
-	 */
+	/** The shifts for left leaning tracks. */
 	private int _leftLayerShifts[];
 
-	/**
-	 * The shifts for right leaning tracks.
-	 */
+	/** The shifts for right leaning tracks. */
 	private int _rightLayerShifts[];
 
 	/**
@@ -56,11 +52,6 @@ public class NoiseReductionParameters {
 	private ExtendedWord _rightSegments;
 
 	/**
-	 * A workspace for a copy of the data.
-	 */
-	private ExtendedWord _copy[];
-
-	/**
 	 * A workspace used for storing a reservoir of misses. When
 	 * the analysis is done, this can be used to determine a quality
 	 * factor for the potential left segment, based on the number of
@@ -76,19 +67,25 @@ public class NoiseReductionParameters {
 	 */
 	private ExtendedWord _rightMisses[];
 
-	/**
-	 * More workspace. This array has numLayers + 1 entries.
-	 */
-	private ExtendedWord _workSpace[];
 
-	/**
-	 * This is the actual data. Before noise reduction analysis is run, this
-	 * contains all the hits. After the analysis, the noise hits are removed.
-	 */
-	private ExtendedWord _packedData[];
-
-	// keep a copy of the raw data
+	/** This is the raw data. */
 	private ExtendedWord _rawData[];
+	
+	/** The cleaned data, with noise removed */
+	private ExtendedWord _cleanData[];
+	
+	/** The data bled left, used for RIGHT segments */
+	private ExtendedWord _bledLeftData[];
+	
+	/** The data bled right, used for LEFT segments */
+	private ExtendedWord _bledRightData[];
+
+
+	//for workspace
+	private ExtendedWord _oldSegments;
+	private ExtendedWord _leftClean;
+	private ExtendedWord _rightClean;
+
 
 	// flag that specifies whether the data have been analyzed
 	private boolean _analyzed = false;
@@ -219,25 +216,27 @@ public class NoiseReductionParameters {
 			_leftSegments = new ExtendedWord(_numWire);
 			_rightSegments = new ExtendedWord(_numWire);
 
-			_packedData = new ExtendedWord[_numLayer];
 			_rawData = new ExtendedWord[_numLayer];
-			_copy = new ExtendedWord[_numLayer];
+			_cleanData = new ExtendedWord[_numLayer];
+			_bledLeftData = new ExtendedWord[_numLayer];
+			_bledRightData = new ExtendedWord[_numLayer];
 			_leftMisses = new ExtendedWord[_numLayer];
 			_rightMisses = new ExtendedWord[_numLayer];
-			_workSpace = new ExtendedWord[_allowedMissingLayers + 1];
 			
 			
 			for (int layer = 0; layer < _numLayer; layer++) {
-				_packedData[layer] = new ExtendedWord(_numWire);
 				_rawData[layer] = new ExtendedWord(_numWire);
-				_copy[layer] = new ExtendedWord(_numWire);
+				_cleanData[layer] = new ExtendedWord(_numWire);
+				_bledLeftData[layer] = new ExtendedWord(_numWire);
+				_bledRightData[layer] = new ExtendedWord(_numWire);
 				_leftMisses[layer] = new ExtendedWord(_numWire);
 				_rightMisses[layer] = new ExtendedWord(_numWire);
 			}
-
-			for (int i = 0; i <= _allowedMissingLayers; i++) {
-				_workSpace[i] = new ExtendedWord(_numWire);
-			}
+			
+			//workspace
+			_oldSegments =  new ExtendedWord(_numWire);
+			_leftClean =  new ExtendedWord(_numWire);
+			_rightClean =  new ExtendedWord(_numWire);
 
 		}
 	}
@@ -255,8 +254,8 @@ public class NoiseReductionParameters {
 		if (_analyzed) {
 			boolean inRaw = _rawData[layer].checkBit(wire);
 			if (inRaw) {
-				boolean inPacked = _packedData[layer].checkBit(wire);
-				return !inPacked;
+				boolean inClean = _cleanData[layer].checkBit(wire);
+				return !inClean;
 			}
 		}
 		return false;
@@ -267,7 +266,7 @@ public class NoiseReductionParameters {
 	 */
 	public void clear() {
 		for (int layer = 0; layer < _numLayer; layer++) {
-			_packedData[layer].clear();
+			_rawData[layer].clear();
 		}
 		_leftSegments.clear();
 		_rightSegments.clear();
@@ -339,63 +338,25 @@ public class NoiseReductionParameters {
 		return _rightSegments;
 	}
 
-	/**
-	 * Get the packed data arrays.
-	 * 
-	 * @return the packedData this may be raw or may have had the noise removed--use
-	 *         "is analyzed" to distinguish
-	 */
-	public ExtendedWord[] getPackedData() {
-		return _packedData;
-	}
 
 	/**
-	 * Get the packed data for a specific layer
-	 * 
-	 * @param layer the 0-based layer
-	 * @return the packed data for the given layer
-	 */
-	public ExtendedWord getPackedData(int layer) {
-		return _packedData[layer];
-	}
-
-	/**
-	 * Get the raw data arrays.
-	 * 
-	 * @return the raw data
-	 */
-	public ExtendedWord[] getRawData() {
-		return _rawData;
-	}
-
-	/**
-	 * Get the raw data for a specific layer
-	 * 
-	 * @param layer the 0-based layer
-	 * @return the raw data for the given layer
-	 */
-	public ExtendedWord getRawData(int layer) {
-		return _rawData[layer];
-	}
-
-	/**
-	 * pack a hit
+	 * pack a hit into the raw data
 	 * 
 	 * @param layer the 0-based layer
 	 * @param wire  the 0-based wire
 	 */
 	public void packHit(int layer, int wire) {
-		_packedData[layer].setBit(wire);
+		_rawData[layer].setBit(wire);
 	}
 
 
 	/**
 	 * Set new raw data. The analyzed flag is set to false.
 	 * 
-	 * @param packedData the packedData to set. This should be new raw data.
+	 * @param rawData the new raw data to set.
 	 */
 	public void setPackedData(ExtendedWord[] packedData) {
-		_packedData = packedData;
+		_rawData = packedData;
 		_analyzed = false;
 	}
 
@@ -413,13 +374,9 @@ public class NoiseReductionParameters {
 	 */
 	public void removeNoise() {
 		
-		// keep a copy of the raw data. Not needed but convenient.
-
-		for (int layer = 0; layer < _numLayer; layer++) {
-			ExtendedWord.copy(_packedData[layer], _rawData[layer]);
-		}
-
+		
 		// first find the left and then the right leaning segments
+		initBledData(_rawData);
 		findPossibleSegments(LEFT_LEAN);
 		findPossibleSegments(RIGHT_LEAN);
 
@@ -430,17 +387,32 @@ public class NoiseReductionParameters {
 			//run it twice
 			stage2Analysis();
 			stage2Analysis();
+			initBledData(_cleanData);
+			
 			findPossibleSegments(LEFT_LEAN);
 			findPossibleSegments(RIGHT_LEAN);
 			
 			//find cluster candidates
 			findClusters();
-
 		}
 		
-		
-		
 		_analyzed = true;
+	}
+	
+	
+	//prepare the bled data for finding segments
+	private void initBledData(ExtendedWord[] data) {
+		//do the bleeding. First layer (layer 0) never bled
+		ExtendedWord.copy(data[0], _bledLeftData[0]);
+		ExtendedWord.copy(data[0], _bledRightData[0]);
+		
+		for (int lay = 1; lay < _numLayer; lay++) {
+			ExtendedWord.copy(data[lay], _bledLeftData[lay]);
+			ExtendedWord.copy(data[lay], _bledRightData[lay]);
+			_bledLeftData[lay].bleedLeft(_leftLayerShifts[lay]);
+			_bledRightData[lay].bleedRight(_rightLayerShifts[lay]);
+		}
+
 	}
 	
 	//experimental stage 2 uses the adjacency test
@@ -450,9 +422,9 @@ public class NoiseReductionParameters {
 		
 		for (int layer = 0; layer < _numLayer; layer++) {
 			for (int wire = 0; wire < _numWire; wire++) {
-				if (_packedData[layer].checkBit(wire)) {
+				if (_cleanData[layer].checkBit(wire)) {
 					if (computeAdjacency(layer, wire) < _adjacencyThreshold) {
-						_packedData[layer].clearBit(wire);
+						_cleanData[layer].clearBit(wire);
 					}
 				}
 			}
@@ -463,7 +435,6 @@ public class NoiseReductionParameters {
 	
 	//find the clusters
 	private void findClusters() {
-		//step 1, 
 		
 		if (_leftClusters == null) {
 			_leftClusters = new ArrayList<>();
@@ -533,33 +504,43 @@ public class NoiseReductionParameters {
 	public ArrayList<Cluster> getRightClusters() {
 		return _rightClusters;
 	}
+ 
+	//d = a & (Left | Right)
+	private void aAndLeftOrRight(ExtendedWord a, ExtendedWord left, ExtendedWord right, ExtendedWord d) {
+		ExtendedWord.bitwiseOr(left, right, d);
+		ExtendedWord.bitwiseAnd(d, a, d);
+	}
+	
+	
+	//used to mask for clean data
+	private void rawAndSegBledRight(ExtendedWord raw, ExtendedWord seg, int shift, ExtendedWord c) {
+		ExtendedWord.copy(seg, c);
+		c.bleedRight(shift);
+		ExtendedWord.bitwiseAnd(c, raw , c);
+	}
+	
+	//used to mask for clean data
+	private void rawAndSegBledLeft(ExtendedWord raw, ExtendedWord seg, int shift, ExtendedWord c) {
+		ExtendedWord.copy(seg, c);
+		c.bleedLeft(shift);
+		ExtendedWord.bitwiseAnd(c, raw , c);
+	}
 
 
 	// this creates the masks and .ANDS. them with the data
 	private void cleanFromSegments() {
-		// now remove the noise first. Set packedData[0] to contain overlap
+		// Set clean[0] to contain overlap
 		// (union) of both sets of segments and its own hits.
 		// NOTE: the first layer (layer 0) NEVER has a layer shift.*/
-		ExtendedWord.bitwiseOr(_leftSegments, _rightSegments, _copy[0]);
-		ExtendedWord.bitwiseAnd(_packedData[0], _copy[0], _packedData[0]);
-
+		
+		aAndLeftOrRight(_rawData[0], _leftSegments, _rightSegments, _cleanData[0]);
+		
+		
 		// start loop at 1 since layer 0 never bled
-		for (int i = 1; i < _numLayer; i++) {
-
-			// copy segments onto a given layer and bleed to create left and
-			// right buckets
-
-			ExtendedWord.copy(_leftSegments, _copy[i]);
-			_copy[i].bleedLeft(_leftLayerShifts[i]);
-
-			ExtendedWord.copy(_rightSegments, _workSpace[0]);
-			_workSpace[0].bleedRight(_rightLayerShifts[i]);
-
-			// combine left and right buckets
-			ExtendedWord.bitwiseOr(_copy[i], _workSpace[0], _copy[i]);
-
-			// now get overlap of original data with buckets
-			ExtendedWord.bitwiseAnd(_packedData[i], _copy[i], _packedData[i]);
+		for (int lay = 1; lay < _numLayer; lay++) {
+			rawAndSegBledLeft(_rawData[lay], _leftSegments, _leftLayerShifts[lay], _leftClean);
+			rawAndSegBledRight(_rawData[lay], _rightSegments, _rightLayerShifts[lay], _rightClean);
+			ExtendedWord.bitwiseOr(_leftClean, _rightClean, _cleanData[lay]);
 		}
 	}
 
@@ -581,66 +562,42 @@ public class NoiseReductionParameters {
 		}
 
 		ExtendedWord segments = null;
+		ExtendedWord bledData[] = null;
 
 		// copy the data. Bleed based on lean. If looking for right leaners,
-		// bleed left to try to find a complete "vertical" segment. Similarly
-		// for left leaners--bleed right.
-		// segments start out as copy of first layer.
+		// bled left data.
 		if (direction == LEFT_LEAN) {
 			segments = _leftSegments;
-			for (int i = 0; i < _numLayer; i++) {
-				ExtendedWord.copy(_packedData[i], _copy[i]);
-				_copy[i].bleedRight(_leftLayerShifts[i]);
-			}
-			ExtendedWord.copy(_packedData[0], segments);
+			bledData = _bledRightData;
 
-		} else { // right leaners
+		} else { // right leaners use bled left data
 			segments = _rightSegments;
-			for (int i = 0; i < _numLayer; i++) {
-				ExtendedWord.copy(_packedData[i], _copy[i]);
-				_copy[i].bleedLeft(_rightLayerShifts[i]);
-			}
-			ExtendedWord.copy(_packedData[0], segments);
+			bledData = _bledLeftData;
 		}
+		
+		// segments start out as copy of first layer.
+		//bledData[0] is same as first raw data layer
+		ExtendedWord.copy(bledData[0], segments);
 
-		// now .AND. the other layers, which have been shifted to accommodate
-		// the buckets
-		int numCheck = 0;
-
-		for (int i = 0; i < getNumLayer();) {
-			if (i > 0) {
-				ExtendedWord.bitwiseAnd(segments, _copy[i], segments);
+		for (int lay = 0; lay < _numLayer; lay++) {
+			if (lay > 0) {
+				ExtendedWord.bitwiseAnd(segments, bledData[lay], segments);
 			}
 
-			// Now take missing layers into account. missingLayers
-			// is the max number of missing layers allowed. However
-			// there is no need to check more misses the layer that we
+
+			// See how many deep we can go into the missing hit reservoir
+			// There is no need to check more misses the layer that we
 			// are presently investigating.
-
-			if (++i < _allowedMissingLayers) { //note from this step i is the "NEXT" layer
-				numCheck = i;
-			} else {
-				numCheck = _allowedMissingLayers;
+			int numToCheck = Integer.min((lay+1), _allowedMissingLayers);
+			
+			
+			for (int j = 0; j < numToCheck; j++) {
+				ExtendedWord.copy(segments,  _oldSegments);
+				ExtendedWord.bitwiseOr(segments, misses[j], segments);
+				ExtendedWord.bitwiseAnd(misses[j], _oldSegments, misses[j]);
 			}
-
-			// note: numCheck is always > 0 unless a level shift is set
-			// to zero which is unlikely. (in which case segments will
-			// be unnecessarily copied onto workspace[0] and back again.
-			// The algorithm still would work.
-
-			ExtendedWord.copy(segments, _workSpace[0]);
-			for (int j = 0; j < numCheck; j++) {
-
-				// first step: use whatever misses are left for this j
-				ExtendedWord.bitwiseOr(_workSpace[j], misses[j], _workSpace[j + 1]);
-
-				// second step: remove used up misses
-				ExtendedWord.bitwiseAnd(misses[j], _workSpace[j], misses[j]);
-				
-			}
-			ExtendedWord.copy(_workSpace[numCheck], segments);
-
-		} /* end of layer loop */
+			
+		}
 	}
 	
 	/**
@@ -684,7 +641,7 @@ public class NoiseReductionParameters {
 	 * @return the occupancy of the raw. Multiply by 100 to express as percent.
 	 */
 	public double getNoiseReducedOccupancy() {
-		return getOccupancy(_packedData);
+		return getOccupancy(_cleanData);
 	}
 
 	/**
@@ -733,7 +690,7 @@ public class NoiseReductionParameters {
 	 * @return number of noise reduced hits
 	 */
 	public int totalReducedHitCount() {
-		return (hitCount(_packedData));
+		return (hitCount(_cleanData));
 	}
 	
 	/**
@@ -749,18 +706,21 @@ public class NoiseReductionParameters {
 	}
 	
 	/**
-	 * Used in second stage analysis
-	 * @param layer the 0-based layer 0..5
-	 * @param wire  the 0-base wire 0..
-	 * @return the adjacency
+	 * Used in second stage analysis. Adjaceny counts that are within "del"
+	 * from the given wire, where del is 1 for the layer the wire is
+	 * in an increases by 1 for every layer as you move up or down. Thus
+	 * for CLAS12, del is [1..5]
+	 * @param layer the 0-based layer, for CLAS12 [0..5]
+	 * @param wire  the 0-base wire, for CLAS12 [0..111]
+	 * @return the adjacency value
 	 */
 	public int computeAdjacency(int layer, int wire) {
-		if (_packedData == null) {
+		if (_cleanData == null) {
 			return 0;
 		}
 
 		// if no hit, bail
-		if (_packedData[layer].checkBit(wire)) {
+		if (_cleanData[layer].checkBit(wire)) {
 			int adj = 0;
 
 			for (int tlay = 0; tlay < layer; tlay++) {
@@ -768,7 +728,7 @@ public class NoiseReductionParameters {
 				int wiremin = Integer.max(0, wire - del);
 				int wiremax = Integer.min((_numWire - 1), wire + del);
 				for (int twire = wiremin; twire <= wiremax; twire++) {
-					if (_packedData[tlay].checkBit(twire)) {
+					if (_cleanData[tlay].checkBit(twire)) {
 						adj++;
 					}
 				}
@@ -779,7 +739,7 @@ public class NoiseReductionParameters {
 				int wiremin = Integer.max(0, wire - del);
 				int wiremax = Integer.min((_numWire - 1), wire + del);
 				for (int twire = wiremin; twire <= wiremax; twire++) {
-					if (_packedData[tlay].checkBit(twire)) {
+					if (_cleanData[tlay].checkBit(twire)) {
 						adj++;
 					}
 				}

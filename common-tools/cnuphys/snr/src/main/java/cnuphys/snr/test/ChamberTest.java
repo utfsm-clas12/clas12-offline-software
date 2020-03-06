@@ -675,10 +675,14 @@ public class ChamberTest {
 		for (HitTest ht : _hits) {
 			int layer = ht.getLayer();
 			int wire = ht.getWire();
+
 			if (_data[layer].checkBit(wire)) {
-				ht.setComputedHitType(HitTest.HitType.TRACK);
-			} else {
-				ht.setComputedHitType(HitTest.HitType.NOISE);
+
+				if (_parameters.isNoiseHit(layer, wire)) {
+					ht.setComputedHitType(HitTest.HitType.NOISE);
+				} else {
+					ht.setComputedHitType(HitTest.HitType.TRACK);
+				}
 			}
 		}
 	}
