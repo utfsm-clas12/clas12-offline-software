@@ -13,6 +13,10 @@ public class Cluster {
 	/** The number of layers, probably 6 */
 	public final int numLayers;
 	
+	/** The number of wires, probably 112 */
+	public final int numWires;
+
+	
 	/** a wirelist for the segment starting points. */
 	public final SegmentStartList segmentStartList = new SegmentStartList();
 	
@@ -22,15 +26,22 @@ public class Cluster {
 	/** the direction, 0 for left, 1 for right */
 	public int direction;
 	
+	/** slope of linear fit */
 	private double _slope = Double.NaN;
+	
+	/** intercept of linear fit */
+	private double _intercept = Double.NaN;
+
 	
 	/**
 	 * @param numLayers the number of layers, for CLAS12 6
+	 * @param numWires the number of wires, for CLAS12 112
 	 * @param direction the direction, 0 for left, 1 for right
 	 */
-	public Cluster(int numLayers, int direction) {
+	public Cluster(int numLayers, int numWires, int direction) {
 		this.direction = direction;
 		this.numLayers = numLayers;
+		this.numWires = numWires;
 		wireLists = new WireList[numLayers];
 
 		clear();
@@ -64,7 +75,7 @@ public class Cluster {
 
 		for (int layer = 0; layer < numLayers; layer++) {
 			if (wireLists[layer] == null) {
-				wireLists[layer] = new WireList();
+				wireLists[layer] = new WireList(numWires);
 			}
 			else {
 				wireLists[layer].clear();
@@ -92,7 +103,7 @@ public class Cluster {
 		sb.append("}  ");
 		
 		if (Double.isNaN(_slope)) {
-			computeSlope();
+			computeLine();
 		}
 		sb.append(String.format(" M: %5.2f ", _slope));
 		return sb.toString();
@@ -102,16 +113,41 @@ public class Cluster {
 		
 	}
 	
-	private double getSlope() {
+	/**
+	 * Get the slope of the linear fit
+	 * @return
+	 */
+	public  double getSlope() {
+		if (Double.isNaN(_slope)) {
+			computeLine();
+		}
 		return _slope;
 	}
 	
 	/**
-	 * This computes slope a line using the layer as the X value and the 
-	 * average wire number as the Y so a slope of 0 looks "vetical".
+	 * This removes wires from the wire list if there are more than two in a given
+	 * layer.
+	 */
+	public void clean() {
+		for (int lay = 0; lay < numLayers; lay++) {
+			if (wireLists[lay].size() > 2) {
+				wireLists[lay].sort();
+				
+				while (wireLists[lay].size() > 2) {
+					wireLists[lay].remove(wireLists[lay].size()-1);
+				}
+				
+				_slope =  Double.NaN;
+			}
+		}
+	}
+	
+	/**
+	 * This computes slope and intercept a line using the layer as the X value and the 
+	 * average wire number as the Y so a slope of 0 looks "vertical".
 	 * We do it this way to avoid the possibility of an infinite slope.
 	 */
-	public void computeSlope() {
+	public void computeLine() {
 		double sumx = 0;
 		double sumy = 0;
 		double sumxy = 0;
@@ -129,10 +165,32 @@ public class Cluster {
 			}
 		}
 		
-		if (n >0) {
-			_slope = (n*sumxy- sumx*sumy)/(n*sumx2 -sumx*sumx);
+		if (n >1) {
+			_slope = (n*sumxy - sumx*sumy)/(n*sumx2 - sumx*sumx);
+			_intercept = (sumy - _slope*sumx)/n;
+		}
+		else {
+			_slope = Double.NaN;
+			_intercept = Double.NaN;
 		}
 	}
 	
+	/**
+	 * Used to draw a linear fit to the cluster
+	 * @param layer the layer
+	 * @return the wire position as a real (with fractional part) 
+	 */
+	public double getWirePosition(int layer) {
+		if (Double.isNaN(_slope)) {
+			computeLine();
+		}
+		
+		//still NaN?
+		if (Double.isNaN(_slope)) {
+			return Double.NaN;
+		}
+		
+		return _slope*layer + _intercept;
+	}
 
 }

@@ -3,7 +3,6 @@ package cnuphys.snr.test;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -53,12 +52,12 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	/**
 	 * The current world.
 	 */
-	private Rectangle2D.Double world;
+	private Rectangle2D.Double _world;
 
 	/**
 	 * The default world
 	 */
-	private Rectangle2D.Double defaultWorld;
+	private Rectangle2D.Double _defaultWorld;
 
 	/** The chambers */
 	private Vector<ChamberTest> chambers = new Vector<ChamberTest>(10);
@@ -103,8 +102,8 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 		
 		_rand = new Random(_seed);
 
-		world = new Rectangle2D.Double(x, y, w, h);
-		defaultWorld = new Rectangle2D.Double(x, y, w, h);
+		_world = new Rectangle2D.Double(x, y, w, h);
+		_defaultWorld = new Rectangle2D.Double(x, y, w, h);
 
 		_display = new JComponent() {
 			@Override
@@ -263,15 +262,15 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			Point2D.Double wp1 = new Point2D.Double();
 			// wp0.y = world.y;
 			wp0.y = chambers.get(0).boundary.getMinY();
-			wp1.y = world.y + world.height;
+			wp1.y = _world.y + _world.height;
 
-			wp0.x = world.x + world.width / 2.0;
-			double dx = 0.5 * world.width * (1.0 - 2.0 * _rand.nextDouble());
+			wp0.x = _world.x + _world.width / 2.0;
+			double dx = 0.5 * _world.width * (1.0 - 2.0 * _rand.nextDouble());
 			wp0.x = wp0.x + dx;
 
 			double thetaMax = Math.toRadians(TestParameters.getThetaMax());
 			double ang = thetaMax * (1.0 - 2.0 * _rand.nextDouble());
-			wp1.x = wp0.x + world.height * Math.tan(ang);
+			wp1.x = wp0.x + _world.height * Math.tan(ang);
 
 			tracks.add(new TrackTest(wp0, wp1));
 		}
@@ -297,19 +296,19 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			numNoiseHits += ct.getNumNoiseHits();
 			numRemovedNoiseHits += ct.getNumRemovedNoiseHits();
 			numSavedNoiseHits += ct.getNumSavedNoiseHits();
-			ct.draw(g, world, _local);
+			ct.draw(g, _world, _local);
 		}
 
 		// draw the tracks
 		if (displayTrack) {
 			for (TrackTest tt : tracks) {
-				tt.draw(g, world, _local);
+				tt.draw(g, _world, _local);
 			}
 		}
 		
 		// draw more on the chambers
 		for (ChamberTest ct : chambers) {
-			ct.drawAfter(g, world, _local);
+			ct.drawAfter(g, _world, _local);
 		}
 
 		// draw some text
@@ -326,7 +325,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	}
 
 	public void restoreDefaultWorld() {
-		world = (Rectangle2D.Double) defaultWorld.clone();
+		_world = (Rectangle2D.Double) _defaultWorld.clone();
 		_display.repaint();
 	}
 
@@ -346,11 +345,16 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	 * @param pp
 	 */
 	private void updateStatus(Point pp) {
+		Point.Double wp  =  new Point.Double();
+		
+		TestSupport.toWorld(_world, _local, pp, wp);
 		stringBuffer.delete(0, stringBuffer.capacity());
 
+		stringBuffer.append(String.format("local [%d, %d]  world [%5.2f, %5.2f] ", pp.x, pp.y, wp.x, wp.y));
+		
 		// mouse over chamber
 		for (ChamberTest ct : chambers) {
-			String s = ct.feedback(pp, world, _local);
+			String s = ct.feedback(pp, _world, _local);
 			if (s != null) {
 				stringBuffer.append(" " + s);
 				break;
@@ -382,7 +386,7 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 	public void mouseClicked(MouseEvent mouseEvent) {
 		if (mouseEvent.getClickCount() == 2) {
 			for (ChamberTest ct : chambers) {
-				if (ct.contains(mouseEvent.getPoint(), world, _local)) {
+				if (ct.contains(mouseEvent.getPoint(), _world, _local)) {
 					System.out.println("Double Click on " + ct.getName());
 				}
 			}

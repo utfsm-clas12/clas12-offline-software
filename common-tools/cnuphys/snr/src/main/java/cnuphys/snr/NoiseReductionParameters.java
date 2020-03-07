@@ -89,7 +89,7 @@ public class NoiseReductionParameters {
 	private boolean _analyzed = false;
 	
 	//experimental stage 2 adjecency test
-	private int _adjacencyThreshold = 5;
+	private int _adjacencyThreshold = 6;
 	
 	//experimental stage2 cluster finder
 	private ClusterFinder _clusterFinder;
@@ -365,10 +365,10 @@ public class NoiseReductionParameters {
 	public boolean isAnalyzed() {
 		return _analyzed;
 	}
+	
 
 	/**
 	 * Remove the noise. This is the actual algorithm.
-	 * 
 	 */
 	public void removeNoise() {
 		
@@ -382,13 +382,13 @@ public class NoiseReductionParameters {
 		cleanFromSegments();
 		
 		if (_analysisLevel == SNRAnalysisLevel.TWOSTAGE) {
-			//run it twice
-			stage2Analysis();
-			stage2Analysis();
-			initBledData(_cleanData);
 			
+			applyAdjacency();
+			initBledData(_cleanData);
 			findPossibleSegments(LEFT_LEAN);
 			findPossibleSegments(RIGHT_LEAN);
+			cleanFromSegments();
+			applyAdjacency(); //yep, again
 			
 			//find cluster candidates
 			if (_clusterFinder == null) {
@@ -401,6 +401,26 @@ public class NoiseReductionParameters {
 	}
 	
 	
+	//apple the ajacency hueristic
+	private void applyAdjacency() {
+
+		boolean again = true;
+		int oldHitCount = hitCount(_cleanData);
+		int newHitCount = -1;
+
+		while (again) {
+			stage2Analysis();
+			newHitCount = hitCount(_cleanData);
+
+			if (newHitCount == oldHitCount) {
+				again = false;
+			} else {
+				oldHitCount = newHitCount;
+			}
+
+		}
+	}
+
 	//prepare the bled data for finding segments
 	private void initBledData(ExtendedWord[] data) {
 		//do the bleeding. First layer (layer 0) never bled
@@ -683,71 +703,17 @@ public class NoiseReductionParameters {
 		return _clusterFinder;
 	}
 	
-	
 	/**
-	 * Used in second stage analysis. Adjaceny counts that are within "del"
-	 * from the given wire, where del is 1 for the layer the wire is
-	 * in an increases by 1 for every layer as you move up or down. Thus
-	 * for CLAS12, del is [1..5]
+	 * Used in second stage analysis. Adjaceny counts that are within "del" from the
+	 * given wire, where del is 1 for the layer the wire is in an increases by 1 for
+	 * every layer as you move up or down. Thus for CLAS12, del is [1..5]
+	 * 
 	 * @param layer the 0-based layer, for CLAS12 [0..5]
 	 * @param wire  the 0-base wire, for CLAS12 [0..111]
 	 * @return the adjacency value
 	 */
 	public int computeAdjacency(int layer, int wire) {
-		if (_cleanData == null) {
-			return 0;
-		}
-
-		// if no hit, bail
-		if (_cleanData[layer].checkBit(wire)) {
-			int adj = 0;
-
-			//layers below
-			for (int tlay = 0; tlay < layer; tlay++) {
-				int del = layer - tlay + 1;
-				int wiremin = Integer.max(0, wire - del);
-				int wiremax = Integer.min((_numWire - 1), wire + del);
-				for (int twire = wiremin; twire <= wiremax; twire++) {
-					if (_cleanData[tlay].checkBit(twire)) {
-						adj++;
-					}
-				}
-			}
-
-			//layers above
-			for (int tlay = (_numLayer-1); tlay > layer; tlay--) {
-				int del = tlay - layer + 1;
-				int wiremin = Integer.max(0, wire - del);
-				int wiremax = Integer.min((_numWire - 1), wire + del);
-				for (int twire = wiremin; twire <= wiremax; twire++) {
-					if (_cleanData[tlay].checkBit(twire)) {
-						adj++;
-					}
-				}
-			}
-			
-			//same layer
-			int wirePlus = wire+1;
-			int wireMinus = wire-1;
-			if (wirePlus < _numWire) {
-				if (_cleanData[layer].checkBit(wirePlus)) {
-					adj++;
-				}
-			}
-			if (wireMinus >= 0) {
-				if (_cleanData[layer].checkBit(wireMinus)) {
-					adj++;
-				}
-			}
-
-
-			
-			return adj;
-		}
-		else {
-			return 0;
-		}
-		
+		return Adjacency.computeAdjacency(_cleanData, _numLayer, _numWire, layer, wire);
 	}
 
 }

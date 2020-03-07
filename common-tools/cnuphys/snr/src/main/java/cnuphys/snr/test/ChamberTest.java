@@ -7,7 +7,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -24,7 +23,8 @@ public class ChamberTest {
 	private static final Color[] _missingColors = {Color.red, Color.orange, Color.yellow};
 	
 	private static final Color _leftClusterColor = new Color(46, 139, 87);
-	private static final Color _rightClusterColor = new Color(70, 130, 180);
+	private static final Color _rightClusterColor = new Color(210, 105, 30);
+	private static final Color[] _clusterBorders = {Color.black, Color.white, Color.yellow, Color.cyan, Color.magenta, Color.gray};
 
 	
 	public static final Color _maskFillLeft = new Color(255, 128, 0, 48);
@@ -150,6 +150,25 @@ public class ChamberTest {
 			}
 		}
 		
+		//draw clusters?
+		
+		if (TestParameters.showLeftClusters) {
+			
+			ClusterFinder cf = _parameters.getClusterFinder();
+			if (cf != null) {
+				drawClusters(g, world, local, cf.getLeftClusters(), _leftClusterColor);
+			}
+		}
+		
+		if (TestParameters.showRightClusters) {
+			
+			ClusterFinder cf = _parameters.getClusterFinder();
+			if (cf != null) {
+				drawClusters(g, world, local, cf.getRightClusters(), _rightClusterColor);
+			}
+		}
+
+		
 	}
 	
 	/**
@@ -164,37 +183,23 @@ public class ChamberTest {
 		drawLeftSegmentCandidates(g, world, local);
 		drawRightSegmentCandidates(g, world, local);
 		
-		if (TestParameters.showLeftClusters) {
-			System.err.println("drawing left clusters");
-			
-			ClusterFinder cf = _parameters.getClusterFinder();
-			if (cf != null) {
-				drawClusters(g, world, local, cf.getLeftClusters(), _leftClusterColor);
-			}
-		}
-		
-		if (TestParameters.showRightClusters) {
-			System.err.println("drawing right clusters");
-			
-			ClusterFinder cf = _parameters.getClusterFinder();
-			if (cf != null) {
-				drawClusters(g, world, local, cf.getRightClusters(), _rightClusterColor);
-			}
-		}
 
 		
 	}
 	
+	//draw the clusters
 	private void drawClusters(Graphics g, Rectangle2D.Double world, Rectangle local, List<Cluster>clusters, Color color) {
 
 		Rectangle cell = new Rectangle();
 		Graphics2D g2 = (Graphics2D)g;
 		
+		int numLayer = _parameters.getNumLayer();
 		
+		int count = 0;
 		for (Cluster cluster : clusters) {
 			Area area = new Area();
 
-			for (int lay = 0; lay < _parameters.getNumLayer(); lay++) {
+			for (int lay = 0; lay < numLayer; lay++) {
 				for (int wire : cluster.wireLists[lay]) {
 					cellBounds(world, local, lay, wire, cell);
 					area.add(new Area(cell));
@@ -204,8 +209,48 @@ public class ChamberTest {
 			if (!area.isEmpty()) {
 				g2.setColor(color);
 				g2.fill(area);
-				g2.setColor(Color.black);
+				
+				Color borderColor = _clusterBorders[count % _clusterBorders.length];
+				
+				count++;
+				g2.setColor(borderColor);
 				g2.draw(area);
+				
+				//draw best fit line
+				
+				double wire1 = cluster.getWirePosition(0);
+				double wire2 = cluster.getWirePosition(numLayer-1);
+				
+				int iwire1 =  (int)wire1;
+				int iwire2 =  (int)wire2;
+				
+				double fwire1 = wire1 -  iwire1;
+				double fwire2 = wire2 -  iwire2;
+								
+				cellBounds(world, local, 0, iwire1, cell);
+				int y1 = (int)(cell.getCenterY());
+				int x1 = (int)(cell.getCenterX() - fwire1*cell.getWidth());
+				
+				cellBounds(world, local, numLayer-1, iwire2, cell);
+				int y2 = (int)(cell.getCenterY());
+				int x2 = (int)(cell.getCenterX() - fwire2*cell.getWidth());
+				
+
+				g2.setColor (Color.lightGray);
+				g2.drawLine(x1-1, y1, x2-1, y2);
+				g2.setColor (Color.lightGray);
+				g2.drawLine(x1+1, y1, x2+1, y2);
+				g2.setColor (Color.red);
+				g2.drawLine(x1, y1, x2, y2);
+				
+				g2.setColor(Color.yellow);
+				g2.fillOval(x1-3, y1-3, 6, 6);
+				g2.fillOval(x2-3, y2-3, 6, 6);
+				
+				g2.setColor(Color.black);
+				g2.drawOval(x1-3, y1-3, 6, 6);
+				g2.drawOval(x2-3, y2-3, 6, 6);
+
 			}
 
 		}

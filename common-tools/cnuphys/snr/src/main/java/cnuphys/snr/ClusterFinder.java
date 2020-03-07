@@ -1,8 +1,11 @@
 package cnuphys.snr;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ClusterFinder {
+	
+	private static double SLOPE_THRESHOLD = 0.1;
 	
 	public static final int LEFT_LEAN = NoiseReductionParameters.LEFT_LEAN;
 	public static final int RIGHT_LEAN = NoiseReductionParameters.RIGHT_LEAN;
@@ -45,7 +48,7 @@ public class ClusterFinder {
 			for (int wire = 0; wire < _params.getNumWire(); wire++) {
 				if (_params.leftSegments.checkBit(wire)) {
 					if (!connected) { //create a new one
-						currentCluster = new Cluster(_params.getNumLayer(), LEFT_LEAN);
+						currentCluster = createCluster(LEFT_LEAN);
 						leftClusters.add(currentCluster);
 						count = 0;
 						connected = true;
@@ -56,11 +59,17 @@ public class ClusterFinder {
 					
 					count++;
 					connected = count < maxCount;
+					
+					if (!connected) {
+						checkCluster(currentCluster, LEFT_LEAN);
+					}
 				} //end wire was hit (checkBit)
 				else {
+					checkCluster(currentCluster, LEFT_LEAN);
 					connected = false;
+					currentCluster = null;
 				}
-			}
+			} //wire loop
 		}
 		
 		//right clusters
@@ -75,7 +84,7 @@ public class ClusterFinder {
 			for (int wire = (_params.getNumWire()-1); wire >=0; wire--) {
 				if (_params.rightSegments.checkBit(wire)) {
 					if (!connected) { //create a new one
-						currentCluster = new Cluster(_params.getNumLayer(), RIGHT_LEAN);
+						currentCluster = createCluster(RIGHT_LEAN);
 						rightClusters.add(currentCluster);
 						count = 0;
 						connected = true;
@@ -85,17 +94,50 @@ public class ClusterFinder {
 					
 					count++;
 					connected = count < maxCount;
+					
+					if (!connected) {
+						checkCluster(currentCluster, RIGHT_LEAN);
+					}
+
 				} //end wire was hit (checkBit)
 				else {
+					checkCluster(currentCluster, RIGHT_LEAN);
 					connected = false;
+					currentCluster = null;
 				}
-			}
+			} //wire loop
 		}
 
 		//split clusters
 		
 	}
 	
+	//trim rows, check slope
+	private void checkCluster(Cluster cluster, int direction) {
+		if (cluster == null) {
+			return;
+		}
+		
+		cluster.clean();
+		
+		if (direction == LEFT_LEAN) {
+			//slopetest
+			if (cluster.getSlope() < -SLOPE_THRESHOLD) {
+				leftClusters.remove(cluster);
+			}
+		}
+		else {
+			//slopetest
+			if (cluster.getSlope() > SLOPE_THRESHOLD) {
+				rightClusters.remove(cluster);
+			}
+		}
+	}
+	
+	//create a cluster
+	private Cluster createCluster(int direction) {
+		return new Cluster(_params.getNumLayer(),  _params.getNumWire(), direction);
+	}
 	
 	//fill the wire lists
 	private void fillWireLists(Cluster cluster, int segStartWire, int direction) {

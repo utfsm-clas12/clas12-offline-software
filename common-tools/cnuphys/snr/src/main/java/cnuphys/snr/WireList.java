@@ -1,6 +1,8 @@
 package cnuphys.snr;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * 
@@ -9,23 +11,100 @@ import java.util.ArrayList;
  */
 public class WireList extends ArrayList<Integer> {
 	
+	//the number of wires
+	private int _numWires;
+	private byte counts[];
+	private double _avgWire = Double.NaN;
 	
 	/**
 	 * Create a wirelist
 	 */
-	public WireList() {
+	public WireList(int numWires) {
 		super();
+		_numWires = numWires;
+		counts = new byte[numWires];
+	}
+	
+	public void sort() {
+		Comparator<Integer> comp = new Comparator<Integer>() {
+			
+
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				
+				double del1 = delFromAverage(o1);
+				double del2 = delFromAverage(o2);
+				return Double.compare(del1, del2);
+				
+//				int count1 = counts[o1];
+//				int count2 = counts[o2];
+//				
+//				if (count2 < count1) {
+//					return -1;
+//				}
+//				if (count2 > count1) {
+//					return 1;
+//				}
+//
+//				double wp = averageWirePosition();
+//				double del1 = Math.abs(wp )
+//				return Double.compare(d1, d2);
+//				
+//				return Integer.compare(counts[o2], counts[o1]);
+			}
+		};
+		
+		Collections.sort(this, comp);
+	}
+	
+	public double delFromAverage(int wire) {
+		if (Double.isNaN(_avgWire)) {
+			_avgWire = averageWirePosition();
+		}
+		
+		if (Double.isNaN(_avgWire)) {
+			return Double.NaN;
+		}
+		else {
+			return Math.abs(_avgWire-wire);
+		}
 	}
 	
 	/**
 	 * Add a value, do not allow duplicates
-	 * @param val the value to add
+	 * @param wire the 0-based value to add
 	 * @return <code>true</code> as required.
 	 */
 	@Override
-	public boolean add(Integer val) {
-		remove(val);
-		return super.add(val);
+	public boolean add(Integer wire) {
+		if ((wire < 0) || (wire >= _numWires)) {
+			System.err.println("Bad wire index on WireList add: " +  wire);
+		}
+		remove(wire);
+		counts[wire] += 1;
+		_avgWire = Double.NaN;
+		return super.add(wire);
+	}
+	
+	@Override
+	public boolean remove(Object o) {
+		_avgWire = Double.NaN;
+		return super.remove((Integer)o);
+	}
+	
+	/**
+	 * Get the repeat count for this wire
+	 * @param wire the 0-based wire index
+	 * @return the repeat count
+	 */
+	public int getCount(int wire) {
+		return counts[wire];
+	}
+	
+	@Override
+	public void clear() {
+		super.clear();
+		counts = new byte[_numWires];	
 	}
 	
 	/**
@@ -51,6 +130,7 @@ public class WireList extends ArrayList<Integer> {
 	
 	/**
 	 * Get the average wire position (zero-based)
+	 * Duplicate weightings are used via the counts array
 	 * @return the average wire position
 	 */
 	public double averageWirePosition() {
@@ -58,12 +138,15 @@ public class WireList extends ArrayList<Integer> {
 			return Double.NaN;
 		}
 		
+		int totalCount = 0;
+		
 		double sum = 0;
 		for (int wire : this) {
-			sum += wire;
+			sum += counts[wire]*wire;
+			totalCount += counts[wire];
 		}
 		
-		return sum/size();
+		return sum/totalCount;
 	}
 	
 
