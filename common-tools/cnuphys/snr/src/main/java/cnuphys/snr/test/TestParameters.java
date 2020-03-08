@@ -1,6 +1,8 @@
 package cnuphys.snr.test;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Stroke;
 
 public class TestParameters {
 	
@@ -210,21 +212,46 @@ public class TestParameters {
 	public static void setAccumulationIncrement(int accumulationIncrement) {
 		TestParameters.accumulationIncrement = accumulationIncrement;
 	}
+	
+	/**
+	 * Gets a stroke appropriate for the line width and line type. Try the hash
+	 * table first, if not found create the Stroke and place it in the hashtable for
+	 * future use.
+	 * 
+	 * @param lineWidth the desired line width in pixels.
+	 * @param lineStyle the desired line style.
+	 * @return the appropriate stroke.
+	 */
+	public static Stroke getStroke(float lineWidth, LineStyle lineStyle) {
 
-	// public static int getNumWire() {
-	// return numWire;
-	// }
-	//
-	// public static void setNumWire(int numWire) {
-	// TestParameters.numWire = numWire;
-	// }
-	//
-	// public static int getNumLayer() {
-	// return numLayer;
-	// }
-	//
-	// public static void setNumLayer(int numLayer) {
-	// TestParameters.numLayer = numLayer;
-	// }
+		// linewidth 0 same as linewidth 1
+		Stroke stroke = null;
+
+		if (lineStyle.equals(LineStyle.SOLID)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		} else if (lineStyle.equals(LineStyle.DASH)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+					new float[] { 10.0f, 10.0f }, 0.0f);
+		} else if (lineStyle.equals(LineStyle.DOT_DASH)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+					new float[] { 4.0f, 4.0f, 10.0f, 4.0f }, 0.0f);
+		} else if (lineStyle.equals(LineStyle.DOT)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+					new float[] { 4.0f, 4f }, 0.0f);
+		} else if (lineStyle.equals(LineStyle.DOUBLE_DASH)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+					new float[] { 10.0f, 4.0f, 10.0f, 10.0f }, 0.0f);
+		} else if (lineStyle.equals(LineStyle.LONG_DASH)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+					new float[] { 15.0f, 15.0f }, 0.0f);
+		} else if (lineStyle.equals(LineStyle.LONG_DOT_DASH)) {
+			stroke = new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 8.0f,
+					new float[] { 6.0f, 4.0f, 15.0f, 4.0f }, 0.0f);
+		} else {
+			stroke = new BasicStroke(lineWidth);
+		}
+
+		return stroke;
+	}
 
 }

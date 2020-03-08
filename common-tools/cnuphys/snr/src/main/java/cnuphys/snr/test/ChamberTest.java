@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -22,9 +23,9 @@ public class ChamberTest {
 	
 	private static final Color[] _missingColors = {Color.red, Color.orange, Color.yellow};
 	
-	private static final Color _leftClusterColor = new Color(46, 139, 87);
-	private static final Color _rightClusterColor = new Color(210, 105, 30);
-	private static final Color[] _clusterBorders = {Color.black, Color.white, Color.yellow, Color.cyan, Color.magenta, Color.gray};
+	private static final Color _leftClusterColor = new Color(46, 169, 87);
+	private static final Color _rightClusterColor = new Color(170, 105, 30);
+	private static final Color[] _clusterBorders = {Color.black, Color.gray, Color.yellow, Color.cyan, Color.magenta, Color.white};
 
 	
 	public static final Color _maskFillLeft = new Color(255, 128, 0, 48);
@@ -36,6 +37,8 @@ public class ChamberTest {
 
 	private static final Font _smallFont = new Font("SanSerif", Font.BOLD, 9);
 	private static FontMetrics _fm;
+	
+	private static final Stroke _fatStroke = TestParameters.getStroke(2.0f, LineStyle.SOLID);
 	
 	/**
 	 * The parent detector that presumably contains multiple chambers.
@@ -214,6 +217,8 @@ public class ChamberTest {
 				
 				count++;
 				g2.setColor(borderColor);
+				Stroke oldStroke = g2.getStroke();
+				g2.setStroke(_fatStroke);
 				g2.draw(area);
 				
 				//draw best fit line
@@ -235,15 +240,19 @@ public class ChamberTest {
 				int y2 = (int)(cell.getCenterY());
 				int x2 = (int)(cell.getCenterX() - fwire2*cell.getWidth());
 				
+				
 
-				g2.setColor (Color.lightGray);
+				g2.setColor (Color.darkGray);
 				g2.drawLine(x1-1, y1, x2-1, y2);
-				g2.setColor (Color.lightGray);
+				g2.setColor (Color.darkGray);
 				g2.drawLine(x1+1, y1, x2+1, y2);
-				g2.setColor (Color.red);
+				g2.setColor (Color.yellow);
 				g2.drawLine(x1, y1, x2, y2);
 				
-				g2.setColor(Color.yellow);
+				g2.setStroke(oldStroke);
+				
+				
+				g2.setColor(Color.cyan);
 				g2.fillOval(x1-3, y1-3, 6, 6);
 				g2.fillOval(x2-3, y2-3, 6, 6);
 				
