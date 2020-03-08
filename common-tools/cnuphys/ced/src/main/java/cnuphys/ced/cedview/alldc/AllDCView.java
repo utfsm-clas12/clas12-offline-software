@@ -9,9 +9,13 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+
+import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
 
 import cnuphys.ced.cedview.CedView;
 import cnuphys.ced.component.ControlPanel;
@@ -19,6 +23,8 @@ import cnuphys.ced.component.DisplayBits;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.geometry.GeoConstants;
 import cnuphys.ced.item.AllDCSuperLayer;
+import cnuphys.bCNU.component.IRollOverListener;
+import cnuphys.bCNU.component.RollOverPanel;
 import cnuphys.bCNU.drawable.DrawableAdapter;
 import cnuphys.bCNU.drawable.IDrawable;
 import cnuphys.bCNU.format.DoubleFormat;
@@ -40,7 +46,28 @@ import cnuphys.bCNU.view.BaseView;
  * 
  */
 @SuppressWarnings("serial")
-public class AllDCView extends CedView {
+public class AllDCView extends CedView implements IRollOverListener {
+	
+	//rollover colors
+	private static Color inactiveFG = Color.cyan;
+	private static Color inactiveBG = Color.black;
+	private static Color activeFG = Color.yellow;
+	private static Color activeBG = Color.darkGray;
+	
+	//rollover labels
+	private static String roLabels[] = {"Hit Based DC Clusters", 
+			"Time Based DC Clusters", 
+			"snr Left DC Clusters", 
+			"snr Right DC Clusters"};
+	
+	//rollover boolean flags
+	private boolean _roShowHBDCClusters;
+	private boolean _roShowTBDCClusters;
+	private boolean _roShowSNRLeftDCClusters;
+	private boolean _roShowSNRRightDCClusters;
+	
+	//cluster drawer
+	private ClusterDrawer _clusterDrawer;
 
 	// for naming clones
 	private static int CLONE_COUNT = 0;
@@ -63,6 +90,9 @@ public class AllDCView extends CedView {
 
 	// The optional "before" drawer for this view
 	protected IDrawable _beforeDraw;
+	
+	//rollover panel for drawing clusters
+	private RollOverPanel _rollOverPanel;
 
 	/**
 	 * The all dc view is rendered on 2x3 grid. Each grid is 1x1 in world
@@ -109,12 +139,7 @@ public class AllDCView extends CedView {
 		Dimension d = GraphicsUtilities.screenFraction(0.65);
 
 		// create the view
-		view = new AllDCView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, PropertySupport.WIDTH, d.width, // container
-																													// width,
-																													// not
-																													// total
-																													// view
-																													// width
+		view = new AllDCView(PropertySupport.WORLDSYSTEM, _defaultWorldRectangle, PropertySupport.WIDTH, d.width, 
 				PropertySupport.HEIGHT, d.height, // container height, not total view width
 				PropertySupport.TOOLBAR, true, PropertySupport.TOOLBARBITS, CedView.TOOLBARBITS,
 				PropertySupport.VISIBLE, true, PropertySupport.TITLE,
@@ -126,9 +151,27 @@ public class AllDCView extends CedView {
 				+ ControlPanel.ALLDCDISPLAYPANEL,
 				DisplayBits.ACCUMULATION + DisplayBits.MCTRUTH, 3, 5);
 		view.add(view._controlPanel, BorderLayout.EAST);
+		
+		customize(view);
 
 		view.pack();
 		return view;
+	}
+	
+//	public RollOverPanel(String title, int numCols, 
+//			Font font, Color fg, Color bg, String... labels) {
+
+	
+	//add the rollover panel
+	private static void customize(AllDCView view) {
+		JTabbedPane tabbedPane =  view._controlPanel.getTabbedPane();
+		view._rollOverPanel = new RollOverPanel("DC Clusters", 1, Fonts.mediumFont, inactiveFG, inactiveBG, 
+				roLabels);
+		
+		view._rollOverPanel.addRollOverListener(view);
+		tabbedPane.add(view._rollOverPanel, "DC Custers");
+		
+		view._clusterDrawer = new ClusterDrawer(view);
 	}
 
 	/**
@@ -172,6 +215,24 @@ public class AllDCView extends CedView {
 
 			@Override
 			public void draw(Graphics g, IContainer container) {
+				
+				if (_roShowHBDCClusters) {
+					_clusterDrawer.drawHBDCClusters(g, container);
+				}
+				
+				if (_roShowTBDCClusters) {
+					_clusterDrawer.drawTBDCClusters(g, container);					
+				}
+
+				if (_roShowSNRLeftDCClusters) {
+					_clusterDrawer.drawSNRLeftDCClusters(g, container);					
+				}
+
+				if (_roShowSNRRightDCClusters) {
+					_clusterDrawer.drawSNRRightDCClusters(g, container);				
+				}
+
+
 			}
 
 		};
@@ -391,6 +452,53 @@ public class AllDCView extends CedView {
 	 */
 	public boolean showNNHits() {
 		return _controlPanel.getAllDCDisplayPanel().showNNHits();
+	}
+	
+
+
+	@Override
+	public void RollOverMouseEnter(JLabel label, MouseEvent e) {
+		
+		String text = label.getText();
+		if (text.contains("Hit Based")) {
+			_roShowHBDCClusters = true;
+		}
+		else if (text.contains("Time Based")) {
+			_roShowTBDCClusters = true;
+		}
+		else if (text.contains("snr Left")) {
+			_roShowSNRLeftDCClusters = true;
+		}
+		else if (text.contains("snr Right")) {
+			_roShowSNRRightDCClusters = true;
+		}
+		
+		label.setForeground(activeFG);
+		label.setBackground(activeBG);
+		
+		refresh();
+	}
+
+	@Override
+	public void RollOverMouseExit(JLabel label, MouseEvent e) {
+		String text = label.getText();
+		if (text.contains("Hit Based")) {
+			_roShowHBDCClusters = false;
+		}
+		else if (text.contains("Time Based")) {
+			_roShowTBDCClusters = false;
+		}
+		else if (text.contains("snr Left")) {
+			_roShowSNRLeftDCClusters = false;
+		}
+		else if (text.contains("snr Right")) {
+			_roShowSNRRightDCClusters = false;
+		}
+
+		label.setForeground(inactiveFG);
+		label.setBackground(inactiveBG);
+		
+		refresh();
 	}
 
 }

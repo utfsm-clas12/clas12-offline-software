@@ -110,6 +110,9 @@ public class ControlPanel extends JPanel implements ChangeListener {
 	
 	//only for all dc view
 	private AllDCDisplayPanel _allDCDisplayPanel;
+	
+	//the tabbed pane
+	private JTabbedPane _tabbedPane;
 
 	/**
 	 * Create a view control panel
@@ -130,7 +133,8 @@ public class ControlPanel extends JPanel implements ChangeListener {
 		Box box = Box.createVerticalBox();
 
 		// add the tabbed pane
-		box.add(addTabbedPane(view, controlPanelBits, displayArrayBits));
+		_tabbedPane = addTabbedPane(view, controlPanelBits, displayArrayBits);
+		box.add(_tabbedPane);
 
 		// feedback
 		if (Bits.checkBit(controlPanelBits, FEEDBACK)) {
@@ -166,13 +170,21 @@ public class ControlPanel extends JPanel implements ChangeListener {
 
 		return null;
 	}
+	
+	/**
+	 * Get the tabbed pane for customization
+	 * @return the tabbed pane
+	 */
+	public JTabbedPane getTabbedPane() {
+		return _tabbedPane;
+	}
 
 	// use a tabbed pane to save space
 	private JTabbedPane addTabbedPane(CedView view, int controlPanelBits, int displayArrayBits) {
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(Fonts.smallFont);
 
-		// dc noise control
+		// dc noise control?
 		if (Bits.checkBit(controlPanelBits, NOISECONTROL)) {
 			_noisePanel = new NoisePanel(_view);
 		}

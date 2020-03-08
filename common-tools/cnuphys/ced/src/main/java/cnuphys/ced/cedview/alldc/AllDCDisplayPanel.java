@@ -94,7 +94,7 @@ public class AllDCDisplayPanel extends JPanel implements ActionListener {
 				
 			};
 	
-			button = new JCheckBox("HB Hits", true);
+			button = new JCheckBox("HB Hits", false);
 			break;
 
 		case 2:
@@ -109,7 +109,7 @@ public class AllDCDisplayPanel extends JPanel implements ActionListener {
 				
 			};
 	
-			button = new JCheckBox("TB Hits", true);
+			button = new JCheckBox("TB Hits", false);
 			break;
 
 		case 3:
@@ -124,7 +124,7 @@ public class AllDCDisplayPanel extends JPanel implements ActionListener {
 				
 			};
 	
-			button = new JCheckBox("NN Hits", true);
+			button = new JCheckBox("NN Hits", false);
 			break;
 
 		}

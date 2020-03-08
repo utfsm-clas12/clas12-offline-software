@@ -30,17 +30,13 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		if ((sector == null) || (sector.length < 1)) {
 			return;
 		}
+		length = sector.length;
 		
 		byte[] layer = ColumnData.getByteArray(DCBank + ".layer");
 		short[] wire = ColumnData.getShortArray(DCBank + ".component");
 		// byte[] order = ColumnData.getByteArray(DCBank + ".order");
 		int[] TDC = ColumnData.getIntArray(DCBank + ".TDC");
 
-		length = checkArrays(sector, layer, wire, TDC);
-		if (length < 0) {
-			Log.getInstance().warning("[" + DCBank + "] " + _error);
-			return;
-		}
 		
 		//see if there is a nnhits bank
 		byte[] nntrackid = ColumnData.getByteArray(DCNNBank + ".id");
@@ -57,14 +53,13 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 		int docalen = -1;
 		if ((lr != null) && (lr.length != 0)) {
 			doca = ColumnData.getFloatArray(DocaBank + ".doca");
+			
+			docalen = (doca == null) ? 0 : doca.length;
+			
 			time = ColumnData.getFloatArray(DocaBank + ".time");
 			sdoca = ColumnData.getFloatArray(DocaBank + ".sdoca");
 			stime = ColumnData.getFloatArray(DocaBank + ".stime");
 
-			docalen = checkArrays(lr, doca, time, sdoca, stime);
-			if (docalen < 0) {
-				Log.getInstance().warning("[" + DocaBank + "] " + _error);
-			}
 			if (docalen != length) {
 				Log.getInstance().warning(
 						"[" + DocaBank + "] " + "doca length " + docalen + " does not match tdc length: " + length);
@@ -102,84 +97,6 @@ public class DCTdcHitList extends Vector<DCTdcHit> {
 			Collections.sort(this);
 		}
 
-	}
-
-	private int checkArrays(byte[] lr, float[] doca, float[] time, float[] sdoca, float[] stime) {
-		if ((lr == null) || (doca == null) || (time == null) || (sdoca == null) || (stime == null)) {
-			_error = "Unexpected null array when creating DcTdcHitList: " + "lr = null: " + (lr == null)
-					+ " doca = null: " + (doca == null) + " time == null: " + (time == null) + " sdoca = null: "
-					+ (sdoca == null) + " stime == null: " + (stime == null);
-			return -1;
-		}
-
-		if (lr.length < 1) {
-			_error = "LR array has 0 length when creating DcTdcHitList";
-			return -1;
-		}
-
-		if (doca.length != lr.length) {
-			_error = "LR length: " + lr.length + " does not match doca length: " + doca.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-		if (time.length != lr.length) {
-			_error = "LR length: " + lr.length + " does not match time length: " + time.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-		if (sdoca.length != lr.length) {
-			_error = "LR length: " + lr.length + " does not match sdoca length: " + sdoca.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-		if (stime.length != lr.length) {
-			_error = "LR length: " + lr.length + " does not match stime td length: " + stime.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-		return lr.length;
-	}
-
-	private int checkArrays(byte[] sector, byte[] layer, short[] wire, int[] data) {
-		if ((sector == null) || (layer == null) || (wire == null)) {
-			_error = "Unexpected null array when creating DcTdcHitList: " + "sector = null: " + (sector == null)
-					+ " layer == null: " + (layer == null) + " wire == null: " + (wire == null);
-			return -1;
-		}
-
-		if (sector.length < 1) {
-			_error = "Sector array has 0 length when creating DcTdcHitList";
-			return -1;
-		}
-
-		if (layer.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match layer length: " + layer.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-		if (wire.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match component length: " + wire.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-//		if (order.length != sector.length) {
-//			_error = "Sector length: " + sector.length + " does not match order length: " + order.length + " when creating DcTdcHitList";
-//			return -1;
-//		}
-
-		if (data.length != sector.length) {
-			_error = "Sector length: " + sector.length + " does not match data td length: " + data.length
-					+ " when creating DcTdcHitList";
-			return -1;
-		}
-
-		return sector.length;
 	}
 
 	/**

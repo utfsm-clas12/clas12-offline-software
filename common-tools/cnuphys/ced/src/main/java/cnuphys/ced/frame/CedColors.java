@@ -44,14 +44,18 @@ public class CedColors {
 	public static final Color TB_COLOR = X11Colors.getX11Color("dark orange");
 	public static final Color TB_TRANS = X11Colors.getX11Color("dark orange", 240);
 	public static final Color TB_DOCAFRAME = TB_COLOR.darker();
-	
-	// neural net based
-		public static final Color NN_COLOR = X11Colors.getX11Color("medium sea green");
-		public static final Color NN_TRANS = X11Colors.getX11Color("medium sea green", 160);
 
+	// neural net based
+	public static final Color NN_COLOR = X11Colors.getX11Color("medium sea green");
+	public static final Color NN_TRANS = X11Colors.getX11Color("medium sea green", 160);
 
 	// doca fills
 	public static final Color DOCA_COLOR = new Color(0, 255, 0, 76);
 	public static final Color TRKDOCA_COLOR = new Color(0, 0, 255, 76);
+	
+	//snr fills for clusters
+	public static final Color SNR_LEFT_COLOR = new Color(46, 169, 87);
+	public static final Color SNR_RIGHT_COLOR = new Color(170, 105, 30);
+	
 
 }
