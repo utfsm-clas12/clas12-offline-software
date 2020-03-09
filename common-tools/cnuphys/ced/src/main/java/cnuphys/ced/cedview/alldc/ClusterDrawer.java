@@ -14,6 +14,10 @@ import cnuphys.ced.event.data.DCCluster;
 import cnuphys.ced.event.data.DCClusterList;
 import cnuphys.ced.frame.CedColors;
 import cnuphys.ced.geometry.GeoConstants;
+import cnuphys.ced.noise.NoiseManager;
+import cnuphys.snr.NoiseReductionParameters;
+import cnuphys.snr.SNRCluster;
+import cnuphys.snr.WireList;
 
 public class ClusterDrawer {
 	
@@ -21,7 +25,7 @@ public class ClusterDrawer {
 	private AllDCView _view;
 	
 	//cluster colors
-	private static Color _clusterLineColor = Color.black;
+	private static Color _clusterLineColor = Color.cyan;
 	private static Color _clusterFillColor;
 	
 	/**
@@ -60,6 +64,27 @@ public class ClusterDrawer {
 	 */
 	public void drawSNRLeftDCClusters(Graphics g, IContainer container) {
 		_clusterFillColor = CedColors.SNR_LEFT_COLOR;
+		NoiseManager nm = NoiseManager.getInstance();
+		
+		int ntot = 0;
+		for (int sect0 = 0; sect0 < 6; sect0++) {
+			for (int supl0 = 0; supl0 < 6; supl0++) {
+				NoiseReductionParameters params = nm.getParameters(sect0, supl0);
+				List<SNRCluster> leftClusters = params.getLeftClusters();
+				if (leftClusters != null) {
+					for (SNRCluster cluster : leftClusters) {
+						for (int lay0 = 0; lay0< 6; lay0++) {
+							drawSingleSNRClusterOfWires(g, container, sect0, supl0, lay0, 
+									cluster.wireLists[lay0]);
+						}
+
+					}
+					ntot += leftClusters.size();
+				}
+			}
+			
+		}
+		System.err.println("Drew " + ntot +  "  left SNR clusters");
 	}
 	
 	/**
@@ -67,6 +92,29 @@ public class ClusterDrawer {
 	 */
 	public void drawSNRRightDCClusters(Graphics g, IContainer container) {
 		_clusterFillColor = CedColors.SNR_RIGHT_COLOR;
+		NoiseManager nm = NoiseManager.getInstance();
+		
+		int ntot = 0;
+		for (int sect0 = 0; sect0 < 6; sect0++) {
+			for (int supl0 = 0; supl0 < 6; supl0++) {
+				NoiseReductionParameters params = nm.getParameters(sect0, supl0);
+				List<SNRCluster> rightClusters = params.getRightClusters();
+				if (rightClusters != null) {
+					
+					for (SNRCluster cluster : rightClusters) {
+						for (int lay0 = 0; lay0< 6; lay0++) {
+							drawSingleSNRClusterOfWires(g, container, sect0, supl0, lay0, 
+									cluster.wireLists[lay0]);
+						}
+
+					}
+					ntot += rightClusters.size();
+				}
+			}
+			
+		}
+		System.err.println("Drew " + ntot +  "  right SNR clusters");
+
 	}
 	
 	//draws the HB or TB clusters
@@ -129,6 +177,49 @@ public class ClusterDrawer {
 			//drawing hack
 			int hackSL = (sector < 4) ? superlayer : 7-superlayer;
 			_view.getCell(sector, hackSL, layer[i], wire[i], wr);
+			
+			
+			container.worldToLocal(sr, wr);
+			area.add(new Area(sr));
+		}
+		
+		if (!area.isEmpty()) {
+			g2.setColor(_clusterFillColor);
+            g2.fill(area);
+            g2.setColor(_clusterLineColor);
+            g2.draw(area);
+		}
+
+		
+	}
+	
+	/**
+	 * 
+	 * @param g
+	 * @param container
+	 * @param sector 0-based sector
+	 * @param superlayer 0-based superlayer
+	 * @param layer 0-based layer
+	 * @param wireList list of 0-based wires
+	 */
+	private void drawSingleSNRClusterOfWires(Graphics g, IContainer container, 
+			int sector, int superlayer, int layer, WireList wireList) {
+		
+		
+		Graphics2D g2 = (Graphics2D)g;
+		Rectangle sr = new Rectangle();
+		Rectangle.Double wr = new Rectangle.Double();
+		
+		Area area = new Area();
+		
+		sector += 1;
+		superlayer += 1;
+		layer += 1;
+		
+		for (int wire : wireList) {
+			//drawing hack
+			int hackSL = (sector < 4) ? superlayer : 7-superlayer;
+			_view.getCell(sector, hackSL, layer, wire+1, wr);
 			
 			
 			container.worldToLocal(sr, wr);

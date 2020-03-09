@@ -14,8 +14,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.Vector;
 
-import cnuphys.snr.Cluster;
-import cnuphys.snr.ClusterFinder;
+import cnuphys.snr.SNRCluster;
+import cnuphys.snr.SNRClusterFinder;
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
 
@@ -157,7 +157,7 @@ public class ChamberTest {
 		
 		if (TestParameters.showLeftClusters) {
 			
-			ClusterFinder cf = _parameters.getClusterFinder();
+			SNRClusterFinder cf = _parameters.getClusterFinder();
 			if (cf != null) {
 				drawClusters(g, world, local, cf.getLeftClusters(), _leftClusterColor);
 			}
@@ -165,7 +165,7 @@ public class ChamberTest {
 		
 		if (TestParameters.showRightClusters) {
 			
-			ClusterFinder cf = _parameters.getClusterFinder();
+			SNRClusterFinder cf = _parameters.getClusterFinder();
 			if (cf != null) {
 				drawClusters(g, world, local, cf.getRightClusters(), _rightClusterColor);
 			}
@@ -191,7 +191,7 @@ public class ChamberTest {
 	}
 	
 	//draw the clusters
-	private void drawClusters(Graphics g, Rectangle2D.Double world, Rectangle local, List<Cluster>clusters, Color color) {
+	private void drawClusters(Graphics g, Rectangle2D.Double world, Rectangle local, List<SNRCluster>clusters, Color color) {
 
 		Rectangle cell = new Rectangle();
 		Graphics2D g2 = (Graphics2D)g;
@@ -199,7 +199,7 @@ public class ChamberTest {
 		int numLayer = _parameters.getNumLayer();
 		
 		int count = 0;
-		for (Cluster cluster : clusters) {
+		for (SNRCluster cluster : clusters) {
 			Area area = new Area();
 
 			for (int lay = 0; lay < numLayer; lay++) {
@@ -641,18 +641,18 @@ public class ChamberTest {
 		}
 
 		if (_parameters.getClusterFinder() != null) {
-			List<Cluster> leftClusters = _parameters.getClusterFinder().getLeftClusters();
-			List<Cluster> rightClusters = _parameters.getClusterFinder().getRightClusters();
+			List<SNRCluster> leftClusters = _parameters.getClusterFinder().getLeftClusters();
+			List<SNRCluster> rightClusters = _parameters.getClusterFinder().getRightClusters();
 
 			if (leftClusters != null) {
 				sb.append("\nL Clusters [" + leftClusters.size() + "] ");
-				for (Cluster cluster : leftClusters) {
+				for (SNRCluster cluster : leftClusters) {
 					sb.append("    " + cluster);
 				}
 			}
 			if (rightClusters != null) {
 				sb.append("\nR Clusters [" + rightClusters.size() + "] ");
-				for (Cluster cluster : rightClusters) {
+				for (SNRCluster cluster : rightClusters) {
 					sb.append("    " + cluster);
 				}
 			}

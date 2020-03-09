@@ -2,6 +2,7 @@ package cnuphys.snr.clas12;
 
 import cnuphys.snr.ExtendedWord;
 import cnuphys.snr.NoiseReductionParameters;
+import cnuphys.snr.SNRAnalysisLevel;
 
 /**
  * One stop shopping for clas12 noise analysis. Should finally be thread safe.
@@ -47,11 +48,21 @@ public class Clas12NoiseAnalysis {
 	private final NoiseReductionParameters _parameters[][] = new NoiseReductionParameters[NUM_SECTOR][NUM_SUPERLAYER];
 
 	/**
-	 * Create an analysis object for CLAS12 DCs
+	 * Create an analysis object for CLAS12 DCs.
+	 * Uses the basic single stage.
 	 */
 	public Clas12NoiseAnalysis() {
+		this(SNRAnalysisLevel.ONESTAGE);
+	}
+	
+	/**
+	 * Create an analysis object for CLAS12 DCs
+	 */
+	public Clas12NoiseAnalysis(SNRAnalysisLevel level) {
+		NoiseReductionParameters.setSNRAnalysisLevel(level);
 		initialize();
 	}
+
 
 	// initialize arrays
 	private void initialize() {

@@ -24,7 +24,7 @@ public class WireList extends ArrayList<Integer> {
 		_numWires = numWires;
 		counts = new byte[numWires];
 	}
-	
+		
 	public void sort() {
 		Comparator<Integer> comp = new Comparator<Integer>() {
 			

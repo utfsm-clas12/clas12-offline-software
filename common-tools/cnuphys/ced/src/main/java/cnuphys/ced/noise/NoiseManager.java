@@ -10,6 +10,7 @@ import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCTdcHit;
 import cnuphys.ced.event.data.DCTdcHitList;
 import cnuphys.snr.NoiseReductionParameters;
+import cnuphys.snr.SNRAnalysisLevel;
 import cnuphys.snr.clas12.Clas12NoiseAnalysis;
 import cnuphys.snr.clas12.Clas12NoiseResult;
 
@@ -25,7 +26,7 @@ public class NoiseManager implements IClasIoEventListener {
 	private static NoiseManager instance;
 
 	// The analysis package
-	private Clas12NoiseAnalysis noisePackage = new Clas12NoiseAnalysis();
+	private Clas12NoiseAnalysis noisePackage = new Clas12NoiseAnalysis(SNRAnalysisLevel.TWOSTAGE);
 
 	// result container
 	private Clas12NoiseResult _noiseResults = new Clas12NoiseResult();

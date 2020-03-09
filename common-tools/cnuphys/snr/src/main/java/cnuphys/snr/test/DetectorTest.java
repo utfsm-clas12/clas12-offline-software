@@ -140,21 +140,25 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 			ct.clearHits();
 
 			if (ct.index == 0) {
-				ct.forceHit(1, 42);
-				ct.forceHit(2, 41);
-				ct.forceHit(3, 41);
-				ct.forceHit(4, 41);
-				ct.forceHit(5, 41);
-				ct.forceHit(6, 41);
-				ct.forceHit(6, 40);
+				ct.forceHit(1, 11);
+				ct.forceHit(1, 14);
+				ct.forceHit(2, 12);
+				ct.forceHit(2, 14);
+				ct.forceHit(2, 15);
+				ct.forceHit(3, 11);
+				ct.forceHit(3, 14);
+				ct.forceHit(4, 11);
+				ct.forceHit(4, 14);
+				ct.forceHit(5, 10);
+				ct.forceHit(5, 13);
+				ct.forceHit(6, 11);
+				ct.forceHit(6, 13);
 			} else if (ct.index == 1) {
-				ct.forceHit(1, 45);
-				ct.forceHit(2, 45);
-				ct.forceHit(2, 44);
-				ct.forceHit(3, 45);
-				ct.forceHit(4, 44);
-				ct.forceHit(5, 45);
-				ct.forceHit(6, 44);
+				ct.forceHit(2, 28);
+				ct.forceHit(3, 27);
+				ct.forceHit(4, 27);
+				ct.forceHit(5, 27);
+				ct.forceHit(6, 27);
 			} else if (ct.index == 2) {
 				ct.forceHit(1, 39);
 				ct.forceHit(2, 38);
@@ -172,13 +176,14 @@ public class DetectorTest extends JPanel implements MouseListener, MouseMotionLi
 				ct.forceHit(5, 41);
 				ct.forceHit(6, 40);
 			} else if (ct.index == 4) {
-				ct.forceHit(1, 34);
-				ct.forceHit(1, 33);
-				ct.forceHit(2, 33);
-				ct.forceHit(3, 33);
-				ct.forceHit(4, 32);
-				ct.forceHit(5, 33);
-				ct.forceHit(6, 33);
+				ct.forceHit(1, 21);
+				ct.forceHit(3, 21);
+				ct.forceHit(4, 21);
+				ct.forceHit(5, 21);
+				ct.forceHit(5, 22);
+				ct.forceHit(5, 23);
+				ct.forceHit(6, 21);
+				ct.forceHit(6, 22);
 			} else if (ct.index == 5) {
 				ct.forceHit(1, 35);
 				ct.forceHit(2, 34);

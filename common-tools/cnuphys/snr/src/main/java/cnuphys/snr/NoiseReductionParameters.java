@@ -1,5 +1,7 @@
 package cnuphys.snr;
 
+import java.util.ArrayList;
+
 /**
  * All the parameters needed for noise reduction. Each superlayer should have
  * its own object. Now should be thread safe.
@@ -9,7 +11,7 @@ package cnuphys.snr;
 public class NoiseReductionParameters {
 	
 	//the analysis level
-	private static SNRAnalysisLevel _analysisLevel = SNRAnalysisLevel.ONESTAGE;
+	public static SNRAnalysisLevel _analysisLevel = SNRAnalysisLevel.ONESTAGE;
 
 	// track leaning directions
 	public static final int LEFT_LEAN = 0;
@@ -92,7 +94,7 @@ public class NoiseReductionParameters {
 	private int _adjacencyThreshold = 6;
 	
 	//experimental stage2 cluster finder
-	private ClusterFinder _clusterFinder;
+	private SNRClusterFinder _clusterFinder;
 
 
 	/**
@@ -392,7 +394,7 @@ public class NoiseReductionParameters {
 			
 			//find cluster candidates
 			if (_clusterFinder == null) {
-				_clusterFinder = new ClusterFinder(this);
+				_clusterFinder = new SNRClusterFinder(this);
 			}
 			_clusterFinder.findClusters();
 		}
@@ -699,7 +701,7 @@ public class NoiseReductionParameters {
 	 * Get the cluster finder
 	 * @return ther cluster finder
 	 */
-	public ClusterFinder getClusterFinder() {
+	public SNRClusterFinder getClusterFinder() {
 		return _clusterFinder;
 	}
 	
@@ -714,6 +716,22 @@ public class NoiseReductionParameters {
 	 */
 	public int computeAdjacency(int layer, int wire) {
 		return Adjacency.computeAdjacency(_cleanData, _numLayer, _numWire, layer, wire);
+	}
+	
+	/**
+	 * Get the list of left leaning clusters
+	 * @return left leaning clusters
+	 */
+	public ArrayList<SNRCluster> getLeftClusters() {
+		return (_clusterFinder == null) ? null : _clusterFinder.getLeftClusters();
+	}
+	
+	/**
+	 * Get the list of right leaning clusters
+	 * @return right leaning clusters
+	 */
+	public ArrayList<SNRCluster> getRightClusters() {
+		return (_clusterFinder == null) ? null : _clusterFinder.getRightClusters();
 	}
 
 }

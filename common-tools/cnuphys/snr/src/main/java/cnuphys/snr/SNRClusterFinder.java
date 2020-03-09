@@ -3,9 +3,9 @@ package cnuphys.snr;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClusterFinder {
+public class SNRClusterFinder {
 	
-	private static double SLOPE_THRESHOLD = 0.1;
+	private static double SLOPE_THRESHOLD = 0.21;
 	
 	public static final int LEFT_LEAN = NoiseReductionParameters.LEFT_LEAN;
 	public static final int RIGHT_LEAN = NoiseReductionParameters.RIGHT_LEAN;
@@ -15,11 +15,14 @@ public class ClusterFinder {
 	private NoiseReductionParameters _params;
 	
 	//the collections of clusters
-	protected ArrayList<Cluster> leftClusters;
-	protected ArrayList<Cluster> rightClusters;
+	protected ArrayList<SNRCluster> leftClusters;
+	protected ArrayList<SNRCluster> rightClusters;
 
-	
-	public ClusterFinder(NoiseReductionParameters params) {
+	/**
+	 * Create a cluster finder, tied to a parameters object
+	 * @param params the owner of the cluster object
+	 */
+	public SNRClusterFinder(NoiseReductionParameters params) {
 		_params = params;
 	}
 	
@@ -40,7 +43,7 @@ public class ClusterFinder {
 		//left clusters
 		if (!_params.leftSegments.isZero()) {
 			boolean connected = false;
-			Cluster currentCluster = null;
+			SNRCluster currentCluster = null;
 			
 			int maxCount = _params.maxShift(LEFT_LEAN) + 1;
 			int count = 0;
@@ -75,7 +78,7 @@ public class ClusterFinder {
 		//right clusters
 		if (!_params.rightSegments.isZero()) {
 			boolean connected = false;
-			Cluster currentCluster = null;
+			SNRCluster currentCluster = null;
 			
 			int maxCount = _params.maxShift(RIGHT_LEAN) + 1;
 			int count = 0;
@@ -113,7 +116,7 @@ public class ClusterFinder {
 	}
 	
 	//trim rows, check slope
-	private void checkCluster(Cluster cluster, int direction) {
+	private void checkCluster(SNRCluster cluster, int direction) {
 		if (cluster == null) {
 			return;
 		}
@@ -135,12 +138,12 @@ public class ClusterFinder {
 	}
 	
 	//create a cluster
-	private Cluster createCluster(int direction) {
-		return new Cluster(_params.getNumLayer(),  _params.getNumWire(), direction);
+	private SNRCluster createCluster(int direction) {
+		return new SNRCluster(_params.getNumLayer(),  _params.getNumWire(), direction);
 	}
 	
 	//fill the wire lists
-	private void fillWireLists(Cluster cluster, int segStartWire, int direction) {
+	private void fillWireLists(SNRCluster cluster, int segStartWire, int direction) {
 		for (int lay = 0; lay < _params.getNumLayer(); lay++) {
 			_params.addHitsInMask(lay, segStartWire, direction, cluster.wireLists[lay]);
 		}
@@ -152,7 +155,7 @@ public class ClusterFinder {
 	 * Get the list of left leaning clusters
 	 * @return left leaning clusters
 	 */
-	public ArrayList<Cluster> getLeftClusters() {
+	public ArrayList<SNRCluster> getLeftClusters() {
 		return leftClusters;
 	}
 	
@@ -160,7 +163,7 @@ public class ClusterFinder {
 	 * Get the list of right leaning clusters
 	 * @return right leaning clusters
 	 */
-	public ArrayList<Cluster> getRightClusters() {
+	public ArrayList<SNRCluster> getRightClusters() {
 		return rightClusters;
 	}
 

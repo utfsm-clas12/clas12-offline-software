@@ -8,7 +8,7 @@ package cnuphys.snr;
  * requirement that there are no more than two wires
  * in a given layer
  */
-public class Cluster {
+public class SNRCluster {
 		
 	/** The number of layers, probably 6 */
 	public final int numLayers;
@@ -38,7 +38,7 @@ public class Cluster {
 	 * @param numWires the number of wires, for CLAS12 112
 	 * @param direction the direction, 0 for left, 1 for right
 	 */
-	public Cluster(int numLayers, int numWires, int direction) {
+	public SNRCluster(int numLayers, int numWires, int direction) {
 		this.direction = direction;
 		this.numLayers = numLayers;
 		this.numWires = numWires;

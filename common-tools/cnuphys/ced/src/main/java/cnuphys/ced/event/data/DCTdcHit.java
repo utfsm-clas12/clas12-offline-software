@@ -137,8 +137,10 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	 * @param feedbackStrings
 	 */
 	public void tdcAdcFeedback(boolean showNoise, boolean showDoca, List<String> feedbackStrings) {
+		
 
-		feedbackStrings.add(_fbColor + "sector " + sector + " layer " + layer + " wire " + wire);
+		feedbackStrings.add(_fbColor + "sector " + sector + 
+				" suplay " + superlayer + " layer " + layer6 + " wire " + wire);
 
 		String tdcStr = tdcString();
 		if (tdcStr.length() > 3) {
