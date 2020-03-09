@@ -49,22 +49,25 @@ import cnuphys.bCNU.view.BaseView;
 public class AllDCView extends CedView implements IRollOverListener {
 	
 	//rollover colors
-	private static Color inactiveFG = Color.cyan;
-	private static Color inactiveBG = Color.black;
-	private static Color activeFG = Color.yellow;
-	private static Color activeBG = Color.darkGray;
+	private static final Color inactiveFG = Color.cyan;
+	private static final Color inactiveBG = Color.black;
+	private static final Color activeFG = Color.yellow;
+	private static final Color activeBG = Color.darkGray;
+	
+	//roll over labels
+	private static final String HB_ROLLOVER = "Hit Based DC Clusters";
+	private static final String TB_ROLLOVER = "Time Based DC Clusters";
+	private static final String SNR_ROLLOVER = "SNR DC Clusters";
 	
 	//rollover labels
-	private static String roLabels[] = {"Hit Based DC Clusters", 
-			"Time Based DC Clusters", 
-			"snr Left DC Clusters", 
-			"snr Right DC Clusters"};
+	private static String roLabels[] = {HB_ROLLOVER, 
+			TB_ROLLOVER, 
+			SNR_ROLLOVER};
 	
 	//rollover boolean flags
 	private boolean _roShowHBDCClusters;
 	private boolean _roShowTBDCClusters;
-	private boolean _roShowSNRLeftDCClusters;
-	private boolean _roShowSNRRightDCClusters;
+	private boolean _roShowSNRDCClusters;
 	
 	//cluster drawer
 	private ClusterDrawer _clusterDrawer;
@@ -216,6 +219,10 @@ public class AllDCView extends CedView implements IRollOverListener {
 			@Override
 			public void draw(Graphics g, IContainer container) {
 				
+				if (_roShowSNRDCClusters) {
+					_clusterDrawer.drawSNRDCClusters(g, container);					
+				}
+
 				if (_roShowHBDCClusters) {
 					_clusterDrawer.drawHBDCClusters(g, container);
 				}
@@ -224,13 +231,6 @@ public class AllDCView extends CedView implements IRollOverListener {
 					_clusterDrawer.drawTBDCClusters(g, container);					
 				}
 
-				if (_roShowSNRLeftDCClusters) {
-					_clusterDrawer.drawSNRLeftDCClusters(g, container);					
-				}
-
-				if (_roShowSNRRightDCClusters) {
-					_clusterDrawer.drawSNRRightDCClusters(g, container);				
-				}
 
 
 			}
@@ -460,17 +460,14 @@ public class AllDCView extends CedView implements IRollOverListener {
 	public void RollOverMouseEnter(JLabel label, MouseEvent e) {
 		
 		String text = label.getText();
-		if (text.contains("Hit Based")) {
+		if (text.contains(HB_ROLLOVER)) {
 			_roShowHBDCClusters = true;
 		}
-		else if (text.contains("Time Based")) {
+		else if (text.contains(TB_ROLLOVER)) {
 			_roShowTBDCClusters = true;
 		}
-		else if (text.contains("snr Left")) {
-			_roShowSNRLeftDCClusters = true;
-		}
-		else if (text.contains("snr Right")) {
-			_roShowSNRRightDCClusters = true;
+		else if (text.contains(SNR_ROLLOVER)) {
+			_roShowSNRDCClusters = true;
 		}
 		
 		label.setForeground(activeFG);
@@ -481,18 +478,20 @@ public class AllDCView extends CedView implements IRollOverListener {
 
 	@Override
 	public void RollOverMouseExit(JLabel label, MouseEvent e) {
+		
+		if (e.isAltDown() || e.isControlDown() || e.isMetaDown()) {
+			return;
+		}
+
 		String text = label.getText();
-		if (text.contains("Hit Based")) {
+		if (text.contains(HB_ROLLOVER)) {
 			_roShowHBDCClusters = false;
 		}
-		else if (text.contains("Time Based")) {
+		else if (text.contains(TB_ROLLOVER)) {
 			_roShowTBDCClusters = false;
 		}
-		else if (text.contains("snr Left")) {
-			_roShowSNRLeftDCClusters = false;
-		}
-		else if (text.contains("snr Right")) {
-			_roShowSNRRightDCClusters = false;
+		else if (text.contains(SNR_ROLLOVER)) {
+			_roShowSNRDCClusters = false;
 		}
 
 		label.setForeground(inactiveFG);

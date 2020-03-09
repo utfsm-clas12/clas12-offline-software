@@ -73,12 +73,14 @@ public class Adjacency {
 	
 	private static int proximityFactor(int layer, int wire, int tlayer, int twire) {
 		
-//		int delL = Math.abs(layer-tlayer);
+		int delL = Math.abs(layer-tlayer);
 		int delW = Math.abs(wire-twire);
 		
 
+		int pW = Integer.max(0, 3 - delW);
+		int pL = Integer.max(0, pW*(2 - delL));
 		
-		return Integer.max(0, 3 - delW);
+		return pL + pW;
 	}
 
 }

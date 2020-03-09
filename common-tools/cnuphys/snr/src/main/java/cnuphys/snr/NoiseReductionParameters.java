@@ -382,21 +382,24 @@ public class NoiseReductionParameters {
 
 		//now clean the data (remove the noise)
 		cleanFromSegments();
-		
+
 		if (_analysisLevel == SNRAnalysisLevel.TWOSTAGE) {
-			
-			applyAdjacency();
-			initBledData(_cleanData);
-			findPossibleSegments(LEFT_LEAN);
-			findPossibleSegments(RIGHT_LEAN);
-			cleanFromSegments();
-			applyAdjacency(); //yep, again
-			
-			//find cluster candidates
-			if (_clusterFinder == null) {
-				_clusterFinder = new SNRClusterFinder(this);
+
+			if (hitCount(_cleanData) > 0) {
+
+				applyAdjacency();
+				initBledData(_cleanData);
+				findPossibleSegments(LEFT_LEAN);
+				findPossibleSegments(RIGHT_LEAN);
+				cleanFromSegments();
+				applyAdjacency(); // yep, again
+
+				// find cluster candidates
+				if (_clusterFinder == null) {
+					_clusterFinder = new SNRClusterFinder(this);
+				}
+				_clusterFinder.findClusters();
 			}
-			_clusterFinder.findClusters();
 		}
 		
 		_analyzed = true;
@@ -719,19 +722,11 @@ public class NoiseReductionParameters {
 	}
 	
 	/**
-	 * Get the list of left leaning clusters
-	 * @return left leaning clusters
+	 * Get the list of clusters
+	 * @return the list of clusters
 	 */
-	public ArrayList<SNRCluster> getLeftClusters() {
-		return (_clusterFinder == null) ? null : _clusterFinder.getLeftClusters();
-	}
-	
-	/**
-	 * Get the list of right leaning clusters
-	 * @return right leaning clusters
-	 */
-	public ArrayList<SNRCluster> getRightClusters() {
-		return (_clusterFinder == null) ? null : _clusterFinder.getRightClusters();
+	public ArrayList<SNRCluster> getClusters() {
+		return (_clusterFinder == null) ? null : _clusterFinder.getClusters();
 	}
 
 }

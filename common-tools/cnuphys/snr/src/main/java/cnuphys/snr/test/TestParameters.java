@@ -6,12 +6,9 @@ import java.awt.Stroke;
 
 public class TestParameters {
 	
-	/** used to show left clusters */
-	public static boolean showLeftClusters;
+	/** used to show clusters */
+	public static boolean showClusters;
 	
-	/** used to show right clusters */
-	public static boolean showRightClusters;
-
 	/** used to "show clean data */
 	public static boolean noiseOff;
 

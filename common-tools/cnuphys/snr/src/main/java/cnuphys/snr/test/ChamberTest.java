@@ -23,8 +23,7 @@ public class ChamberTest {
 	
 	private static final Color[] _missingColors = {Color.red, Color.orange, Color.yellow};
 	
-	private static final Color _leftClusterColor = new Color(46, 169, 87);
-	private static final Color _rightClusterColor = new Color(170, 105, 30);
+	private static final Color _clusterColor = new Color(46, 169, 87);
 	private static final Color[] _clusterBorders = {Color.black, Color.gray, Color.yellow, Color.cyan, Color.magenta, Color.white};
 
 	
@@ -155,22 +154,14 @@ public class ChamberTest {
 		
 		//draw clusters?
 		
-		if (TestParameters.showLeftClusters) {
+		if (TestParameters.showClusters) {
 			
 			SNRClusterFinder cf = _parameters.getClusterFinder();
 			if (cf != null) {
-				drawClusters(g, world, local, cf.getLeftClusters(), _leftClusterColor);
+				drawClusters(g, world, local, cf.getClusters(), _clusterColor);
 			}
 		}
 		
-		if (TestParameters.showRightClusters) {
-			
-			SNRClusterFinder cf = _parameters.getClusterFinder();
-			if (cf != null) {
-				drawClusters(g, world, local, cf.getRightClusters(), _rightClusterColor);
-			}
-		}
-
 		
 	}
 	
@@ -641,18 +632,11 @@ public class ChamberTest {
 		}
 
 		if (_parameters.getClusterFinder() != null) {
-			List<SNRCluster> leftClusters = _parameters.getClusterFinder().getLeftClusters();
-			List<SNRCluster> rightClusters = _parameters.getClusterFinder().getRightClusters();
+			List<SNRCluster> clusters = _parameters.getClusterFinder().getClusters();
 
-			if (leftClusters != null) {
-				sb.append("\nL Clusters [" + leftClusters.size() + "] ");
-				for (SNRCluster cluster : leftClusters) {
-					sb.append("    " + cluster);
-				}
-			}
-			if (rightClusters != null) {
-				sb.append("\nR Clusters [" + rightClusters.size() + "] ");
-				for (SNRCluster cluster : rightClusters) {
+			if (clusters != null) {
+				sb.append("\n#Clusters [" + clusters.size() + "] ");
+				for (SNRCluster cluster : clusters) {
 					sb.append("    " + cluster);
 				}
 			}

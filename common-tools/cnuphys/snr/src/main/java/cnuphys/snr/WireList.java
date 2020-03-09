@@ -36,21 +36,6 @@ public class WireList extends ArrayList<Integer> {
 				double del2 = delFromAverage(o2);
 				return Double.compare(del1, del2);
 				
-//				int count1 = counts[o1];
-//				int count2 = counts[o2];
-//				
-//				if (count2 < count1) {
-//					return -1;
-//				}
-//				if (count2 > count1) {
-//					return 1;
-//				}
-//
-//				double wp = averageWirePosition();
-//				double del1 = Math.abs(wp )
-//				return Double.compare(d1, d2);
-//				
-//				return Integer.compare(counts[o2], counts[o1]);
 			}
 		};
 		
@@ -149,5 +134,31 @@ public class WireList extends ArrayList<Integer> {
 		return sum/totalCount;
 	}
 	
+	/**
+	 * Is a given list a subset of this list
+	 * @param wl the given list
+	 * @return <code>true</code> if it is a subset
+	 */
+	public boolean hasSubset(WireList wl) {
+		if (wl == null) {
+			return false;
+		}
+		
+		if (wl.isEmpty()) {
+			return true;
+		}
+		
+		if (wl.size() > size()) {
+			return false;
+		}
+		
+		for (Integer e : wl) {
+			if (!contains(e)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 
 }

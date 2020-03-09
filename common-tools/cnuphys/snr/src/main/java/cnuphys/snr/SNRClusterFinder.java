@@ -1,22 +1,17 @@
 package cnuphys.snr;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class SNRClusterFinder {
-	
-	private static double SLOPE_THRESHOLD = 0.21;
 	
 	public static final int LEFT_LEAN = NoiseReductionParameters.LEFT_LEAN;
 	public static final int RIGHT_LEAN = NoiseReductionParameters.RIGHT_LEAN;
 
-
 	//the parameters
 	private NoiseReductionParameters _params;
 	
-	//the collections of clusters
-	protected ArrayList<SNRCluster> leftClusters;
-	protected ArrayList<SNRCluster> rightClusters;
+	//the clusters
+	protected ArrayList<SNRCluster> clusters;
 
 	/**
 	 * Create a cluster finder, tied to a parameters object
@@ -31,115 +26,87 @@ public class SNRClusterFinder {
 	 */
 	public void findClusters() {
 		
-		if (leftClusters == null) {
-			leftClusters = new ArrayList<>();
-			rightClusters = new ArrayList<>();
+		if (clusters == null) {
+			clusters = new ArrayList<>();
 		}
 		else {
-			leftClusters.clear();
-			rightClusters.clear();
+			clusters.clear();
 		}
 		
-		//left clusters
-		if (!_params.leftSegments.isZero()) {
+		int maxShift = Integer.max(_params.maxShift(LEFT_LEAN), _params.maxShift(LEFT_LEAN));
+		
+		boolean noSegs = _params.leftSegments.isZero() && _params.rightSegments.isZero();
+		
+		//build clusters
+		if (!noSegs) {
 			boolean connected = false;
 			SNRCluster currentCluster = null;
 			
-			int maxCount = _params.maxShift(LEFT_LEAN) + 1;
+			int maxCount = maxShift + 1;
 			int count = 0;
 			
 			for (int wire = 0; wire < _params.getNumWire(); wire++) {
-				if (_params.leftSegments.checkBit(wire)) {
-					if (!connected) { //create a new one
-						currentCluster = createCluster(LEFT_LEAN);
-						leftClusters.add(currentCluster);
+
+				boolean inLeft = _params.leftSegments.checkBit(wire);
+				boolean inRight = _params.rightSegments.checkBit(wire);
+
+				if (inLeft || inRight) {
+
+					if (!connected) { // create a new one
+						currentCluster = createCluster();
+						clusters.add(currentCluster);
 						count = 0;
 						connected = true;
 					}
-					currentCluster.addSegmentStart(wire, _params.missingLayersUsed(LEFT_LEAN, wire));
-					
-					fillWireLists(currentCluster, wire, LEFT_LEAN);
-					
+					currentCluster.addSegmentStart(wire);
+
+					if (inLeft) {
+						fillWireLists(currentCluster, wire, LEFT_LEAN);
+					}
+					if (inRight) {
+						fillWireLists(currentCluster, wire, RIGHT_LEAN);
+					}
+
 					count++;
 					connected = count < maxCount;
-					
+
 					if (!connected) {
-						checkCluster(currentCluster, LEFT_LEAN);
+						currentCluster.clean();
 					}
-				} //end wire was hit (checkBit)
+				} // end wire was hit (checkBit)
 				else {
-					checkCluster(currentCluster, LEFT_LEAN);
+					if (currentCluster != null) {
+						currentCluster.clean();
+					}
 					connected = false;
 					currentCluster = null;
 				}
-			} //wire loop
+			} // wire loop
 		}
 		
-		//right clusters
-		if (!_params.rightSegments.isZero()) {
-			boolean connected = false;
-			SNRCluster currentCluster = null;
-			
-			int maxCount = _params.maxShift(RIGHT_LEAN) + 1;
-			int count = 0;
-
-			
-			for (int wire = (_params.getNumWire()-1); wire >=0; wire--) {
-				if (_params.rightSegments.checkBit(wire)) {
-					if (!connected) { //create a new one
-						currentCluster = createCluster(RIGHT_LEAN);
-						rightClusters.add(currentCluster);
-						count = 0;
-						connected = true;
-					}
-					currentCluster.addSegmentStart(wire, _params.missingLayersUsed(RIGHT_LEAN, wire));
-					fillWireLists(currentCluster, wire, RIGHT_LEAN);
-					
-					count++;
-					connected = count < maxCount;
-					
-					if (!connected) {
-						checkCluster(currentCluster, RIGHT_LEAN);
-					}
-
-				} //end wire was hit (checkBit)
-				else {
-					checkCluster(currentCluster, RIGHT_LEAN);
-					connected = false;
-					currentCluster = null;
+		//remove subsets
+		int index = 0;
+		
+		ArrayList<SNRCluster> subsets = new ArrayList<>();
+		while (index < clusters.size()-1) {
+			SNRCluster cmain = clusters.get(index);
+			for (int j = index+1; j < clusters.size(); j++) {
+				SNRCluster ctest = clusters.get(j);
+				if (cmain.hasSubset(ctest)) {
+					subsets.add(ctest);
 				}
-			} //wire loop
+			}
+			clusters.removeAll(subsets);
+
+			subsets.clear();
+			index++;
 		}
 
-		//split clusters
-		
 	}
-	
-	//trim rows, check slope
-	private void checkCluster(SNRCluster cluster, int direction) {
-		if (cluster == null) {
-			return;
-		}
-		
-		cluster.clean();
-		
-		if (direction == LEFT_LEAN) {
-			//slopetest
-			if (cluster.getSlope() < -SLOPE_THRESHOLD) {
-				leftClusters.remove(cluster);
-			}
-		}
-		else {
-			//slopetest
-			if (cluster.getSlope() > SLOPE_THRESHOLD) {
-				rightClusters.remove(cluster);
-			}
-		}
-	}
-	
+
 	//create a cluster
-	private SNRCluster createCluster(int direction) {
-		return new SNRCluster(_params.getNumLayer(),  _params.getNumWire(), direction);
+	private SNRCluster createCluster() {
+		return new SNRCluster(_params.getNumLayer(),  _params.getNumWire());
 	}
 	
 	//fill the wire lists
@@ -152,19 +119,12 @@ public class SNRClusterFinder {
 	
 	
 	/**
-	 * Get the list of left leaning clusters
-	 * @return left leaning clusters
+	 * Get the list of  clusters
+	 * @return the list of clusters
 	 */
-	public ArrayList<SNRCluster> getLeftClusters() {
-		return leftClusters;
+	public ArrayList<SNRCluster> getClusters() {
+		return clusters;
 	}
 	
-	/**
-	 * Get the list of right leaning clusters
-	 * @return right leaning clusters
-	 */
-	public ArrayList<SNRCluster> getRightClusters() {
-		return rightClusters;
-	}
 
 }

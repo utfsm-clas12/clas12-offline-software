@@ -3,8 +3,7 @@ package cnuphys.snr;
 /**
  * 
  * @author heddle
- * A cluster candidate is a list of wires for a 
- * given direction with the
+ * A cluster candidate is a list of wires with the
  * requirement that there are no more than two wires
  * in a given layer
  */
@@ -17,15 +16,12 @@ public class SNRCluster {
 	public final int numWires;
 
 	
-	/** a wirelist for the segment starting points. */
+	/** a list for the segment starting points. */
 	public final SegmentStartList segmentStartList = new SegmentStartList();
 	
 	/** one wirelist for each layer */
 	public final WireList wireLists[];
-	
-	/** the direction, 0 for left, 1 for right */
-	public int direction;
-	
+		
 	/** slope of linear fit */
 	private double _slope = Double.NaN;
 	
@@ -36,10 +32,8 @@ public class SNRCluster {
 	/**
 	 * @param numLayers the number of layers, for CLAS12 6
 	 * @param numWires the number of wires, for CLAS12 112
-	 * @param direction the direction, 0 for left, 1 for right
 	 */
-	public SNRCluster(int numLayers, int numWires, int direction) {
-		this.direction = direction;
+	public SNRCluster(int numLayers, int numWires) {
 		this.numLayers = numLayers;
 		this.numWires = numWires;
 		wireLists = new WireList[numLayers];
@@ -48,7 +42,8 @@ public class SNRCluster {
 	}
 	
 	/**
-	 * Add a wire to the wire list for a given layer
+	 * Add a wire to the wire list for a given layer. The wireList will
+	 * enforce no duplicates, but will keep repeat count
 	 * @param layer the zero-based layer, for CLAS12 [0..5]
 	 * @param wire the zero-based wire, for CLAS12 [0..111]
 	 */
@@ -61,8 +56,8 @@ public class SNRCluster {
 	 * @param wire the zero-based wire, for CLAS12 [0..111]
 	 * @param numMissing the number of missing layers required
 	 */
-	public void addSegmentStart(int wire, int numMissing) {
-		segmentStartList.add(wire, numMissing);
+	public void addSegmentStart(int wire) {
+		segmentStartList.add(wire);
 	}
 		
 	/**
@@ -191,6 +186,23 @@ public class SNRCluster {
 		}
 		
 		return _slope*layer + _intercept;
+	}
+	
+	/**
+	 * The given cluster is a subset of this cluster if
+	 * all wirelists are subsets
+	 * @param c the given cluster
+	 * @return <code>true</code> if the given cluster is a subset of this cluster
+	 */
+	public boolean hasSubset (SNRCluster c) {
+		
+		for (int lay =  0; lay < numLayers; lay++) {
+			if (!wireLists[lay].hasSubset(c.wireLists[lay])) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 }

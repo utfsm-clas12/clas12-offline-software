@@ -53,9 +53,9 @@ public class CedColors {
 	public static final Color DOCA_COLOR = new Color(0, 255, 0, 76);
 	public static final Color TRKDOCA_COLOR = new Color(0, 0, 255, 76);
 	
-	//snr fills for clusters
-	public static final Color SNR_LEFT_COLOR = new Color(46, 169, 87);
-	public static final Color SNR_RIGHT_COLOR = new Color(170, 105, 30);
-	
+	//fills for clusters
+	public static final Color HB_CLUSTER_COLOR = new Color(255, 255, 0, 220);
+	public static final Color TB_CLUSTER_COLOR = X11Colors.getX11Color("dark orange", 220);
+	public static final Color SNR_CLUSTER_COLOR = new Color(46, 169, 87, 220);
 
 }
