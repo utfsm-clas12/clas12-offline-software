@@ -172,7 +172,7 @@ public class AllDCView extends CedView implements IRollOverListener {
 				roLabels);
 		
 		view._rollOverPanel.addRollOverListener(view);
-		tabbedPane.add(view._rollOverPanel, "DC Custers");
+		tabbedPane.add(view._rollOverPanel, "DC Clusters");
 		
 		view._clusterDrawer = new ClusterDrawer(view);
 	}
