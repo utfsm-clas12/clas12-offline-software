@@ -8,10 +8,12 @@ import java.awt.geom.Area;
 import java.util.List;
 
 import cnuphys.bCNU.graphics.container.IContainer;
+import cnuphys.bCNU.graphics.world.WorldGraphicsUtilities;
 import cnuphys.ced.event.data.DC;
 import cnuphys.ced.event.data.DCCluster;
 import cnuphys.ced.event.data.DCClusterList;
 import cnuphys.ced.frame.CedColors;
+import cnuphys.ced.geometry.GeoConstants;
 
 public class ClusterDrawer {
 	
@@ -38,7 +40,6 @@ public class ClusterDrawer {
 		_clusterFillColor = CedColors.HB_COLOR;
 		DCClusterList list = DC.getInstance().getHBClusters();
 		if (list != null) {
-			System.err.println("Drawing " + list.size() + " hit based clusters");
 			drawDCClusterList(g, container, list);
 		}
 	}
@@ -50,7 +51,6 @@ public class ClusterDrawer {
 		_clusterFillColor = CedColors.TB_COLOR;
 		DCClusterList list = DC.getInstance().getTBClusters();
 		if (list != null) {
-			System.err.println("Drawing " + list.size() + " time based clusters");
 			drawDCClusterList(g, container, list);
 		}
 	}
@@ -73,19 +73,36 @@ public class ClusterDrawer {
 	private void drawDCClusterList(Graphics g, IContainer container, DCClusterList list) {
 		
 		for (DCCluster cluster : list) {
-			int sector = cluster.sector;
-			int superlayer = cluster.superlayer;
-			
-			
-			for (int hitId : cluster.hitID) {
-				if (hitId > 0) {
-					int index = hitId-1;
-					int layer = DC.getInstance().layer6[index];
-					int wire = DC.getInstance().wire[index];
+			if ((cluster != null) && (cluster.hitID != null)) {
+				
+
+				int length = 0;
+				for (int i = 0; i < cluster.hitID.length; i++) {
+					if (cluster.hitID[i] > 0) {
+						length++;
+					}
+					else {
+						break;
+					}
+				}
+				
+				
+				if (length > 0) {
+					int sector = cluster.sector;
+					int superlayer = cluster.superlayer;
+					int layer[] = new int[length];
+					int wire[] = new int[length];
 					
-					System.err.println("hitID=" + hitId + "  sector " + sector + " supl " + superlayer + " layer " + layer + "  wire " + wire);
+					for (int i = 0; i < length; i++) {
+						int index = cluster.hitID[i]-1;
+						layer[i] = DC.getInstance().layer6[index];
+						wire[i] = DC.getInstance().wire[index];
+					}
+					
+					drawSingleClusterOfWires(g, container, sector, superlayer, layer, wire);
 				}
 			}
+			
 		}
 	}
 	
@@ -95,14 +112,12 @@ public class ClusterDrawer {
 	 * @param container
 	 * @param sector 1-based sector
 	 * @param superlayer 1-based superlayer
-	 * @param wires list of 1-based wires
+	 * @param layer array of 1-based wires
+	 * @param wire array of 1-based wires
 	 */
 	private void drawSingleClusterOfWires(Graphics g, IContainer container, 
-			int sector, int superlayer, List<Integer> wires) {
+			int sector, int superlayer, int layer[], int wire[]) {
 		
-		if (wires.isEmpty()) {
-			return;
-		}
 		
 		Graphics2D g2 = (Graphics2D)g;
 		Rectangle sr = new Rectangle();
@@ -110,8 +125,21 @@ public class ClusterDrawer {
 		
 		Area area = new Area();
 		
-		for (int wire : wires) {
-		//	_view.getCell(sector, superlayer, layer, wire, wr);
+		for (int i = 0; i < wire.length; i++) {
+			//drawing hack
+			int hackSL = (sector < 4) ? superlayer : 7-superlayer;
+			_view.getCell(sector, hackSL, layer[i], wire[i], wr);
+			
+			
+			container.worldToLocal(sr, wr);
+			area.add(new Area(sr));
+		}
+		
+		if (!area.isEmpty()) {
+			g2.setColor(_clusterFillColor);
+            g2.fill(area);
+            g2.setColor(_clusterLineColor);
+            g2.draw(area);
 		}
 
 		
