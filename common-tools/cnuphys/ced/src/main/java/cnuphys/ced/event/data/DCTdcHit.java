@@ -12,7 +12,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	public byte sector;
 	
 	/** The full layer range 1..36 */
-	public byte layer; // 1..36
+	public byte layer36; // 1..36
 	public short wire;
 	public byte superlayer; // 1..6
 	public byte layer6; // 1..6
@@ -42,16 +42,23 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	public float sdoca = Float.NaN;
 	public float stime = Float.NaN;
 
-	public DCTdcHit(byte sector, byte layer, short wire, int tdc) {
+	/**
+	 * Create a DCTdc hit
+	 * @param sector the sector [1..6]
+	 * @param layer36 the layer [1..36] will be converted to superlayer [1..6] and layer [1..6]
+	 * @param wire the wire [1..111]
+	 * @param tdc the tdc value
+	 */
+	public DCTdcHit(byte sector, byte layer36, short wire, int tdc) {
 		super();
 		this.sector = sector;
-		this.layer = layer;
+		this.layer36 = layer36;
 		this.wire = wire;
 		this.tdc = tdc;
 
 		// for convenience compute the 1..6 indices
-		superlayer = (byte) (((layer - 1) / 6) + 1);
-		layer6 = (byte) (((layer - 1) % 6) + 1);
+		superlayer = (byte) (((layer36 - 1) / 6) + 1);
+		layer6 = (byte) (((layer36 - 1) % 6) + 1);
 	}
 
 	/**
@@ -60,7 +67,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	 * @return <code>true</code> if the hit has valid indices
 	 */
 	public boolean inRange() {
-		return (valInRange(sector, 1, 6) && valInRange(layer, 1, 36) && valInRange(wire, 1, 112));
+		return (valInRange(sector, 1, 6) && valInRange(layer36, 1, 36) && valInRange(wire, 1, 112));
 	}
 
 	private boolean valInRange(int val, int min, int max) {
@@ -80,7 +87,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 	public int compareTo(DCTdcHit hit) {
 		int c = Integer.valueOf(sector).compareTo(Integer.valueOf(hit.sector));
 		if (c == 0) {
-			c = Integer.valueOf(layer).compareTo(Integer.valueOf(hit.layer));
+			c = Integer.valueOf(layer36).compareTo(Integer.valueOf(hit.layer36));
 			if (c == 0) {
 				c = Integer.valueOf(wire).compareTo(Integer.valueOf(hit.wire));
 			}
@@ -103,7 +110,7 @@ public class DCTdcHit implements Comparable<DCTdcHit> {
 
 	@Override
 	public String toString() {
-		String s = "sector = " + sector + " layer " + layer + "  superlayer " + superlayer + "  layer6 " + layer6
+		String s = "sector = " + sector + "  superlayer " + superlayer + "  layer6 " + layer6
 				+ " wire: " + wire + " " + tdcString();
 
 		String dStr = docaString(doca, time);
