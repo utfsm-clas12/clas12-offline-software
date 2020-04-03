@@ -137,7 +137,7 @@
     <dependency>
       <groupId>org.jlab.clas</groupId>
       <artifactId>clas-tracking</artifactId>
-      <version>6.2.0-SNAPSHOT</version>
+      <version>6.5.3-SNAPSHOT</version>
     </dependency>
     <!--
     <dependency>
