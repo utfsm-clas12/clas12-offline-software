@@ -14,8 +14,10 @@ public class EBTBEngine extends EBEngine {
 
     public EBTBEngine(){
         super("EBTB");
+        setUsePOCA(false);
     }
 
+    @Override
     public boolean processDataEvent(DataEvent de) {
         return super.processDataEvent(de,ebScalers);
     }

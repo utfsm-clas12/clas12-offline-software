@@ -1,5 +1,6 @@
 package org.jlab.service.eb;
 
+import java.util.Collections;
 import java.util.List;
 import org.jlab.clas.reco.ReconstructionEngine;
 import org.jlab.io.base.DataEvent;
@@ -22,6 +23,7 @@ public class EBEngine extends ReconstructionEngine {
 
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
+    boolean usePOCA = false;
 
     // output banks:
     String eventBank        = null;
@@ -52,6 +54,11 @@ public class EBEngine extends ReconstructionEngine {
         //Initialize bank names
     }
 
+    public void setUsePOCA(boolean val) {
+        this.usePOCA=val;
+    }
+
+    @Override
     public boolean processDataEvent(DataEvent de) {
         throw new RuntimeException("EBEngine cannot be used directly.  Use EBTBEngine/EBHBEngine instead.");
     }
@@ -75,6 +82,7 @@ public class EBEngine extends ReconstructionEngine {
         DetectorHeader head = EBio.readHeader(de,ebs,ccdb);
 
         EventBuilder eb = new EventBuilder(ccdb);
+        eb.setUsePOCA(this.usePOCA);
         eb.initEvent(head); // clear particles
 
         EBMatching ebm = new EBMatching(eb);
@@ -123,15 +131,17 @@ public class EBEngine extends ReconstructionEngine {
         ebm.addCentralNeutrals(eb.getEvent());
 
         // Do PID etc:
-        EBAnalyzer analyzer = new EBAnalyzer(ccdb);
-        analyzer.processEvent(eb.getEvent(),rf);
+        EBAnalyzer analyzer = new EBAnalyzer(ccdb,rf);
+        analyzer.processEvent(eb.getEvent());
 
         // Add Forward Tagger particles:
         eb.processForwardTagger(de);
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
-        
+       
+            Collections.sort(eb.getEvent().getParticles());
+
             eb.setParticleStatuses();
             //eb.setEventStatuses();
             
@@ -175,7 +185,7 @@ public class EBEngine extends ReconstructionEngine {
       
             // update PID for FT-based start time:
             // WARNING:  this modified particles
-            analyzer.processEventFT(eb.getEvent(),rf);
+            analyzer.processEventFT(eb.getEvent());
             if (eb.getEvent().getEventHeader().getStartTimeFT()>0 && eventBankFT!=null) {
                 DataBank bankEveFT = DetectorData.getEventShadowBank(eb.getEvent(), de, eventBankFT);
                 de.appendBanks(bankEveFT);
@@ -261,6 +271,8 @@ public class EBEngine extends ReconstructionEngine {
         }
         de.removeBank(eventBank);
         de.removeBank(particleBank);
+        de.removeBank(eventBankFT);
+        de.removeBank(particleBankFT);
         de.removeBank(calorimeterBank);
         de.removeBank(scintillatorBank);
         de.removeBank(cherenkovBank);

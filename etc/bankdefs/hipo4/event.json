@@ -11,8 +11,8 @@
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
                 {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
-                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
-                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
                 {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
@@ -29,6 +29,7 @@
             {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
             {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
             {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"},
+            {"name":"vt",       "type":"F", "info":"RF and z corrected vertex time (ns)"},
             {"name":"charge",   "type":"B", "info":"particle charge"},
             {"name":"beta",     "type":"F", "info":"particle beta measured by TOF"},
             {"name":"chi2pid",  "type":"F", "info":"Chi2 of assigned PID"},
@@ -139,7 +140,8 @@
             {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
             {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
             {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
-            {"name":"status",   "type":"S", "info":"hit status"}
+            {"name":"status",   "type":"S", "info":"hit status"},
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"}
         ]
     },
     {
@@ -190,8 +192,8 @@
                 {"name":"liveTime",   "type":"D", "info":"Lifetime"},
                 {"name":"startTime",  "type":"F", "info":"Event Start Time (ns)"},
                 {"name":"RFTime",     "type":"F", "info":"RF Time (ns)"},
-                {"name":"helicity",   "type":"B", "info":"Helicity of Event (0 or 1, else undefined), with HWP-correction"},
-                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (0 or 1, else undefined)"},
+                {"name":"helicity",   "type":"B", "info":"Helicity of Event (+/-1, else undefined), with HWP-correction"},
+                {"name":"helicityRaw","type":"B", "info":"Helicity of Event (+/-1, else undefined)"},
                 {"name":"procTime",   "type":"F", "info":"Event Processing Time (UNIX Time = seconds)"}
             ]
     },
@@ -208,6 +210,7 @@
             {"name":"vx",       "type":"F", "info":"x component of the vertex (cm)"},
             {"name":"vy",       "type":"F", "info":"y component of the vertex (cm)"},
             {"name":"vz",       "type":"F", "info":"z component of the vertex (cm)"},
+            {"name":"vt",       "type":"F", "info":"RF and z corrected vertex time (ns)"},
             {"name":"charge",   "type":"B", "info":"particle charge"},
             {"name":"beta",     "type":"F", "info":"particle beta measured by TOF"},
             {"name":"chi2pid",  "type":"F", "info":"Chi2 of assigned PID"},
@@ -318,7 +321,8 @@
             {"name":"hx",       "type":"F", "info":"X coordinate of the matched hit (cm)"},
             {"name":"hy",       "type":"F", "info":"Y coordinate of the mathced hit (cm)"},
             {"name":"hz",       "type":"F", "info":"Z coordinate of the matched hit (cm)"},
-            {"name":"status",   "type":"S", "info":"hit status"}
+            {"name":"status",   "type":"S", "info":"hit status"},
+            {"name":"dedx",     "type":"F", "info":"Energy deposition per distance travelled (MeV/cm)"}
         ]
     },
     {
@@ -433,7 +437,7 @@
         "item": 41,
         "info": "Event Header Bank, shadowing REC::Event with FT-based start time",
         "entries": [
-            {"name":"EvCAT",     "type":"S", "info":"Event Category, if >0:  e-, e-p, e-pi+....."},
+            {"name":"category",   "type":"L", "info":"Undefined"},
             {"name":"startTime", "type":"F", "info":"Event Start Time (ns)"}
         ]
     },
@@ -444,6 +448,7 @@
         "info": "Reconstructed Particle Information, shadowing REC::Particle with FT-based start time",
         "entries": [
             {"name":"pid",     "type":"I", "info":"particle id in LUND conventions"},
+            {"name":"vt",      "type":"F", "info":"RF and z corrected vertex time (ns)"},
             {"name":"beta",    "type":"F", "info":"particle beta measured by TOF"},
             {"name":"chi2pid", "type":"F", "info":"Chi2 of assigned PID"},
             {"name":"status",  "type":"S", "info":"particle status (represents detector collection it passed)"}
