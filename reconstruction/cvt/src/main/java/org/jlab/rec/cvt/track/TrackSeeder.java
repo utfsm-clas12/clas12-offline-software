@@ -76,8 +76,8 @@ public class TrackSeeder {
         ((ArrayList<Double>) Xs).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ys).ensureCapacity(seedcrs.size()+1);
         ((ArrayList<Double>) Ws).ensureCapacity(seedcrs.size()+1);
-        Xs.add(0, 0.0); 
-        Ys.add(0, 0.0);
+        Xs.add(0, org.jlab.rec.cvt.Constants.getXb()); 
+        Ys.add(0, org.jlab.rec.cvt.Constants.getYb());
         Ws.add(0,0.1);
         for (Cross c : seedcrs ) { 
             if(c.get_DetectorType().equalsIgnoreCase("C") ) System.err.println("WRONG CROSS TYPE");
@@ -154,6 +154,8 @@ public class TrackSeeder {
             }
 
             int binIdx = (int) (phi / (360./NBINS) );
+            if(binIdx>35)
+                binIdx = 35;
             sortedCrosses.get(binIdx).get(crosses.get(i).get_Region() - 1).add(crosses.get(i));
             LPhi[binIdx][crosses.get(i).get_Region() - 1]++; 
         }
@@ -212,7 +214,6 @@ public class TrackSeeder {
         List<Cross> crosses = new ArrayList<Cross>();
         List<Cross> bmtC_crosses = new ArrayList<Cross>();
         
-        //crosses.addAll(svt_crosses);
         
         for(Cross c : bmt_crosses) { 
             if(c.get_DetectorType().equalsIgnoreCase("Z"))
@@ -221,8 +222,10 @@ public class TrackSeeder {
                 bmtC_crosses.add(c);
         }
         
-        this.FindSeedCrossList(crosses);
-        this.MatchSeed(svt_crosses);
+        //this.FindSeedCrossList(crosses);
+        //this.MatchSeed(svt_crosses);
+        this.FindSeedCrossList(svt_crosses);
+        this.MatchSeed(crosses);
         
         for(Seed mseed : seedScan) { 
             List<Cross> seedcrs = mseed.get_Crosses();
