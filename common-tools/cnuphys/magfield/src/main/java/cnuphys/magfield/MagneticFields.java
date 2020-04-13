@@ -7,6 +7,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
@@ -890,15 +892,35 @@ public class MagneticFields {
 	 * Tries to load the magnetic fields from fieldmaps
 	 */
 	public void initializeMagneticFields() {
+		
+		
 
-		// three dirs to try (they should have a magfield directory)
-		String dirs[] = { getProperty("user.dir"), getProperty("user.home"),
-				getProperty("user.dir") + "/../../../../../../etc/data" };
+		// dirs to try (they should have a magfield directory)
+		
+		ArrayList<String> dirs = new ArrayList<>();
+		String c12dir = System.getenv("CLAS12DIR");
+		String coatdir = System.getenv("COATJAVA");
 
-		boolean goodDir[] = new boolean[dirs.length];
+		if (c12dir != null) {
+			String d = c12dir + "/etc/data";
+			d = d.replace("//", "/");
+			dirs.add(d);
+		}
+		if (coatdir != null) {
+			String d = coatdir + "/etc/data";
+			d = d.replace("//", "/");
+			dirs.add(d);
+		}
+		
+		dirs.add(getProperty("user.dir"));
+		dirs.add(getProperty("user.home"));
+		dirs.add(getProperty(getProperty("user.dir") + "/../../../../../../etc/data"));
+		
+		int len = dirs.size();
+		boolean goodDir[] = new boolean[len];
 
-		for (int i = 0; i < goodDir.length; i++) {
-			File magdir = new File(dirs[i], "magfield");
+		for (int i = 0; i < len; i++) {
+			File magdir = new File(dirs.get(i), "magfield");
 			goodDir[i] = (magdir.exists() && magdir.isDirectory());
 
 			try {
@@ -908,9 +930,9 @@ public class MagneticFields {
 			}
 		}
 
-		for (int i = 0; i < goodDir.length; i++) {
+		for (int i = 0; i < len; i++) {
 			if (goodDir[i]) {
-				File magdir = new File(dirs[i], "magfield");
+				File magdir = new File(dirs.get(i), "magfield");
 				if (initializeMagneticFields(magdir)) {
 					System.out.println("Used fields found in [" + magdir.getPath() + "]");
 					return;
@@ -1724,7 +1746,7 @@ public class MagneticFields {
 	 * @param arg command line arguments
 	 */
 	public static void main(String arg[]) {
-		MagTests.runTests();
+	//	MagTests.runTests();
 	}
 
 	public String getCurrentConfiguration() {
