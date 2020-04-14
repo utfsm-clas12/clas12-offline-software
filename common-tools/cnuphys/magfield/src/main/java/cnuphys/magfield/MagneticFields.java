@@ -46,7 +46,7 @@ public class MagneticFields {
 	}
 
 	// version of mag field package
-	private static String VERSION = "1.095";
+	private static String VERSION = "1.096";
 
 	// initialize only once
 	private boolean _initialized = false;
@@ -893,21 +893,23 @@ public class MagneticFields {
 	 */
 	public void initializeMagneticFields() {
 		
-		
+		System.out.println("Checking for ENV Vars");
 
 		// dirs to try (they should have a magfield directory)
 		
 		ArrayList<String> dirs = new ArrayList<>();
-		String c12dir = System.getenv("CLAS12DIR");
 		String coatdir = System.getenv("COATJAVA");
+		String c12dir = System.getenv("CLAS12DIR");
+		System.out.println("In initializeMagneticFields COATJAVA = [" + coatdir + "]");
+		System.out.println("In initializeMagneticFields CLAS12DIR = [" + c12dir + "]");
 
-		if (c12dir != null) {
-			String d = c12dir + "/etc/data";
+		if (coatdir != null) {
+			String d = coatdir + "/etc/data";
 			d = d.replace("//", "/");
 			dirs.add(d);
 		}
-		if (coatdir != null) {
-			String d = coatdir + "/etc/data";
+		if (c12dir != null) {
+			String d = c12dir + "/etc/data";
 			d = d.replace("//", "/");
 			dirs.add(d);
 		}
