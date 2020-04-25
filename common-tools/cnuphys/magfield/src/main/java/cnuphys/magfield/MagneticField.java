@@ -16,7 +16,7 @@ import java.nio.FloatBuffer;
  * @author Nicole Schumacher
  * @version 1.0
  */
-public abstract class MagneticField implements IMagField {
+public abstract class MagneticField implements IMagField, IField {
 
 	/** Magic number used to check if byteswapping is necessary. */
 	public static final int MAGICNUMBER = 0xced;
@@ -791,5 +791,26 @@ public abstract class MagneticField implements IMagField {
 		}
 		return true;
 	}
+	
+	/**
+	 * Get the field magnitude in kiloGauss at a given location expressed in
+	 * Cartesian coordinates.
+	 * 
+	 * @param x the x coordinate in cm
+	 * @param y the y coordinate in cm
+	 * @param z the z coordinate in cm
+	 * @return the magnitude of the field in kiloGauss.
+	 */
+	@Override
+	public float fieldMagnitude(float x, float y, float z) {
+		float result[] = new float[3];
+		field(x, y, z, result);
+		double bx = result[0];
+		double by = result[1];
+		double bz = result[2];
+		double mag = Math.sqrt(bx*bx + by*by + bz*bz);
+		return (float)mag;
+	}
+
 
 }

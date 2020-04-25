@@ -351,5 +351,61 @@ public final class Solenoid extends MagneticField {
 
 		return s;
 	}
+	
+	
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
+	 *
+	 * @param x      the x coordinate in cm
+	 * @param y      the y coordinate in cm
+	 * @param z      the z coordinate in cm
+	 * @param result a float array holding the retrieved field in kiloGauss. The 0,1
+	 *               and 2 indices correspond to x, y, and z components.
+	 */
+	@Override
+	public void field(float x, float y, float z, float[] result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * Obtain the magnetic field at a given location expressed in Cartesian
+	 * coordinates for the sector system. The other "field" methods are for the lab
+	 * system. The field is returned as a Cartesian vector in kiloGauss.
+	 * 
+	 * @param sector the sector [1..6]
+	 * @param x      the x sector coordinate in cm
+	 * @param y      the y sector coordinate in cm
+	 * @param z      the z sector coordinate in cm
+	 * @param result the result is a float array holding the retrieved field in
+	 *               kiloGauss. The 0,1 and 2 indices correspond to x, y, and z
+	 *               components.
+	 */
+	@Override
+	public void field(int sector, float xs, float ys, float zs, float[] result) {
+		System.err.println("CALLING UNIMPLEMENTED METHOD field is sector coordinates in class Solenoid");
+		System.exit(-1);
+	}
+
+
+	/**
+	 * Obtain an approximation for the magnetic field gradient at a given location
+	 * expressed in Cartesian coordinates. The field is returned as a Cartesian
+	 * vector in kiloGauss/cm.
+	 *
+	 * @param x      the x coordinate in cm
+	 * @param y      the y coordinate in cm
+	 * @param z      the z coordinate in cm
+	 * @param result a float array holding the retrieved field in kiloGauss. The 0,1
+	 *               and 2 indices correspond to x, y, and z components.
+	 */
+	@Override
+	public void gradient(float x, float y, float z, float[] result) {
+		System.err.println("CALLING UNIMPLEMENTED METHOD gradient in class Solenoid");
+		System.exit(-1);
+	}
+	
+
 
 }
