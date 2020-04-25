@@ -465,6 +465,74 @@ public class MagTests {
 	private static void loadAsciiTorus() {	
 		ToAscii.readAsciiTorus("/Users/heddle/magfield/FullTorus.txt");
 	}
+	
+	private static void compareGEMCSolenoid() {
+		System.out.println("Setting field to solenoid only.");
+		
+		double gemcdata[][] = {
+				{187.691, 159.811, 47.3208,  -7.67908,  -6.5384,  9.06023  },
+				{164.229, 40.1344, 112.58 ,  -60.9808,  -14.9025,  -47.5493  },
+				{59.9728, 70.585, 241.228,   37.1744,  43.7524,  39.1832  },
+				{48.7519, 109.422, 244.992,   17.6347,  39.5805,  15.2529  },
+				{150.382, 51.144, 140.373,   -11.1821,  -3.80298,  -73.5199  },
+				{18.0697, 131.957, -133.863,   -1.82845,  -13.3526,  -161.079  },
+				{84.1644, 90.2623, -140.76,   -56.5292,  -60.6249,  -168.356  },
+				{216.666, 62.4497, 63.2686,   -18.8424,  -5.43097,  9.27143  },
+				{203.636, 187.693, 142.927,   -3.41886,  -3.15118,  -4.86278  },
+				{86.3591, 53.7414, 47.6946,   1084.31,  674.769,  571.271  },
+				{22.553, 276.033, -209.349,   -0.130278,  -1.59451,  -5.46614  },
+				{209.231, 126.264, -277.744,   -5.54475,  -3.34607,  -2.47414  },
+				{40.2278, 294.298, -11.8372,   0.206677,  1.512,  4.56982  },
+				{22.4589, 298.864, -97.1238,   0.389101,  5.17783,  -0.935768  },
+				{102.786, 151.367, -262.625,   -9.31576,  -13.7188,  -1.39919  },
+				{52.5945, 205.298, 86.9238,   -7.37084,  -28.7715,  0.218492  },
+				{75.429, 71.645, 157.629,   155.303,  147.512,  -78.8034  },
+				{198.831, 97.19, -59.7657,   19.8982,  9.72639,  9.75546  },
+				{134.14, 24.1661, 131.512,   -10.5008,  -1.89177,  -152.257  },
+				{258.632, 34.8282, -273.035,   -5.04712,  -0.679661,  -2.73791  },
+				{27.1344, 203.246, -192.919,   -1.09949,  -8.23551,  -16.5786  },
+				{231.759, 21.227, -41.4448,   13.5599,  1.24196,  12.172  },
+				{143.973, 130.229, 295.353,   8.05824,  7.28895,  0.667539  },
+				{209.832, 82.8324, 257.018,   7.5876,  2.99524,  -4.05822  },
+				{126.527, 229.581, 8.3879,   -0.417419,  -0.757402,  9.3967  },
+				{195.223, 200.525, -192.946,   -0.1803,  -0.185196,  -5.74216  },
+				{283.692, 44.5934, 72.9987,   -5.82731,  -0.91599,  1.8131  },
+				{259.022, 13.0388, 167.449,   -2.60386,  -0.131074,  -7.75096  }};
+		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
+		
+		IField ifield = FieldProbe.factory();
+				
+		float result[] = new float[3];
+		
+		for (double v[] : gemcdata) {
+			double x = v[0];
+			double y = v[1];
+			double z = v[2];
+			
+			ifield.field((float)x, (float)y, (float)z, result);
+			
+			double gBx = v[3];
+			double gBy = v[4];
+			double gBz = v[5];
+			double gB = Math.sqrt(gBx*gBx + gBy*gBy + gBz*gBz);
+			
+			double cBx = result[0]*1000;
+			double cBy = result[1]*1000;
+			double cBz = result[2]*1000;
+			double cB = Math.sqrt(cBx*cBx + cBy*cBy + cBz*cBz);
+			
+			
+			String s = String.format("(%-8.3f, %-8.3f, %-8.3f) BGSIM = (%-8.5f, %-8.5f, %-8.5f) [%-8.5f] Bced = (%-8.5f, %-8.5f, %-8.5f) [%-8.5f] BGSMIM/Bced = %-8.4f", 
+					x, y, z, 
+					gBx, gBy, gBz, gB,
+					cBx, cBy, cBz, cB, gB/cB);
+			
+			System.err.println(s);
+		}
+		
+		
+		
+	}
 
 	private static void scanCSVFile() {
 
@@ -554,6 +622,7 @@ public class MagTests {
 		final JMenuItem asciiSolenoidItem = new JMenuItem("Convert Solenoid to ASCII");
 		final JMenuItem scanItem = new JMenuItem("Scan csv file");
 		final JMenuItem loadItem = new JMenuItem("Load ASCII Torus");
+		final JMenuItem gemcSolenoidItem = new JMenuItem("Compare GEMC Solenoid");
 
 
 		ActionListener al1 = new ActionListener() {
@@ -579,6 +648,9 @@ public class MagTests {
 				} else if (e.getSource() == loadItem) {
 					loadAsciiTorus();
 				}
+				else if (e.getSource() == gemcSolenoidItem) {
+					compareGEMCSolenoid();
+				}
 			}
 
 		};
@@ -592,6 +664,7 @@ public class MagTests {
 		asciiSolenoidItem.addActionListener(al1);
 		scanItem.addActionListener(al1);
 		loadItem.addActionListener(al1);
+		gemcSolenoidItem.addActionListener(al1);
 		
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
@@ -603,6 +676,7 @@ public class MagTests {
 		testMenu.add(asciiSolenoidItem);
 		testMenu.add(scanItem);
 		testMenu.add(loadItem);
+		testMenu.add(gemcSolenoidItem);
 		testMenu.addSeparator();
 
 		// now for rectangular grids
@@ -681,7 +755,7 @@ public class MagTests {
 //					"Symm_solenoid_r601_phi1_z1201_2008.dat");
 //			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
 //					"SolenoidMarch2019_BIN.dat");
-			mf.initializeMagneticFields(mfdir.getPath(), "Full_torus_r251_phi181_z251_08May2018.dat",
+			mf.initializeMagneticFields(mfdir.getPath(), "Symm_torus_r2501_phi16_z251_24Apr2018.dat",
 					"Symm_solenoid_r601_phi1_z1201_13June2018.dat");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

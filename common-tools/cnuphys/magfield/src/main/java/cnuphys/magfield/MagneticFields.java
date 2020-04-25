@@ -1748,7 +1748,7 @@ public class MagneticFields {
 	 * @param arg command line arguments
 	 */
 	public static void main(String arg[]) {
-	//	MagTests.runTests();
+		MagTests.runTests();
 	}
 
 	public String getCurrentConfiguration() {
