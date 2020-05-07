@@ -505,7 +505,7 @@ public class EBTwoTrackTest {
 
         nEvents++;
 
-        if (recBank==null || recPartBank==null || recFtBank==null || recFtPartBank==null) return;
+        if (recBank==null || recPartBank==null || recFtBank==null)return;// || recFtPartBank==null) return;
 
         if (debug) {
             System.out.println("\n\n#############################################################\n");
@@ -516,9 +516,9 @@ public class EBTwoTrackTest {
 
         final float startTime=recBank.getFloat("startTime",0);
 
-        for (int ii=0; ii<recFtPartBank.rows(); ii++) {
-            if (Math.abs(recFtPartBank.getShort("status",ii))/1000 == 1) {
-                switch (recFtPartBank.getInt("pid",ii)) {
+        for (int ii=0; ii<recPartBank.rows(); ii++) {
+            if (Math.abs(recPartBank.getShort("status",ii))/1000 == 1) {
+                switch (recPartBank.getInt("pid",ii)) {
                     case 11:
                         nFtElectrons++;
                         break;
@@ -529,8 +529,8 @@ public class EBTwoTrackTest {
             }
         }
 
-        for (int ii=0; ii<recFtPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
-            final int pid = recFtPartBank.getInt("pid",ii);
+        for (int ii=0; ii<recPartBank.rows() && (startTime>0 || fdCharge==0); ii++) {
+            final int pid = recPartBank.getInt("pid",ii);
             if (pid==hadronPDG) {
                 final double px=recPartBank.getFloat("px",ii);
                 final double py=recPartBank.getFloat("py",ii);

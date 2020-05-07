@@ -57,7 +57,6 @@ public class TaggerResponse extends DetectorResponse {
             for(int row = 0; row < nrows; row++){
                 TaggerResponse ft = new TaggerResponse();
                 float dx,dy;
-                int id  = bank.getShort("id", row);
                 int size = bank.getShort("size", row);
                 double x = bank.getFloat("x",row);
                 double y = bank.getFloat("y",row);
@@ -65,6 +64,7 @@ public class TaggerResponse extends DetectorResponse {
                 switch (bankType) {
                     case BANK_TYPE_DET:
                         ft.setHitIndex(row);
+                        ft.setID(bank.getShort("id", row));
                         dx = bank.getFloat("widthX",row);
                         dy = bank.getFloat("widthY",row);
                         break;
@@ -80,7 +80,7 @@ public class TaggerResponse extends DetectorResponse {
                 double radius = bank.getFloat("radius", row);
                 double time = bank.getFloat("time",row);
                 double energy = bank.getFloat("energy",row);
-               
+
                 double z0 = 0; // FIXME vertex
                 double path = Math.sqrt(x*x+y*y+(z-z0)*(z-z0)); 
                 double cx = x / path;
@@ -89,7 +89,6 @@ public class TaggerResponse extends DetectorResponse {
                 ft.setMomentum(energy*cx,energy*cy,energy*cz);
 
                 ft.setSize(size);
-                ft.setID(id);
                 ft.setEnergy(energy);
                 ft.setRadius(radius);
                 ft.setTime(time);

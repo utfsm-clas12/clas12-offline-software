@@ -5,15 +5,17 @@ import org.jlab.io.base.DataEvent;
 
 /**
  *
+ * Same as EBTB, except uses DST banks as inputs.
+ * 
  * @author baltzell
  */
-public class EBTBRerunEngine extends EBEngine {
+public class EBTBDSTEngine extends EBEngine {
 
     // static to store across events:
     static EBScalers ebScalers = new EBScalers();
 
-    public EBTBRerunEngine(){
-        super("EBTBRerun");
+    public EBTBDSTEngine(){
+        super("EBTBDST");
         setUsePOCA(false);
         bankType=DetectorResponse.BANK_TYPE_DST;
         dropBanks=true;

@@ -133,8 +133,7 @@ then
     if [ $? != 0 ] ; then echo "wget validation files failure" ; exit 1 ; fi
     gunzip -f ${webFileStub}.evio.gz
 
-    rm -f ${webFileStub}.hipo
-    rm -f out?_${webFileStub}.hipo
+    rm -f *${webFileStub}.hipo
 
     # convert to hipo:
     $COAT/bin/evio2hipo -s $gemcSolenoidDefault -o ${webFileStub}.hipo ${webFileStub}.evio
@@ -147,7 +146,7 @@ then
         ../../coatjava/bin/recon-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
         if [ $dstInput -ne 0 ]
         then
-            ../../coatjava/bin/recon-util -i out_${webFileStub}.hipo -o dstinput_${webFileStub}.hipo org.jlab.service.eb.EBTBRerunEngine
+            ../../coatjava/bin/recon-util -i out_${webFileStub}.hipo -o dstinput_${webFileStub}.hipo org.jlab.service.eb.EBTBDSTEngine
         fi
     else
         echo "set inputDir $PWD/" > cook.clara
@@ -170,7 +169,7 @@ if [ $? != 0 ] ; then echo "EBTwoTrackTest test failure" ; exit 1 ; else echo "E
 if [ $dstInput -ne 0 ]
 then
     java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath2 -DINPUTFILE=dstinput_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
-    if [ $? != 0 ] ; then echo "EBTwoTrackTest dstinput failure" ; exit 1 ; else echo "EBTwoTrackTest test1 success" ; fi
+    if [ $? != 0 ] ; then echo "EBTwoTrackTest dstinput failure" ; exit 1 ; else echo "EBTwoTrackTest dstinput success" ; fi
 fi
 
 exit 0

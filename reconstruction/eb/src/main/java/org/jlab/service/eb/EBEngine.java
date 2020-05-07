@@ -76,8 +76,6 @@ public class EBEngine extends ReconstructionEngine {
 
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
 
-        //if (this.dropBanks==true) this.dropBanks(de);
-
         // check run number, get constants from CCDB:
         int run=-1;
         if (de.hasBank("RUN::config")) {
@@ -160,7 +158,8 @@ public class EBEngine extends ReconstructionEngine {
         // Add Forward Tagger particles:
         eb.processForwardTagger(de);
        
-        // we wait until now to drop banks, to accommadate using them as inputs:
+        // we wait until now to drop EB output banks,
+        // to accommadate using them also as inputs:
         if (this.dropBanks==true) this.dropBanks(de);
 
         // create REC:detector banks:
