@@ -542,7 +542,7 @@ public class DetectorData {
                    for (int ii=0; ii<covBank.rows(); ii++) {
                        if (covBank.getInt("id",ii) !=  trkId) continue;
                        for (int jj=1; jj<=dimCovMat; jj++) {
-                           for (int kk=jj; kk<=dimCovMat; kk++) {
+                           for (int kk=1; kk<=dimCovMat; kk++) {
                                float ele=covBank.getFloat(String.format("C%d%d",jj,kk),ii);
                                track.setCovMatrix(jj-1,kk-1,ele);
                            }
@@ -652,9 +652,11 @@ public class DetectorData {
                 for (int icov=0; icov<covBank.rows(); icov++) {
                     if (covBank.getInt("pindex",icov) !=  pindex) continue;
                     for (int jj=1; jj<=dimCovMat; jj++) {
-                        for (int kk=1; kk<=dimCovMat; kk++) {
+                        for (int kk=jj; kk<=dimCovMat; kk++) {
                             float ele=covBank.getFloat(String.format("C%d%d",jj,kk),icov);
                             track.setCovMatrix(jj-1,kk-1,ele);
+                            // populate the other, symmetric half:
+                            track.setCovMatrix(kk-1,jj-1,ele);
                         }
                     }
                 }
