@@ -21,6 +21,7 @@ import org.jlab.rec.eb.EBRadioFrequency;
  */
 public class EBEngine extends ReconstructionEngine {
 
+    int bankType = DetectorResponse.BANK_TYPE_DET; 
     boolean dropBanks = false;
     boolean alreadyDroppedBanks = false;
     boolean usePOCA = false;
@@ -39,11 +40,21 @@ public class EBEngine extends ReconstructionEngine {
     String trajectoryBank   = null;
     String covMatrixBank    = null;
     
-    // inputs banks:
-    String trackType        = null;
-    String ftofHitsType     = null;
-    String trajectoryType   = null;
-    String covMatrixType    = null;
+    // inputs banks that have HB/TB versions:
+    String ftofBankIn     = null;
+    String dcTrackBankIn  = null;
+    String dcTrajBankIn   = null;
+    String dcCovMatBankIn = null;
+
+    // more static input banks:
+    String cvtTrackBankIn  = "CVTRec::Tracks";
+    String cvtTrajBankIn   = "CVTRec::Trajectory";
+    String ecClusterBankIn = "ECAL::clusters";
+    String ecMomentsBankIn = "ECAL::moments";
+    String ctofBankIn = "CTOF::hits";
+    String cndBankIn = "CND::clusters";
+    String htccBankIn = "HTCC::rec";
+    String ltccBankIn = "LTCC::clusters";
     
     public EBEngine(String name){
         super(name,"gavalian","1.0");
@@ -65,7 +76,7 @@ public class EBEngine extends ReconstructionEngine {
 
     public boolean processDataEvent(DataEvent de,EBScalers ebs) {
 
-        if (this.dropBanks==true) this.dropBanks(de);
+        //if (this.dropBanks==true) this.dropBanks(de);
 
         // check run number, get constants from CCDB:
         int run=-1;
@@ -83,20 +94,21 @@ public class EBEngine extends ReconstructionEngine {
 
         EventBuilder eb = new EventBuilder(ccdb);
         eb.setUsePOCA(this.usePOCA);
+        eb.setBankType(bankType);
         eb.initEvent(head); // clear particles
 
         EBMatching ebm = new EBMatching(eb);
-        
+       
         // Process RF:
         EBRadioFrequency rf = new EBRadioFrequency(ccdb);
         eb.getEvent().getEventHeader().setRfTime(rf.getTime(de)+ccdb.getDouble(EBCCDBEnum.RF_OFFSET));
         
-        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de, "ECAL::clusters", DetectorType.ECAL,"ECAL::moments");
-        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofHitsType, DetectorType.FTOF);
-        List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, "CTOF::hits", DetectorType.CTOF);
-        List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, "CND::clusters", DetectorType.CND);
-        List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,"HTCC::rec",DetectorType.HTCC);
-        List<DetectorResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,"LTCC::clusters",DetectorType.LTCC);
+        List<DetectorResponse> responseECAL = CalorimeterResponse.readHipoEvent(de,ecClusterBankIn, DetectorType.ECAL,ecMomentsBankIn,bankType);
+        List<DetectorResponse> responseFTOF = ScintillatorResponse.readHipoEvent(de, ftofBankIn, DetectorType.FTOF,bankType);
+        List<DetectorResponse> responseCTOF = ScintillatorResponse.readHipoEvent(de, ctofBankIn, DetectorType.CTOF,bankType);
+        List<DetectorResponse> responseCND  = ScintillatorResponse.readHipoEvent(de, cndBankIn, DetectorType.CND,bankType);
+        List<DetectorResponse> responseHTCC = CherenkovResponse.readHipoEvent(de,htccBankIn,DetectorType.HTCC,bankType);
+        List<DetectorResponse> responseLTCC = CherenkovResponse.readHipoEvent(de,ltccBankIn,DetectorType.LTCC,bankType);
         
         eb.addDetectorResponses(responseFTOF);
         eb.addDetectorResponses(responseCTOF);
@@ -106,10 +118,21 @@ public class EBEngine extends ReconstructionEngine {
         eb.addDetectorResponses(responseLTCC);
 
         // Add tracks
-        List<DetectorTrack>  tracks = DetectorData.readDetectorTracks(de, trackType, trajectoryType, covMatrixType);
+        List<DetectorTrack>  tracks = null;
+        List<DetectorTrack> ctracks = null;
+        switch (bankType) {
+            case DetectorResponse.BANK_TYPE_DET:
+                tracks = DetectorData.readDetectorTracks(de, dcTrackBankIn, dcTrajBankIn, dcCovMatBankIn);
+                ctracks = DetectorData.readCentralDetectorTracks(de, cvtTrackBankIn, cvtTrajBankIn);
+                break;
+            case DetectorResponse.BANK_TYPE_DST:
+                tracks = DetectorData.readDetectorTracksDST(de, DetectorType.DC.getDetectorId());
+                ctracks = DetectorData.readDetectorTracksDST(de, DetectorType.CVT.getDetectorId());
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
         eb.addTracks(tracks);      
-        
-        List<DetectorTrack> ctracks = DetectorData.readCentralDetectorTracks(de, "CVTRec::Tracks", "CVTRec::Trajectory");
         eb.addTracks(ctracks);
        
         // FIXME:  remove need for these indexing bookkeepers:
@@ -136,6 +159,9 @@ public class EBEngine extends ReconstructionEngine {
 
         // Add Forward Tagger particles:
         eb.processForwardTagger(de);
+       
+        // we wait until now to drop banks, to accommadate using them as inputs:
+        if (this.dropBanks==true) this.dropBanks(de);
 
         // create REC:detector banks:
         if(eb.getEvent().getParticles().size()>0){
@@ -249,19 +275,19 @@ public class EBEngine extends ReconstructionEngine {
     }
     
     public void setTrackType(String trackType) {
-        this.trackType = trackType;
+        this.dcTrackBankIn = trackType;
     }
     
     public void setFTOFHitsType(String hitsType) {
-        this.ftofHitsType = hitsType;
+        this.ftofBankIn = hitsType;
     }
 
     public void setCovMatrixType(String covMatrixType) {
-        this.covMatrixType = covMatrixType;
+        this.dcCovMatBankIn = covMatrixType;
     }
 
     public void setTrajectoryType(String trajectoryType) {
-        this.trajectoryType = trajectoryType;
+        this.dcTrajBankIn = trajectoryType;
     }
 
     public void dropBanks(DataEvent de) {

@@ -27,6 +27,7 @@ then
 fi
 
 nEvents=-1
+dstInput=0
 
 for arg in $@
 do
@@ -36,6 +37,9 @@ do
     elif [[ $arg == "-100" ]]
     then
         webDir=${webDir}-100
+    elif [[ $arg == '-dstinput' ]]
+    then
+        dstInput=1
     fi
 done
 
@@ -130,7 +134,7 @@ then
     gunzip -f ${webFileStub}.evio.gz
 
     rm -f ${webFileStub}.hipo
-    rm -f out_${webFileStub}.hipo
+    rm -f out?_${webFileStub}.hipo
 
     # convert to hipo:
     $COAT/bin/evio2hipo -s $gemcSolenoidDefault -o ${webFileStub}.hipo ${webFileStub}.evio
@@ -141,6 +145,10 @@ then
         GEOMDBVAR=$geoDbVariation
         export GEOMDBVAR
         ../../coatjava/bin/recon-util -i ${webFileStub}.hipo -o out_${webFileStub}.hipo -c 2
+        if [ $dstInput -ne 0 ]
+        then
+            ../../coatjava/bin/recon-util -i out_${webFileStub}.hipo -o dstinput_${webFileStub}.hipo org.jlab.service.eb.EBTBRerunEngine
+        fi
     else
         echo "set inputDir $PWD/" > cook.clara
         echo "set outputDir $PWD/" >> cook.clara
@@ -158,7 +166,12 @@ fi
 
 # run Event Builder tests:
 java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath2 -DINPUTFILE=out_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
-if [ $? != 0 ] ; then echo "EBTwoTrackTest unit test failure" ; exit 1 ; else echo "EBTwoTrackTest passed unit tests" ; fi
+if [ $? != 0 ] ; then echo "EBTwoTrackTest test failure" ; exit 1 ; else echo "EBTwoTrackTest test0 success" ; fi
+if [ $dstInput -ne 0 ]
+then
+    java -DCLAS12DIR="$COAT" -Xmx1536m -Xms1024m -cp $classPath2 -DINPUTFILE=dstinput_${webFileStub}.hipo org.junit.runner.JUnitCore eb.EBTwoTrackTest
+    if [ $? != 0 ] ; then echo "EBTwoTrackTest dstinput failure" ; exit 1 ; else echo "EBTwoTrackTest test1 success" ; fi
+fi
 
 exit 0
 

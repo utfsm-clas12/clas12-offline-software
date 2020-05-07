@@ -75,8 +75,17 @@ public class EBRadioFrequency {
             if(cycles>0 && timeStamp!=-1) triggerPhase=period*((timeStamp+phase)%cycles);
         
         }
-        // if RUN::rf bank does not exist but tdc bnk exist, reconstruct RF signals from TDC hits and save to bank
-        if(event.hasBank("RF::tdc") && !event.hasBank("RUN::rf")) {
+        // use RUN::rf if it exists,
+        // else recreate it from RF::tdc,
+        // else use REC::Event (e.g. when re-running EB)
+        if(event.hasBank("RUN::rf")) {
+            DataBank bank = event.getBank("RUN::rf");
+            int rows = bank.rows();
+            for(int i = 0; i < rows; i++){
+                if(bank.getShort("id", i)==rfId) rfTime=bank.getFloat("time", i);
+            }
+        }
+        else if(event.hasBank("RF::tdc")) {
             DataBank bank = event.getBank("RF::tdc");
             int rows = bank.rows();
             for(int i = 0; i < rows; i++){
@@ -108,12 +117,9 @@ public class EBRadioFrequency {
             if(debugMode>0) bankOut.show();
             
         }  
-        else if(event.hasBank("RUN::rf")) {
-            DataBank bank = event.getBank("RUN::rf");
-            int rows = bank.rows();
-            for(int i = 0; i < rows; i++){
-                if(bank.getShort("id", i)==rfId) rfTime=bank.getFloat("time", i);
-            }
+        else if (event.hasBank("REC::Event")) {
+            DataBank bank = event.getBank("REC::Event");
+            rfTime = bank.getFloat("RFTime",0);
         }
         
     }

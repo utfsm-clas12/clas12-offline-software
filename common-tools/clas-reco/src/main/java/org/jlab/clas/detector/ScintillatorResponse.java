@@ -25,20 +25,23 @@ public class ScintillatorResponse extends DetectorResponse {
    public ScintillatorResponse(int sector, int layer, int component){
         this.getDescriptor().setSectorLayerComponent(sector, layer, component);
     }
-    
+   
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type){        
+            String bankName, DetectorType type, int bankType){        
+
         List<DetectorResponse> responseList = new ArrayList<>();
+
         if(event.hasBank(bankName)==true){
+
             DataBank bank = event.getBank(bankName);
-            int nrows = bank.rows();
-            for(int row = 0; row < nrows; row++){
+
+            for(int row = 0; row < bank.rows(); row++){
+
                 int sector = bank.getByte("sector", row);
                 int layer  = bank.getByte("layer", row);
                 int paddle = bank.getShort("component", row);
+
                 ScintillatorResponse  response = new ScintillatorResponse(sector,layer,paddle);
-                response.setHitIndex(row);
-                response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
                 float z = bank.getFloat("z", row);
@@ -46,11 +49,23 @@ public class ScintillatorResponse extends DetectorResponse {
                 response.setEnergy(bank.getFloat("energy", row));
                 response.setTime(bank.getFloat("time", row));
                 response.setStatus(bank.getInt("status",row));
+                response.getDescriptor().setType(type);
 
-                // CND clusters do not have path length in bar (but its hits do!):
-                if (type != DetectorType.CND) {
-                    float dx = bank.getFloat("pathLengthThruBar",row);
-                    if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
+                switch (bankType) {
+                    case BANK_TYPE_DET:
+                        response.setHitIndex(row);
+                        // CND clusters do not have path length in bar (but its hits do!):
+                        if (type != DetectorType.CND) {
+                            float dx = bank.getFloat("pathLengthThruBar",row);
+                            if (dx>0) response.setDedx(bank.getFloat("energy", row)/dx);
+                        }
+                        break;
+                    case BANK_TYPE_DST:
+                        response.setHitIndex(-1);
+                        response.setDedx(bank.getFloat("dedx", row));
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
                 }
                 
                 responseList.add(response);

@@ -18,6 +18,8 @@ public class TaggerResponse extends DetectorResponse {
     private int     hitID = -1;
     private int     hitSize = -1;
     private double  hitRadius = 0.0;
+   
+    public int pindex=-1;
     
     private Vector3D hitMomentum = new Vector3D();
     private Point3D  hitWidth = new Point3D();
@@ -47,23 +49,37 @@ public class TaggerResponse extends DetectorResponse {
     }
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-        String bankName, DetectorType type){        
+        String bankName, DetectorType type, int bankType){        
         List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
+                TaggerResponse ft = new TaggerResponse();
+                float dx,dy;
                 int id  = bank.getShort("id", row);
                 int size = bank.getShort("size", row);
                 double x = bank.getFloat("x",row);
                 double y = bank.getFloat("y",row);
                 double z = bank.getFloat("z",row);
-                double dx = bank.getFloat("widthX",row);
-                double dy = bank.getFloat("widthY",row);
+                switch (bankType) {
+                    case BANK_TYPE_DET:
+                        ft.setHitIndex(row);
+                        dx = bank.getFloat("widthX",row);
+                        dy = bank.getFloat("widthY",row);
+                        break;
+                    case BANK_TYPE_DST:
+                        ft.setHitIndex(-1);
+                        ft.pindex = bank.getShort("pindex", row);
+                        dx = bank.getFloat("dx",row);
+                        dy = bank.getFloat("dy",row);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
                 double radius = bank.getFloat("radius", row);
                 double time = bank.getFloat("time",row);
                 double energy = bank.getFloat("energy",row);
-                TaggerResponse ft = new TaggerResponse();
                
                 double z0 = 0; // FIXME vertex
                 double path = Math.sqrt(x*x+y*y+(z-z0)*(z-z0)); 
@@ -77,7 +93,6 @@ public class TaggerResponse extends DetectorResponse {
                 ft.setEnergy(energy);
                 ft.setRadius(radius);
                 ft.setTime(time);
-                ft.setHitIndex(row);
                 ft.setPosition(x, y, z);
                 ft.setPositionWidth(dx, dy, 0);
 

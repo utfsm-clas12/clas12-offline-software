@@ -32,6 +32,7 @@ import org.jlab.rec.eb.SamplingFractions;
 public class EventBuilder {
 
     public EBCCDBConstants ccdb;
+    private int bankType = DetectorResponse.BANK_TYPE_DET;
     private final DetectorEvent               detectorEvent = new DetectorEvent();
     private final List<DetectorResponse>  detectorResponses = new ArrayList<>();
     private final List<Map<DetectorType,Integer>> ftIndices = new ArrayList<>();
@@ -45,6 +46,10 @@ public class EventBuilder {
         this.ccdb=ccdb;
     }
 
+    public void setBankType(int val) {
+        bankType=val;
+    }
+    
     public void setUsePOCA(boolean val) {
         usePOCA=val;
     }
@@ -215,6 +220,32 @@ public class EventBuilder {
         }
         return false;
     }
+   
+    public void forwardTaggerIDMatchingDST() {
+        for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
+            DetectorParticle p = this.detectorEvent.getParticles().get(ii);
+            if (p.getTrackDetector() != DetectorType.FTCAL.getDetectorId()) continue;
+            for (int jj=0; jj<this.detectorResponses.size(); jj++) {
+                DetectorType rt = this.detectorResponses.get(jj).getDescriptor().getType();
+                if (rt==DetectorType.FTCAL || rt==DetectorType.FTHODO) {
+                    TaggerResponse ftr=(TaggerResponse)this.detectorResponses.get(jj);
+                    if (p.pindex==ftr.pindex) {
+                        p.addResponse(ftr);
+                        this.detectorResponses.get(jj).setAssociation(ii);
+                        if (rt==DetectorType.FTCAL) {
+                            final double x=ftr.getPosition().x();
+                            final double y=ftr.getPosition().y();
+                            final double z=ftr.getPosition().z();
+                            final double mag = Math.sqrt(x*x+y*y+z*z);
+                            p.getTrack().addCross(x,y,z,x/mag,y/mag,z/mag);
+                            p.getTrack().setPath(mag);
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
     
     public void forwardTaggerIDMatching() {
         int np = this.detectorEvent.getParticles().size();
@@ -266,15 +297,29 @@ public class EventBuilder {
     }
 
     public void processForwardTagger(DataEvent de) {
-        List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles");       
-        List<Map<DetectorType, Integer>> indices = DetectorData.readForwardTaggerIndex(de,"FT::particles");
-        List<DetectorResponse> responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL);
-        List<DetectorResponse> responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO);
-        addParticles(ftparticles);
-        addDetectorResponses(responseFTCAL);
-        addDetectorResponses(responseFTHODO);
-        addFTIndices(indices);
-        forwardTaggerIDMatching();
+        switch (bankType) {
+            case DetectorResponse.BANK_TYPE_DET:
+                List<DetectorParticle> ftparticles = DetectorData.readForwardTaggerParticles(de, "FT::particles",bankType);
+                List<DetectorResponse> responseFTCAL = TaggerResponse.readHipoEvent(de,"FTCAL::clusters",DetectorType.FTCAL,bankType);
+                List<DetectorResponse> responseFTHODO = TaggerResponse.readHipoEvent(de,"FTHODO::clusters",DetectorType.FTHODO,bankType);
+                addParticles(ftparticles);
+                addDetectorResponses(responseFTCAL);
+                addDetectorResponses(responseFTHODO);
+                addFTIndices(DetectorData.readForwardTaggerIndex(de,"FT::particles"));
+                forwardTaggerIDMatching();
+                break;
+            case DetectorResponse.BANK_TYPE_DST:
+                ftparticles = DetectorData.readForwardTaggerParticles(de, "REC::Particle",bankType);
+                responseFTCAL = TaggerResponse.readHipoEvent(de,"REC::ForwardTagger",DetectorType.FTCAL,bankType);
+                responseFTHODO = TaggerResponse.readHipoEvent(de,"REC::ForwardTagger",DetectorType.FTHODO,bankType);
+                addParticles(ftparticles);
+                addDetectorResponses(responseFTCAL);
+                addDetectorResponses(responseFTHODO);
+                forwardTaggerIDMatchingDST();
+                break;
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
 

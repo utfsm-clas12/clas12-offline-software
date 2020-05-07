@@ -53,7 +53,7 @@ public class CalorimeterResponse extends DetectorResponse {
     }
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type, String momentsBankName){        
+            String bankName, DetectorType type, String momentsBankName, int bankType){        
         List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
@@ -66,24 +66,46 @@ public class CalorimeterResponse extends DetectorResponse {
             }
             int nrows = bank.rows();
             for(int row = 0; row < nrows; row++){
+                float u,v,w;
                 int sector = bank.getByte("sector", row);
                 int layer = bank.getByte("layer", row);
                 CalorimeterResponse  response = new CalorimeterResponse(sector,layer,0);
-                response.setHitIndex(row);
                 response.getDescriptor().setType(type);
                 float x = bank.getFloat("x", row);
                 float y = bank.getFloat("y", row);
                 float z = bank.getFloat("z", row);
                 response.setPosition(x, y, z);
-                float u = bank.getFloat("widthU",row);
-                float v = bank.getFloat("widthV",row);
-                float w = bank.getFloat("widthW",row);
-                response.setWidthUVW(u,v,w);
+                switch (bankType) {
+                    case BANK_TYPE_DET:
+                        response.setHitIndex(row);
+                        u = bank.getFloat("widthU",row);
+                        v = bank.getFloat("widthV",row);
+                        w = bank.getFloat("widthW",row);
+                        response.setWidthUVW(u,v,w);
+                        if (momentsBank!=null) {
+                            u = momentsBank.getFloat("distU",row);
+                            v = momentsBank.getFloat("distV",row);
+                            w = momentsBank.getFloat("distW",row);
+                            response.setCoordUVW(u,v,w);
+                        }
+                        break;
+                    case BANK_TYPE_DST:
+                        response.setHitIndex(-1);
+                        u = bank.getFloat("du",row);
+                        v = bank.getFloat("dv",row);
+                        w = bank.getFloat("dw",row);
+                        response.setWidthUVW(u,v,w);
+                        if (momentsBank!=null) {
+                            u = momentsBank.getFloat("lu",row);
+                            v = momentsBank.getFloat("lv",row);
+                            w = momentsBank.getFloat("lw",row);
+                            response.setCoordUVW(u,v,w);
+                        }
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
                 if (momentsBank!=null) {
-                    u = momentsBank.getFloat("distU",row);
-                    v = momentsBank.getFloat("distV",row);
-                    w = momentsBank.getFloat("distW",row);
-                    response.setCoordUVW(u,v,w);
                     u = momentsBank.getFloat("m2u",row);
                     v = momentsBank.getFloat("m2v",row);
                     w = momentsBank.getFloat("m2w",row);

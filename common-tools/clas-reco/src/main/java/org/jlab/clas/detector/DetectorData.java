@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jlab.clas.physics.Particle;
+import org.jlab.detector.base.DetectorLayer;
 import org.jlab.detector.base.DetectorType;
 import org.jlab.geom.prim.Line3D;
 import org.jlab.geom.prim.Vector3D;
@@ -18,6 +19,7 @@ import org.jlab.io.base.DataEvent;
  * @author baltzell
  */
 public class DetectorData {
+    
     /**
      * Read detector hits from the bank
      * @param event
@@ -553,6 +555,116 @@ public class DetectorData {
        }
        return tracks;
    }
+    
+   public static List<DetectorTrack>  readDetectorTracksDST(DataEvent event, int detectorType){
+     
+        final String partBankName = "REC::Particle";
+        final String trackBankName = "REC::Track";
+        final String trajBankName = "REC::Traj";
+        final String covBankName = "REC::CovMat";
+        
+        List<DetectorTrack>  tracks = new ArrayList<>();
+
+        if(!event.hasBank(trackBankName) ||
+                !event.hasBank(partBankName) ||
+                !event.hasBank(trajBankName)) {
+            return tracks;
+        }
+
+        DataBank partBank=event.getBank(partBankName);
+        DataBank trackBank=event.getBank(trackBankName);
+        DataBank trajBank=event.getBank(trajBankName);
+        DataBank covBank = null;
+        if (event.hasBank(covBankName)) {
+            covBank=event.getBank(covBankName);
+        }
+
+        for (int row=0; row<trackBank.rows(); row++) {
+
+            if (trackBank.getByte("detector",row)!=detectorType) {
+                continue;
+            }
+
+            // vertex and mometnum comes from particle bank:
+            short pindex = trackBank.getShort("pindex",row);
+            Vector3D pvec = DetectorData.readVector(partBank, pindex, "px", "py", "pz");
+            Vector3D vertex = DetectorData.readVector(partBank, pindex, "vx", "vy", "vz");
+
+            DetectorTrack track = new DetectorTrack(trackBank.getByte("q",row),pvec.mag(), -1);
+            track.setVector(pvec.x(), pvec.y(), pvec.z());
+            track.setVertex(vertex.x(), vertex.y(), vertex.z());
+            //track.setPath(trackBank.getFloat("pathlength", row));
+            track.setSector(trackBank.getByte("sector", row));
+            track.setNDF(trackBank.getShort("NDF",row));
+            track.setchi2(trackBank.getFloat("chi2",row));
+            track.setStatus(trackBank.getShort("status",row));
+            track.setDetectorID(detectorType);
+
+            Vector3D lc_vec=null,lc_dir=null,hc_vec=null,hc_dir=null;
+
+            for (int ii=0; ii<trajBank.rows(); ii++) {
+
+                if (trajBank.getInt("pindex",ii) !=  pindex) continue;
+                int detId=trajBank.getInt("detector",ii);
+                int layId=trajBank.getByte("layer",ii);
+                float pathLength=trajBank.getFloat("path",ii);
+                float xx=trajBank.getFloat("x",ii);
+                float yy=trajBank.getFloat("y",ii);
+                float zz=trajBank.getFloat("z",ii);
+                Line3D traj=new Line3D(xx,yy,zz,
+                        xx+track.getMaxLineLength()*trajBank.getFloat("cx",ii),
+                        yy+track.getMaxLineLength()*trajBank.getFloat("cy",ii),
+                        zz+track.getMaxLineLength()*trajBank.getFloat("cz",ii));
+                track.addTrajectoryPoint(detId,layId,traj,0,pathLength);
+
+                // recreate the old first/third crosses:
+                if (DetectorType.DC.getDetectorId()==detectorType) {
+                    if (DetectorType.HTCC.getDetectorId()==detId) {
+                        lc_vec = DetectorData.readVector(trajBank, ii, "x", "y", "z");
+                        lc_dir = DetectorData.readVector(trajBank, ii, "cx", "cy", "cz");
+                    }
+                    else if (DetectorType.DC.getDetectorId()==detId) {
+                        if (DetectorLayer.DC_R3_SL6==layId) {
+                            hc_vec = DetectorData.readVector(trajBank, row, "x", "y", "z");
+                            hc_dir = DetectorData.readVector(trajBank, row, "cx", "cy", "cz");
+                        }
+                    }
+                }
+                else if (DetectorType.CVT.getDetectorId()==detectorType) {
+                    if (DetectorType.CTOF.getDetectorId()==detId) {
+                        hc_vec = DetectorData.readVector(trajBank, row, "x", "y", "z");
+                        hc_dir = DetectorData.readVector(trajBank, row, "cx", "cy", "cz");
+                    }
+                }
+                else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+            if (lc_vec!=null && lc_dir!=null) {
+                track.addCross(lc_vec.x(), lc_vec.y(), lc_vec.z(), lc_dir.x(), lc_dir.y(), lc_dir.z());
+            }
+            if (hc_vec!=null && hc_dir!=null) {
+                track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
+            }
+            /*
+            if (covBank!=null) {
+                final int dimCovMat=5;
+                for (int ii=0; ii<covBank.rows(); ii++) {
+                    if (covBank.getInt("pindex",ii) !=  pindex) continue;
+                    for (int jj=1; jj<=dimCovMat; jj++) {
+                        for (int kk=1; kk<=dimCovMat; kk++) {
+                            float ele=covBank.getFloat(String.format("C%d%d",jj,kk),ii);
+                            track.setCovMatrix(jj-1,kk-1,ele);
+                        }
+                    }
+                }
+            }
+            */
+                
+            tracks.add(track);
+        }
+        return tracks;
+    }
    
    
    public static List<DetectorTrack>  readCentralDetectorTracks(DataEvent event, String bank_name, String traj_bank_name){
@@ -644,23 +756,38 @@ public class DetectorData {
        return tracks;
    }
    
-   public static List<DetectorParticle>  readForwardTaggerParticles(DataEvent event, String bank_name){
+   public static List<DetectorParticle>  readForwardTaggerParticles(DataEvent event, String bank_name, int bankType){
         List<DetectorParticle>  particles = new ArrayList<>();
         if(event.hasBank(bank_name)==true){
             DataBank bank = event.getBank(bank_name);
-            int nrows = bank.rows();
-
-            for(int row = 0; row < nrows; row++){
+            for(int row = 0; row < bank.rows(); row++){
+                double px,py,pz;
+                int pindex=-1;
+                switch (bankType) {
+                    case DetectorResponse.BANK_TYPE_DET:
+                        double cx   = bank.getFloat("cx",row);
+                        double cy   = bank.getFloat("cy",row);
+                        double cz   = bank.getFloat("cz",row);
+                        double energy = bank.getFloat("energy",row);
+                        px=cx*energy;
+                        py=cy*energy;
+                        pz=cz*energy;
+                        break;
+                    case DetectorResponse.BANK_TYPE_DST:
+                        if (Math.abs(bank.getShort("status", row))/1000 != 1) continue;
+                        pindex = row;
+                        px = bank.getFloat("px",row);
+                        py = bank.getFloat("py",row);
+                        pz = bank.getFloat("pz",row);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
+                
                 int charge  = bank.getByte("charge", row);
-                double cx   = bank.getFloat("cx",row);
-                double cy   = bank.getFloat("cy",row);
-                double cz   = bank.getFloat("cz",row);
-                double energy = bank.getFloat("energy",row);
-
-                DetectorTrack track = new DetectorTrack(charge, cx*energy ,cy*energy, cz*energy);
+                DetectorTrack track = new DetectorTrack(charge, px,py,pz);
                 track.setDetectorID(DetectorType.FTCAL.getDetectorId());
 
-                // FIXME:  FT not in trajectory bank
                 DetectorParticle particle = new DetectorParticle(track);
                 
                 int pid = 0;
@@ -670,6 +797,7 @@ public class DetectorData {
                 particle.setBeta(1.0);
                 particle.setPidQuality(0.0);
                 particle.setPid(pid);
+                particle.pindex=pindex;
                 particles.add(particle);
             }
         }

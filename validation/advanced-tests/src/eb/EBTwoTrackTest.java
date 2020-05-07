@@ -86,8 +86,12 @@ public class EBTwoTrackTest {
             assertEquals(false, true);
         }
 
+        boolean dstinput=false;
+        if (fileName.startsWith("dstinput_")) dstinput=true;
+
         // Strip off the "out_" prefix:
-        String ss=fileName.replace("out_","");
+        String s1=fileName.replace("out_","");
+        String ss=s1.replace("dstinput_","");
         
         // Strip off the hipo suffix:
         ss=ss.replace(".hipo","");
@@ -164,7 +168,7 @@ public class EBTwoTrackTest {
         while (reader.hasEvent()) {
             DataEvent event = reader.getNextEvent();
             getBanks(event);
-            checkAllRefs(event);
+            checkAllRefs(event,dstinput);
             checkParticleStatus(event);
             if (!udfFileType) {
                 if (isForwardTagger) processEventFT(event);
@@ -357,7 +361,7 @@ public class EBTwoTrackTest {
      * Check that all from->to indices are within valid range
      *
      */
-    public void checkAllRefs(DataEvent ev) {
+    public void checkAllRefs(DataEvent ev,boolean ebbanksonly) {
         if (recPartBank!=null) {
             if (recCheBank!=null)
                 assertEquals(true,hasValidRefsToREC(ev,recCheBank,recPartBank,"pindex"));
@@ -370,9 +374,11 @@ public class EBTwoTrackTest {
             if (recFtBank!=null)
                 assertEquals(true,hasValidRefsToREC(ev,recFtBank,recPartBank,"pindex"));
         }
-        if (recTrkBank!=null) {
-            if (trkBank!=null) {
-                assertEquals(true,hasValidRefsToDET(ev,recTrkBank,"index"));
+        if (!ebbanksonly) {
+            if (recTrkBank!=null) {
+                if (trkBank!=null) {
+                    assertEquals(true,hasValidRefsToDET(ev,recTrkBank,"index"));
+                }
             }
         }
     }

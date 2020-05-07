@@ -34,6 +34,9 @@ public class DetectorParticle implements Comparable {
     private int     particleScore     = 0; // scores are assigned detector hits
     private double  particleScoreChi2 = 0.0; // chi2 for particle score 
     private double  startTime         = -1.0; // per-particle start-time
+
+    // hack for FT:
+    public int pindex = -1;
   
     public double getStartTime() { return this.startTime; }
     public void setStartTime(double time) {this.startTime=time; }

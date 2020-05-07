@@ -16,6 +16,9 @@ import org.jlab.io.base.DataEvent;
  * @author baltzell
  */
 public class DetectorResponse {
+   
+    public static final int BANK_TYPE_DET = 1;
+    public static final int BANK_TYPE_DST = 2;
     
     private DetectorDescriptor  descriptor  = new DetectorDescriptor();
     private Vector3D            hitPosition = new Vector3D();
@@ -111,7 +114,7 @@ public class DetectorResponse {
      * @return 
      */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-        String bankName, DetectorType type){        
+        String bankName, DetectorType type,int bankType){        
         List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
@@ -145,7 +148,7 @@ public class DetectorResponse {
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
             String bankName, DetectorType type, double minEnergy){ 
         DetectorResponse response = new DetectorResponse();
-        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type);
+        List<DetectorResponse> responses = DetectorResponse.readHipoEvent(event, bankName, type, BANK_TYPE_DET);
         return DetectorResponse.getListByEnergy(responses, minEnergy);
     }
     

@@ -118,7 +118,7 @@ public class CherenkovResponse extends DetectorResponse {
     }
 
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-            String bankName, DetectorType type){        
+            String bankName, DetectorType type, int bankType){        
         List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
@@ -132,38 +132,53 @@ public class CherenkovResponse extends DetectorResponse {
                 double nphe = bank.getFloat("nphe", row);
                 double theta = Math.atan2(Math.sqrt(x*x+y*y),z);
                 double phi   = Math.atan2(y,x);
-                int sector = 0;
+                int sector=0,status=0,index=-1;
 
                 // FIXME:  move these constants to CCDB
                 double dtheta=0,dphi=0;
-                if (type==DetectorType.HTCC) {
-                    dtheta = 10*3.14159/180; // based on MC
-                    dphi   = 18*3.14159/180; // based on MC
-                    // HTCC reconstruction does not provide a sector,
-                    // so we calculate it based on hit position:
-                    sector = DetectorResponse.getSector(phi);
-                }
-                else if (type==DetectorType.LTCC) {
-                    dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
-                    dphi   = 10*3.14159/180;
-                    sector = bank.getByte("sector",row);
-                }
-                else {
-                    throw new RuntimeException(
-                            "CherenkovResponse::readHipoEvent:  invalid DetectorType: "+type);
+                
+                switch (bankType) {
+                    case BANK_TYPE_DET:
+                        index=row;
+                        if (type==DetectorType.HTCC) {
+                            dtheta = 10*3.14159/180; // based on MC
+                            dphi   = 18*3.14159/180; // based on MC
+                            // HTCC reconstruction does not provide a sector,
+                            // so we calculate it based on hit position:
+                            sector = DetectorResponse.getSector(phi);
+                            // HTCC doesn't report status:
+                            //status = bank.getInt("status",row);
+                        }
+                        else if (type==DetectorType.LTCC) {
+                            dtheta = (35-5)/18*2 * 3.14159/180; // +/- 2 mirrors
+                            dphi   = 10*3.14159/180;
+                            sector = bank.getByte("sector",row);
+                            status = bank.getInt("status",row);
+                        }
+                        else {
+                            throw new RuntimeException(
+                                    "CherenkovResponse::readHipoEvent:  invalid DetectorType: "+type);
+                        }
+                        break;
+                    case BANK_TYPE_DST:
+                        dphi = bank.getFloat("dphi",row);
+                        dtheta = bank.getFloat("dtheta",row);
+                        sector = bank.getByte("sector",row);
+                        status = bank.getInt("status",row);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
                 }
 
                 CherenkovResponse che = new CherenkovResponse(dtheta,dphi);
                 che.setHitPosition(x, y, z);
-                che.setHitIndex(row);
+                che.setHitIndex(index);
                 che.setEnergy(nphe);
                 che.setTime(time);
                 che.getDescriptor().setSector(sector);
                 che.getDescriptor().setType(type);
                 che.getDescriptor().setLayer(1);
-
-                // only LTCC currently reports status:
-                if (type==DetectorType.LTCC) che.setStatus(bank.getInt("status",row));
+                che.setStatus(status);
                 
                 responseList.add((DetectorResponse)che);
             }
