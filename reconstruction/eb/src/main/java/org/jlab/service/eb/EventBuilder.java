@@ -222,16 +222,16 @@ public class EventBuilder {
     }
    
     public void forwardTaggerIDMatchingDST() {
-        for (int ii=0; ii<this.detectorEvent.getParticles().size(); ii++) {
-            DetectorParticle p = this.detectorEvent.getParticles().get(ii);
+        for (int ipart=0; ipart<this.detectorEvent.getParticles().size(); ipart++) {
+            DetectorParticle p = this.detectorEvent.getParticles().get(ipart);
             if (p.getTrackDetector() != DetectorType.FTCAL.getDetectorId()) continue;
-            for (int jj=0; jj<this.detectorResponses.size(); jj++) {
-                DetectorType rt = this.detectorResponses.get(jj).getDescriptor().getType();
+            for (int iresp=0; iresp<this.detectorResponses.size(); iresp++) {
+                DetectorType rt = this.detectorResponses.get(iresp).getDescriptor().getType();
                 if (rt==DetectorType.FTCAL || rt==DetectorType.FTHODO) {
-                    TaggerResponse ftr=(TaggerResponse)this.detectorResponses.get(jj);
+                    TaggerResponse ftr=(TaggerResponse)this.detectorResponses.get(iresp);
                     if (p.pindex==ftr.pindex) {
                         p.addResponse(ftr);
-                        this.detectorResponses.get(jj).setAssociation(ii);
+                        this.detectorResponses.get(iresp).setAssociation(ipart);
                         if (rt==DetectorType.FTCAL) {
                             final double x=ftr.getPosition().x();
                             final double y=ftr.getPosition().y();

@@ -542,7 +542,7 @@ public class DetectorData {
                    for (int ii=0; ii<covBank.rows(); ii++) {
                        if (covBank.getInt("id",ii) !=  trkId) continue;
                        for (int jj=1; jj<=dimCovMat; jj++) {
-                           for (int kk=1; kk<=dimCovMat; kk++) {
+                           for (int kk=jj; kk<=dimCovMat; kk++) {
                                float ele=covBank.getFloat(String.format("C%d%d",jj,kk),ii);
                                track.setCovMatrix(jj-1,kk-1,ele);
                            }
@@ -579,61 +579,61 @@ public class DetectorData {
             covBank=event.getBank(covBankName);
         }
 
-        for (int row=0; row<trackBank.rows(); row++) {
+        for (int itrack=0; itrack<trackBank.rows(); itrack++) {
 
-            if (trackBank.getByte("detector",row)!=detectorType) {
+            if (trackBank.getByte("detector",itrack)!=detectorType) {
                 continue;
             }
 
             // vertex and mometnum comes from particle bank:
-            short pindex = trackBank.getShort("pindex",row);
+            short pindex = trackBank.getShort("pindex",itrack);
             Vector3D pvec = DetectorData.readVector(partBank, pindex, "px", "py", "pz");
             Vector3D vertex = DetectorData.readVector(partBank, pindex, "vx", "vy", "vz");
 
-            DetectorTrack track = new DetectorTrack(trackBank.getByte("q",row),pvec.mag(), -1);
+            DetectorTrack track = new DetectorTrack(trackBank.getByte("q",itrack),pvec.mag(), -1);
             track.setVector(pvec.x(), pvec.y(), pvec.z());
             track.setVertex(vertex.x(), vertex.y(), vertex.z());
             //track.setPath(trackBank.getFloat("pathlength", row));
-            track.setSector(trackBank.getByte("sector", row));
-            track.setNDF(trackBank.getShort("NDF",row));
-            track.setchi2(trackBank.getFloat("chi2",row));
-            track.setStatus(trackBank.getShort("status",row));
+            track.setSector(trackBank.getByte("sector", itrack));
+            track.setNDF(trackBank.getShort("NDF",itrack));
+            track.setchi2(trackBank.getFloat("chi2",itrack));
+            track.setStatus(trackBank.getShort("status",itrack));
             track.setDetectorID(detectorType);
 
             Vector3D lc_vec=null,lc_dir=null,hc_vec=null,hc_dir=null;
 
-            for (int ii=0; ii<trajBank.rows(); ii++) {
+            for (int itraj=0; itraj<trajBank.rows(); itraj++) {
 
-                if (trajBank.getInt("pindex",ii) !=  pindex) continue;
-                int detId=trajBank.getInt("detector",ii);
-                int layId=trajBank.getByte("layer",ii);
-                float pathLength=trajBank.getFloat("path",ii);
-                float xx=trajBank.getFloat("x",ii);
-                float yy=trajBank.getFloat("y",ii);
-                float zz=trajBank.getFloat("z",ii);
+                if (trajBank.getInt("pindex",itraj) !=  pindex) continue;
+                int detId=trajBank.getInt("detector",itraj);
+                int layId=trajBank.getByte("layer",itraj);
+                float pathLength=trajBank.getFloat("path",itraj);
+                float xx=trajBank.getFloat("x",itraj);
+                float yy=trajBank.getFloat("y",itraj);
+                float zz=trajBank.getFloat("z",itraj);
                 Line3D traj=new Line3D(xx,yy,zz,
-                        xx+track.getMaxLineLength()*trajBank.getFloat("cx",ii),
-                        yy+track.getMaxLineLength()*trajBank.getFloat("cy",ii),
-                        zz+track.getMaxLineLength()*trajBank.getFloat("cz",ii));
+                        xx+track.getMaxLineLength()*trajBank.getFloat("cx",itraj),
+                        yy+track.getMaxLineLength()*trajBank.getFloat("cy",itraj),
+                        zz+track.getMaxLineLength()*trajBank.getFloat("cz",itraj));
                 track.addTrajectoryPoint(detId,layId,traj,0,pathLength);
 
                 // recreate the old first/third crosses:
                 if (DetectorType.DC.getDetectorId()==detectorType) {
                     if (DetectorType.HTCC.getDetectorId()==detId) {
-                        lc_vec = DetectorData.readVector(trajBank, ii, "x", "y", "z");
-                        lc_dir = DetectorData.readVector(trajBank, ii, "cx", "cy", "cz");
+                        lc_vec = DetectorData.readVector(trajBank, itraj, "x", "y", "z");
+                        lc_dir = DetectorData.readVector(trajBank, itraj, "cx", "cy", "cz");
                     }
                     else if (DetectorType.DC.getDetectorId()==detId) {
                         if (DetectorLayer.DC_R3_SL6==layId) {
-                            hc_vec = DetectorData.readVector(trajBank, row, "x", "y", "z");
-                            hc_dir = DetectorData.readVector(trajBank, row, "cx", "cy", "cz");
+                            hc_vec = DetectorData.readVector(trajBank, itraj, "x", "y", "z");
+                            hc_dir = DetectorData.readVector(trajBank, itraj, "cx", "cy", "cz");
                         }
                     }
                 }
                 else if (DetectorType.CVT.getDetectorId()==detectorType) {
                     if (DetectorType.CTOF.getDetectorId()==detId) {
-                        hc_vec = DetectorData.readVector(trajBank, row, "x", "y", "z");
-                        hc_dir = DetectorData.readVector(trajBank, row, "cx", "cy", "cz");
+                        hc_vec = DetectorData.readVector(trajBank, itraj, "x", "y", "z");
+                        hc_dir = DetectorData.readVector(trajBank, itraj, "cx", "cy", "cz");
                     }
                 }
                 else {
@@ -646,20 +646,19 @@ public class DetectorData {
             if (hc_vec!=null && hc_dir!=null) {
                 track.addCross(hc_vec.x(), hc_vec.y(), hc_vec.z(), hc_dir.x(), hc_dir.y(), hc_dir.z());
             }
-            /*
+            
             if (covBank!=null) {
                 final int dimCovMat=5;
-                for (int ii=0; ii<covBank.rows(); ii++) {
-                    if (covBank.getInt("pindex",ii) !=  pindex) continue;
+                for (int icov=0; icov<covBank.rows(); icov++) {
+                    if (covBank.getInt("pindex",icov) !=  pindex) continue;
                     for (int jj=1; jj<=dimCovMat; jj++) {
                         for (int kk=1; kk<=dimCovMat; kk++) {
-                            float ele=covBank.getFloat(String.format("C%d%d",jj,kk),ii);
+                            float ele=covBank.getFloat(String.format("C%d%d",jj,kk),icov);
                             track.setCovMatrix(jj-1,kk-1,ele);
                         }
                     }
                 }
             }
-            */
                 
             tracks.add(track);
         }
