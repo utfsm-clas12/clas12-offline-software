@@ -114,7 +114,7 @@ public class DetectorResponse {
      * @return 
      */
     public static List<DetectorResponse>  readHipoEvent(DataEvent event, 
-        String bankName, DetectorType type,int bankType){        
+        String bankName, DetectorType type){        
         List<DetectorResponse> responseList = new ArrayList<>();
         if(event.hasBank(bankName)==true){
             DataBank bank = event.getBank(bankName);
