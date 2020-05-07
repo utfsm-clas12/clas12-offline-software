@@ -498,14 +498,23 @@ public class EBTwoTrackTest {
         assertEquals(hEff>0.62,true);
     }
 
-    // This is for Forward Tagger;
+    // This is for Forward Tagger, with its special RECFT::Particle bank:;
     private void processEventFT(DataEvent event) {
 
         if (ftcBank==null) return;
 
         nEvents++;
+        
+        DataBank bank;
+        if (hadronPDG!=22 && ftPDG==11) {
+            bank=recFtPartBank;
+        }
+        else {
+            bank=recPartBank;
+        }
 
-        if (recBank==null || recPartBank==null || recFtBank==null)return;// || recFtPartBank==null) return;
+        if (recBank==null || recPartBank==null || bank==null || recFtBank==null) return;
+
 
         if (debug) {
             System.out.println("\n\n#############################################################\n");
@@ -516,9 +525,9 @@ public class EBTwoTrackTest {
 
         final float startTime=recBank.getFloat("startTime",0);
 
-        for (int ii=0; ii<recPartBank.rows(); ii++) {
-            if (Math.abs(recPartBank.getShort("status",ii))/1000 == 1) {
-                switch (recPartBank.getInt("pid",ii)) {
+        for (int ii=0; ii<bank.rows(); ii++) {
+            if (Math.abs(bank.getShort("status",ii))/1000 == 1) {
+                switch (bank.getInt("pid",ii)) {
                     case 11:
                         nFtElectrons++;
                         break;
