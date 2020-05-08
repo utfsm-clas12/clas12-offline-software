@@ -635,6 +635,7 @@ public class DetectorData {
                     if (DetectorType.CTOF.getDetectorId()==detId) {
                         hc_vec = DetectorData.readVector(trajBank, itraj, "x", "y", "z");
                         hc_dir = DetectorData.readVector(trajBank, itraj, "cx", "cy", "cz");
+                        hc_vec.add(hc_dir.asUnit().multiply(-2.0));
                         track.setPath(trajBank.getFloat("path", itraj));
                     }
                 }
