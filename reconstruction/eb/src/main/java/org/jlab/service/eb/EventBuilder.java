@@ -231,7 +231,7 @@ public class EventBuilder {
                     TaggerResponse ftr=(TaggerResponse)this.detectorResponses.get(iresp);
                     if (p.pindex==ftr.pindex) {
                         p.addResponse(ftr);
-                        this.detectorResponses.get(iresp).setAssociation(ipart);
+                        ftr.setAssociation(ipart);
                         if (rt==DetectorType.FTCAL) {
                             final double x=ftr.getPosition().x();
                             final double y=ftr.getPosition().y();

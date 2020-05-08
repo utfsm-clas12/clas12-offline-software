@@ -627,6 +627,7 @@ public class DetectorData {
                         if (DetectorLayer.DC_R3_SL6==layId) {
                             hc_vec = DetectorData.readVector(trajBank, itraj, "x", "y", "z");
                             hc_dir = DetectorData.readVector(trajBank, itraj, "cx", "cy", "cz");
+                            track.setPath(trajBank.getFloat("path", itraj));
                         }
                     }
                 }
@@ -634,6 +635,7 @@ public class DetectorData {
                     if (DetectorType.CTOF.getDetectorId()==detId) {
                         hc_vec = DetectorData.readVector(trajBank, itraj, "x", "y", "z");
                         hc_dir = DetectorData.readVector(trajBank, itraj, "cx", "cy", "cz");
+                        track.setPath(trajBank.getFloat("path", itraj));
                     }
                 }
                 else {
