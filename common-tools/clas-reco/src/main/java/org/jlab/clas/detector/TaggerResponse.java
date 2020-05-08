@@ -69,6 +69,7 @@ public class TaggerResponse extends DetectorResponse {
                         dy = bank.getFloat("widthY",row);
                         break;
                     case BANK_TYPE_DST:
+                        if (bank.getByte("detector",row)!=type.getDetectorId()) continue;
                         ft.setHitIndex(-1);
                         ft.pindex = bank.getShort("pindex", row);
                         dx = bank.getFloat("dx",row);

@@ -90,6 +90,7 @@ public class CalorimeterResponse extends DetectorResponse {
                         }
                         break;
                     case BANK_TYPE_DST:
+                        if (bank.getByte("detector",row)!=type.getDetectorId()) continue;
                         response.setHitIndex(-1);
                         u = bank.getFloat("du",row);
                         v = bank.getFloat("dv",row);

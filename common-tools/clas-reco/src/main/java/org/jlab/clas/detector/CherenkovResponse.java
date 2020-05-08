@@ -161,6 +161,7 @@ public class CherenkovResponse extends DetectorResponse {
                         }
                         break;
                     case BANK_TYPE_DST:
+                        if (bank.getByte("detector",row)!=type.getDetectorId()) continue;
                         dphi = bank.getFloat("dphi",row);
                         dtheta = bank.getFloat("dtheta",row);
                         sector = bank.getByte("sector",row);

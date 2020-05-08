@@ -61,6 +61,7 @@ public class ScintillatorResponse extends DetectorResponse {
                         }
                         break;
                     case BANK_TYPE_DST:
+                        if (bank.getByte("detector",row)!=type.getDetectorId()) continue;
                         response.setHitIndex(-1);
                         response.setDedx(bank.getFloat("dedx", row));
                         break;
