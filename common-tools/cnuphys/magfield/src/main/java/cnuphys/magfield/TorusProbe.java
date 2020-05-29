@@ -15,9 +15,6 @@ public class TorusProbe extends FieldProbe {
 	// 12 -fold symmetry or full map?
 	private boolean _fullMap;
 
-	// hack used only by double torus
-	protected boolean _notDoubleTorus = true;
-
 	/**
 	 * Create a probe for use with the torus
 	 * 
@@ -76,14 +73,11 @@ public class TorusProbe extends FieldProbe {
 	@Override
 	public void field(float x, float y, float z, float result[]) {
 
-		// hack for double torus
-		if (_notDoubleTorus) {
-			if (isZeroField()) {
-				result[X] = 0f;
-				result[Y] = 0f;
-				result[Z] = 0f;
-				return;
-			}
+		if (isZeroField()) {
+			result[X] = 0f;
+			result[Y] = 0f;
+			result[Z] = 0f;
+			return;
 		}
 
 		// note that the contains functions handles the shifts

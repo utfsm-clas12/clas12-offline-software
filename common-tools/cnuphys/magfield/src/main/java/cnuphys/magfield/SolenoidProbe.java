@@ -68,9 +68,9 @@ public class SolenoidProbe extends FieldProbe {
 	}
 
 	/**
-	 * Get the field by trilinear interpolation.
+	 * Get the field by bilinear interpolation.
 	 * 
-	 * @param probe  for faster results
+	 * @param cell   holds cached nearest neighbors
 	 * @param phi    azimuthal angle in degrees.
 	 * @param rho    the cylindrical rho coordinate in cm.
 	 * @param z      coordinate in cm
@@ -95,9 +95,9 @@ public class SolenoidProbe extends FieldProbe {
 		//The solenoid map has cylindrical field components
 		double bphi = result[0]; //0 if symmetric
 		double brho = result[1];
-		result[X] = (float) (brho * cos - bphi * sin);
-		result[Y] = (float) (brho * sin + bphi * cos);
-		// }
+		result[X] = (float) (brho * cos);
+		result[Y] = (float) (brho * sin);
+	
 
 		double sf = _solenoid.getScaleFactor();
 		result[X] *= sf;

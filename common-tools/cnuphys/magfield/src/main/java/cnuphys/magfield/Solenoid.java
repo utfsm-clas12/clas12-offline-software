@@ -306,7 +306,7 @@ public final class Solenoid extends MagneticField {
 		System.out.println("Done processing ODU file.");
 	}
 	
-	
+	//tokenize a string
 	private static String[] tokens(String str, String delimiter) {
 
 		StringTokenizer t = new StringTokenizer(str, delimiter);
@@ -352,23 +352,171 @@ public final class Solenoid extends MagneticField {
 		return s;
 	}
 	
-	
 	/**
-	 * Obtain the magnetic field at a given location expressed in Cartesian
-	 * coordinates. The field is returned as a Cartesian vector in kiloGauss.
-	 *
+	 * Get the field in kG
+	 * 
 	 * @param x      the x coordinate in cm
 	 * @param y      the y coordinate in cm
 	 * @param z      the z coordinate in cm
-	 * @param result a float array holding the retrieved field in kiloGauss. The 0,1
-	 *               and 2 indices correspond to x, y, and z components.
+	 * @param result holds the resuts, the Cartesian coordinates of B in kG
 	 */
 	@Override
-	public void field(float x, float y, float z, float[] result) {
-		// TODO Auto-generated method stub
+	public void field(float x, float y, float z, float result[]) {
+
+		if (isZeroField()) {
+			result[0] = 0f;
+			result[1] = 0f;
+			result[2] = 0f;
+			return;
+		}
+
+		// note that the contains functions handles the shifts
+		if (!contains(x, y, z)) {
+			result[0] = 0f;
+			result[1] = 0f;
+			result[2] = 0f;
+			return;
+		}
+
+		// apply the shifts
+		x -= getShiftX();
+		y -= getShiftY();
+		z -= getShiftZ();
+
+		double rho = FastMath.sqrt(x * x + y * y);
+		double phi = FastMath.atan2Deg(y, x);
+		fieldCylindrical(phi, rho, z, result);
+	}
+	
+	
+	private static boolean DEBUG = false;
+	/**
+	 * Get the field by bilinear interpolation.
+	 * 
+	 * @param phi    azimuthal angle in degrees.
+	 * @param rho    the cylindrical rho coordinate in cm.
+	 * @param z      coordinate in cm
+	 * @param result the result
+	 * @result a Cartesian vector holding the calculated field in kiloGauss.
+	 */
+	public void fieldCylindrical(double phi, double rho, double z, float result[]) {
+		
+		// get the nearest neighbors
+		int N2 = q2Coordinate.getIndex(rho);
+		if (N2 < 0) {
+			System.err.println("rho value out of range in Solenoid fieldCylindrical: " + rho);
+			result[0] = 0;
+			result[1] = 0;
+			result[2] = 0;
+			return;
+		}
+		int N3 = q3Coordinate.getIndex(z);
+		if (N3 < 0) {
+			System.err.println("z value out of range in Solenoid fieldCylindrical: " + z);
+			result[0] = 0;
+			result[1] = 0;
+			result[2] = 0;
+			return;
+		}
+
+		int N2P1 = N2+1;
+		int N3P1 = N3+1;
+		
+		double r1 = q2Coordinate.getValue(N2);
+		double r2 = q2Coordinate.getValue(N2P1);
+		double z1 = q3Coordinate.getValue(N3);
+		double z2 = q3Coordinate.getValue(N3P1);
+				
+		
+		if ((r1 > rho) || (r2 < rho)) {
+			System.err.println(String.format("rho bracket error: [%-7.3f, %-7.3f, %-7.3f]", r1, rho, r2));
+			System.exit(-1);
+		}
+
+
+		if ((z1 > z) || (z2 < z)) {
+			System.err.println(String.format("z bracket error: [%-7.3f, %-7.3f, %-7.3f]", z1, z, z2));
+			System.exit(-1);
+		}
+		
+		
+		if (MagneticField.isInterpolate()) {
+			interpolate(phi, rho, z, r1, z1, r2, z2, N2, N3, result);
+		}
+		else {
+			double t1 = q2Coordinate.getFraction(rho);
+			double t2 = q3Coordinate.getFraction(z);
+			int nn2 = (t1 < 0.5) ? N2 : N2P1;
+			int nn3 = (t2 < 0.5) ? N3 : N3P1;
+
+			nearestNeighbor(phi, getCompositeIndex(0, nn2, nn3), result);
+		}
+		
+		result[0] *= _scaleFactor;
+		result[1] *= _scaleFactor;
+		result[2] *= _scaleFactor;
+
+		
+		if (DEBUG) {
+			System.err.println(String.format("rho bracket error: [%-7.3f, %-7.3f, %-7.3f]", r1, rho, r2));
+			System.err.println(String.format("z bracket error: [%-7.3f, %-7.3f, %-7.3f]", z1, z, z2));
+			System.err.println(String.format("field (%-8.5f,  %-8.5f, %-8.5f)", result[0], result[1], result[2]));
+		}
+
 		
 	}
+	
+	//does the interpolation
+	private void interpolate(double phi, double x, double y, double x0, double y0, double x1, double y1, int nx0, int ny0, float[] result) {
+		
+		int nx1 = nx0 + 1;
+		int ny1 = ny0 + 1;
+		
+		double delx = x1 - x0;
+		double dely = y1 - y0;
+		double invdelxy = 1./(delx*dely);
+		
+		double dx0 = x-x0;
+		double dx1 = x1-x;
+		double dy0 = y-y0;
+		double dy1 = y1-y;
 
+		
+		int c00 = getCompositeIndex(0, nx0, ny0);
+		int c10 = getCompositeIndex(0, nx1, ny0);
+		int c01 = getCompositeIndex(0, nx0, ny1);
+		int c11 = getCompositeIndex(0, nx1, ny1);
+
+		for (int i = 2; i <= 3; i++) {
+			
+			double q00 = getBComponent(i, c00);
+			double q10 = getBComponent(i, c10);
+			double q01 = getBComponent(i, c01);
+			double q11 = getBComponent(i, c11);
+			
+			result[i-1] = (float)(invdelxy*(q00*dx1*dy1 + q10*dx0*dy1 + q01*dx1*dy0 + q11*dx0*dy0));
+		}
+		
+		//get Cartesian field
+		double rphi = Math.toRadians(phi);
+		double Brho = result[1];
+		result[0] = (float) (Brho*Math.cos(rphi));
+		result[1] = (float) (Brho*Math.sin(rphi));
+	}
+	
+	//get the nearest neighbor value
+	private void nearestNeighbor(double phi, int index, float result[]) {
+		
+		//get Cartesian field
+		double rphi = Math.toRadians(phi);
+		double Brho = getB2(index);
+		result[0] = (float) (Brho*Math.cos(rphi));
+		result[1] = (float) (Brho*Math.sin(rphi));
+		result[2] = getB3(index);
+		
+	}
+	
+	
 	/**
 	 * Obtain the magnetic field at a given location expressed in Cartesian
 	 * coordinates for the sector system. The other "field" methods are for the lab

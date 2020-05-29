@@ -21,7 +21,7 @@ public class GridCoordinate {
 	private double _min;
 
 	/**
-	 * The overll maximum value.
+	 * The overall maximum value.
 	 */
 	private double _max;
 
@@ -70,6 +70,14 @@ public class GridCoordinate {
 		for (int i = 0; i < numPoints; i++) {
 			_values[i] = _min + i * _delta;
 		}
+	}
+	
+	/**
+	 * Get the values of the grid points
+	 * @return the values of the grid points
+	 */
+	public double[] getValues() {
+		return _values;
 	}
 
 	/**
@@ -167,10 +175,7 @@ public class GridCoordinate {
 	 * @param val the value
 	 * @return the fraction of spacing.
 	 */
-	public double getFraction(double val, int index) {
-
-//		double mv = _min + index*_delta;
-//		return (val - mv)/_delta;
+	public double getFraction(double val) {
 		double vv = (val - _min) / _delta;
 		return vv - Math.floor(vv);
 	}

@@ -428,6 +428,8 @@ public abstract class MagneticField implements IMagField, IField {
 
 			boolean swap = false;
 			int magicnum = dos.readInt(); // magic number
+			
+			System.out.println(String.format("Magic number: %04x", magicnum));
 
 			// TODO handle swapping if necessary
 			swap = (magicnum != MAGICNUMBER);
@@ -520,10 +522,10 @@ public abstract class MagneticField implements IMagField, IField {
 	}
 
 	/**
-	 * Get the B1 component at a given index.
+	 * Get the B1 component at a given composite index.
 	 * 
-	 * @param index the index.
-	 * @return the B1 at the given index.
+	 * @param index the composite index.
+	 * @return the B1 at the given composite index.
 	 */
 	@Override
 	public final float getB1(int index) {
@@ -543,10 +545,10 @@ public abstract class MagneticField implements IMagField, IField {
 	}
 
 	/**
-	 * Get the B2 component at a given index.
+	 * Get the B2 component at a given composite index.
 	 * 
-	 * @param index the index.
-	 * @return the B2 at the given index.
+	 * @param index the composite index.
+	 * @return the B2 at the given composite index.
 	 */
 	@Override
 	public final float getB2(int index) {
@@ -559,10 +561,10 @@ public abstract class MagneticField implements IMagField, IField {
 	}
 
 	/**
-	 * Get the B3 component at a given index.
+	 * Get the B3 component at a given composite index.
 	 * 
-	 * @param index the index.
-	 * @return the B3 at the given index.
+	 * @param index the composite index.
+	 * @return the B3 at the given composite index.
 	 */
 	@Override
 	public final float getB3(int index) {
@@ -573,6 +575,32 @@ public abstract class MagneticField implements IMagField, IField {
 		float val = field.get(i);
 		return val;
 	}
+	
+	/**
+	 * Get a component of the magnetic field
+	 * @param componentIndex [1..3]
+	 * @param compositeIndex
+	 * @return the component
+	 */
+	public double getBComponent(int componentIndex, int compositeIndex) {
+		switch (componentIndex) {
+		case 1:
+			return getB1(compositeIndex);
+
+		case 2:
+			return getB2(compositeIndex);
+			
+		case 3:
+			return getB3(compositeIndex);
+		
+		default: 
+			System.err.println("Asked for bad component of the magnetic field: [" + componentIndex + "] sould be 1, 2 or 3 only.");
+			System.exit(-1);
+		}
+		
+		return Double.NaN;
+	}
+
 
 	/**
 	 * Get the q1 coordinate.

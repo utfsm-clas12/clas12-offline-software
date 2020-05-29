@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
 import cnuphys.magfield.MagneticFields.FieldType;
+import cnuphys.magfield.converter.Converter;
 
 /**
  * Static testing of the magnetic field
@@ -631,69 +632,79 @@ public class MagTests {
 		System.out.println("Setting field to solenoid only.");
 		
 		double gemcdata[][] = {
-				//NN SOLEN ONLY
-//				{73.822, 180.526, 11.5862,    -1.76004,  -4.30404,  34.2},
-//				{83.4609, 36.8472, 271.273,    30.1339,  13.3038,  30.51},
-//				{49.6422, 185.186, 75.6753,    -12.2808,  -45.8125,  10.48},
-//				{39.9618, 204.784, -109.912,    5.19618,  26.6277,  -14.34},
-//				{140.013, 108.221, -116.055,    36.9177,  28.5349,  -41.61},
-//				{68.9909, 96.9404, -210.254,    -43.7774,  -61.5125,  6.84},
-//				{76.3865, 78.1135, 243.842,   33.9512,  34.7188,  22.72},
-//				{207.078, 77.4315, -167.772,    1.20829,  0.451809,  -16.44},
-//				{99.2131, 65.2532, -170.018,    -103.074,  -67.7927,  -52.95},
-//				{204.521, 138.17, 289.181,    4.78118,  3.23006,  -1.79},
-//				{43.715, 54.0158, -121.354,    -923.823,  -1141.51,  5.43},
-//				{228.752, 193.281, 203.377,    0.290261,  0.245252,  -3.92},
-//				{155.742, 165.299, -57.4807,    13.187,  13.9963,  9.32},
-//				{107.589, 110.217, 208.377,    25.5311,  26.1547,  -14.69},
-//				{112.956, 126.821, 257.498,    13.1226,  14.7333,  -0.74},
-//				{72.0802, 36.9867, -217.642,    -90.3139,  -46.343,  71.66},
-//				{128.02, 241.639, -275.975,    -1.99902,  -3.77317,  -2.48},
-//				{157.732, 68.1332, -276.739,    -15.7532,  -6.80466,  1.79},
-//				{49.1934, 159.215, -265.476,    -5.98381,  -19.3666,  1.4},
-//				{59.1272, 37.5827, 284.228,    21.2167,  13.4859,  36.73},
-//				{148.134, 197.375, 126.488,    -6.12874,  -8.16595,  -7.11},
-//				{160.22, 201.965, 236.195,    2.49219,  3.14151,  -4.94},
-//				{70.8317, 272.381, -259.15,    -0.890933,  -3.42605,  -3.12},
-//				{11.337, 183.953, 78.5665,    -3.54931,  -57.5907,  9.19},
-//				{94.5989, 225.429, 140.949,    -3.07238,  -7.32148,  -9.2},
-//				{122.537, 46.9626, -236.023,    -41.6649,  -15.9681,  7.71},
-//				{125.117, 222.013, -68.4566,    5.813,  10.3148,  3.21},
-//				{38.5663, 244.286, 4.3558,    -0.0358667,  -0.227186,  12.59},
-//				{85.3342, 158.314, 128.972,    -14.0826,  -26.1263,  -41.43}};
+//				//SOLEN LINEAR
+				{252.621, 78.0631, -84.644,   9.78175,  3.02268,  0.0939963},
+				{98.5272, 80.6655, -235.325,   -36.5625,  -29.9342,  9.78602},
+				{145.337, 182.43, 221.267,   3.56792,  4.47853,  -7.70959},
+				{198.186, 138.028, -129.261,   8.68335,  6.04758,  -9.51473},
+				{13.0208, 178.025, -154.435,   0.030217,  0.413138,  -41.6462},
+				{246.237, 144.786, -117.245,   5.07523,  2.9842,  -3.03708},
+				{194.157, 95.8568, -145.274,   8.39041,  4.14241,  -18.6848},
+				{174.724, 237.351, 52.0498,   -2.42903,  -3.29969,  3.16203},
+				{4.7558, 289.171, -204.95,   -0.0144656,  -0.879565,  -4.79184},
+				{188.956, 164.685, 221.243,   2.84971,  2.48367,  -6.39677},
+				{108.793, 130.519, 271.142,   11.2787,  13.5311,  1.21306},
+				{190.365, 226.68, -261.684,   -1.85224,  -2.20557,  -2.70522},
+				{27.2253, 106.754, -183.089,   -32.7932,  -128.587,  -10.4294},
+				{77.9569, 279.363, 166.032,   -0.559574,  -2.00526,  -4.55015},
+				{70.9442, 260.838, -26.198,   1.2042,  4.42745,  7.0013},
+				{185.785, 179.892, 6.0338,   -0.33558,  -0.324935,  10.1066},
+				{81.4187, 88.5149, 64.3861,   -220.186,  -239.376,  490.642},
+				{13.1301, 78.056, -75.8103,   -741.999,  -4411.04,  -9880.13},
+				{114.773, 217.91, 24.153,   -2.3905,  -4.53864,  12.0242},
+				{141.11, 137.61, -60.883,   26.9757,  26.3066,  16.8306},
+				{114.791, 113.642, -160.319,   -12.0075,  -11.8874,  -53.8249},
+				{154.075, 166.87, -18.2631,   5.25176,  5.6879,  17.5978},
+				{268.657, 7.964, 279.725,   4.27454,  0.126713,  -2.26789},
+				{64.2641, 230.487, -114.639,   3.7368,  13.4023,  -7.51401},
+				{172.466, 174.868, 91.8857,   -9.94714,  -10.0857,  -0.545308},
+				{25.532, 94.4568, 230.476,   17.7289,  65.5889,  35.5982},
+				{156.575, 71.0398, -288.072,   -14.0702,  -6.38382,  2.81132},
+				{46.495, 95.6866, 155.67,   88.1142,  181.339,  -94.3699},
+				{244.339, 133.918, -222.247,   -2.03128,  -1.11331,  -4.84167},
+				{102.994, 66.01, 246.892,   34.5357,  22.1344,  13.8334}
+				};
 		
-				//LINEAR INTERP SOL ONLY
-				{187.691, 159.811, 47.3208,  -7.67908,  -6.5384,  9.06023  },
-				{164.229, 40.1344, 112.58 ,  -60.9808,  -14.9025,  -47.5493  },
-				{59.9728, 70.585, 241.228,   37.1744,  43.7524,  39.1832  },
-				{48.7519, 109.422, 244.992,   17.6347,  39.5805,  15.2529  },
-				{150.382, 51.144, 140.373,   -11.1821,  -3.80298,  -73.5199  },
-				{18.0697, 131.957, -133.863,   -1.82845,  -13.3526,  -161.079  },
-				{84.1644, 90.2623, -140.76,   -56.5292,  -60.6249,  -168.356  },
-				{216.666, 62.4497, 63.2686,   -18.8424,  -5.43097,  9.27143  },
-				{203.636, 187.693, 142.927,   -3.41886,  -3.15118,  -4.86278  },
-				{86.3591, 53.7414, 47.6946,   1084.31,  674.769,  571.271  },
-				{22.553, 276.033, -209.349,   -0.130278,  -1.59451,  -5.46614  },
-				{209.231, 126.264, -277.744,   -5.54475,  -3.34607,  -2.47414  },
-				{40.2278, 294.298, -11.8372,   0.206677,  1.512,  4.56982  },
-				{22.4589, 298.864, -97.1238,   0.389101,  5.17783,  -0.935768  },
-				{102.786, 151.367, -262.625,   -9.31576,  -13.7188,  -1.39919  },
-				{52.5945, 205.298, 86.9238,   -7.37084,  -28.7715,  0.218492  },
-				{75.429, 71.645, 157.629,   155.303,  147.512,  -78.8034  },
-				{198.831, 97.19, -59.7657,   19.8982,  9.72639,  9.75546  },
-				{134.14, 24.1661, 131.512,   -10.5008,  -1.89177,  -152.257  },
-				{258.632, 34.8282, -273.035,   -5.04712,  -0.679661,  -2.73791  },
-				{27.1344, 203.246, -192.919,   -1.09949,  -8.23551,  -16.5786  },
-				{231.759, 21.227, -41.4448,   13.5599,  1.24196,  12.172  },
-				{143.973, 130.229, 295.353,   8.05824,  7.28895,  0.667539  },
-				{209.832, 82.8324, 257.018,   7.5876,  2.99524,  -4.05822  },
-				{126.527, 229.581, 8.3879,   -0.417419,  -0.757402,  9.3967  },
-				{195.223, 200.525, -192.946,   -0.1803,  -0.185196,  -5.74216  },
-				{283.692, 44.5934, 72.9987,   -5.82731,  -0.91599,  1.8131  },
-				{259.022, 13.0388, 167.449,   -2.60386,  -0.131074,  -7.75096  }};
+				//SOLENOID NN
+//		{21.0317, 244.232, 95.2729,   -1.21889,  -14.1544,  -1.41521},
+//		{174.432, 196.567, -263.224,   -3.20192,  -3.60823,  -3.27755},
+//		{288.243, 7.8778, -82.5142,   6.46423,  0.17667,  0.282259},
+//		{105.14, 181.542, -84.2208,   15.927,  27.5006,  -0.327652},
+//		{16.576, 148.955, 176.399,   4.42786,  39.7896,  -43.2307},
+//		{72.9677, 230.268, -244.82,   -1.95093,  -6.15664,  -5.06388},
+//		{246.484, 81.8586, -1.737,   0.96789,  0.321441,  9.91855},
+//		{251.295, 5.453, -245.891,   -5.41577,  -0.11752,  -4.66959},
+//		{210.474, 146.127, 275.894,   4.203,  2.91803,  -2.52403},
+//		{195.531, 213.615, 7.4519,   -0.236798,  -0.258699,  5.47413},
+//		{83.8357, 23.184, 123.292,   657.595,  181.852,  -439.556},
+//		{105.841, 134.876, -78.5556,   51.3912,  65.4891,  9.14706},
+//		{11.743, 291.14, -148.5,   0.132803,  3.29254,  -4.4603},
+//		{48.2771, 110.934, -114.821,   34.6511,  79.623,  -329.556},
+//		{131.855, 97.759, -49.7778,   46.9646,  34.8202,  59.0092},
+//		{220.196, 115.514, 266.187,   5.0157,  2.63122,  -3.17758},
+//		{73.0324, 5.5785, 178.748,   263.64,  20.1379,  136.897},
+//		{256.495, 153.741, -156.435,   2.08414,  1.24922,  -4.16564},
+//		{36.172, 72.2379, -226.888,   -37.0557,  -74.0027,  64.6766},
+//		{39.39, 39.9497, 271.879,   20.1851,  20.4719,  51.8233},
+//		{24.1363, 138.98, 205.722,   8.55665,  49.2703,  -13.3516},
+//		{264.531, 31.4866, -270.127,   -4.63366,  -0.551535,  -2.84764},
+//		{54.0208, 55.563, -1.2278,   411.473,  423.22,  -23869.1},
+//		{158.14, 96.7593, 160.347,   0.0603408,  0.0369201,  -33.0466},
+//		{105.24, 100.995, 17.3683,   4.14226,  3.97518,  68.608},
+//		{152.66, 164.654, 186.291,   1.51438,  1.63335,  -13.0138},
+//		{117.994, 168.875, -88.3551,   19.7803,  28.3099,  -3.28007},
+//		{272.064, 35.7897, -146.729,   4.35926,  0.573456,  -5.91188},
+//		{152.263, 152.57, 285.83,   6.24651,  6.25913,  -1.27165},
+//		{63.5133, 192.669, 298.619,   3.00884,  9.12737,  0.240413},
+//		{141.172, 16.2907, 220.072,   42.9365,  4.9547,  -4.74594},
+//		{177.99, 38.3277, 23.1713,   -13.176,  -2.83727,  43.3687},
+//		{5.788, 178.128, 259.632,   0.561831,  17.2906,  -1.51619},
+//		{241.583, 155.961, -204.312,   -0.754936,  -0.48737,  -4.91092}};
+		
 		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
 		
-		IField ifield = FieldProbe.factory();
+	//	IField ifield = FieldProbe.factory();
+		Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
 				
 		float result[] = new float[3];
 		
@@ -706,7 +717,7 @@ public class MagTests {
 			double y = v[1];
 			double z = v[2];
 			
-			ifield.field((float)x, (float)y, (float)z, result);
+			solenoid.field((float)x, (float)y, (float)z, result);
 			
 			double gBx = v[3];
 			double gBy = v[4];
@@ -735,6 +746,100 @@ public class MagTests {
 		System.err.println(String.format("avg delrel = %-8.5f", delsumrel/gemcdata.length));
 		System.err.println(String.format("avg delabs = %-8.5f Gauss", delsumabs/gemcdata.length));
 		
+	}
+	
+	private static void testTorusProbe() {
+		System.out.println("Setting field to torus only.");
+		
+		MagneticFields.getInstance().setActiveField(FieldType.TORUS);
+		
+		IField ifield = FieldProbe.factory();
+		Torus torus = MagneticFields.getInstance().getTorus();
+
+		float resultTorus[] = new float[3];
+		float resultProbe[] = new float[3];
+
+		int num = 10;
+		Random rand = new Random(99991L);
+
+		for (int i = 0; i < num; i++) {
+			
+			if ((i % 100000) == 0) {
+				System.err.println("  i = " + i);
+			}
+
+			float z = 300 + 290 * rand.nextFloat();
+			double rho = 50 + 400 * rand.nextFloat();
+			double phi = Math.toRadians(360 * rand.nextFloat());
+			
+			double rphi = Math.toRadians(phi);
+			double x = rho*Math.cos(rphi);
+			double y = rho*Math.sin(rphi);
+			
+			
+			torus.field((float)x, (float)y, (float)z, resultTorus);
+			ifield.field((float)x, (float)y, (float)z, resultProbe);
+			
+			System.err.println(String.format(">>> %s  %s", vecStr("Torus ", 0.1, resultTorus), vecStr("Probe", 0.1, resultProbe)));
+
+		}
+		
+
+		System.err.println("Done");
+
+	}
+	
+	private static void testSolenoidProbe() {
+		System.out.println("Setting field to solenoid only.");
+
+		
+		MagneticFields.getInstance().setActiveField(FieldType.SOLENOID);
+		
+		IField ifield = FieldProbe.factory();
+		Solenoid solenoid = MagneticFields.getInstance().getSolenoid();
+		
+		float resultSol[] = new float[3];
+		float resultProbe[] = new float[3];
+		
+		int num = 100000;
+		Random rand = new Random();
+
+		for (int i = 0; i < num; i++) {
+			
+			if ((i % 100000) == 0) {
+				System.err.println("  i = " + i);
+			}
+
+			float z = -100 + 390 * rand.nextFloat();
+			double rho = 290 * rand.nextFloat();
+			double phi = Math.toRadians(360 * rand.nextFloat());
+			
+			double rphi = Math.toRadians(phi);
+			double x = rho * Math.cos(rphi);
+			double y = rho * Math.sin(rphi);
+
+			solenoid.field((float) x, (float) y, (float) z, resultSol);
+			ifield.field((float) x, (float) y, (float) z, resultProbe);
+
+			System.err.println(String.format(">>> %s  %s", vecStr("Solenoid ", 1000., resultSol),
+					vecStr("Probe", 1000., resultProbe)));
+
+			for (int j = 0; j < 3; j++) {
+				if ((Math.abs(resultSol[j] - resultProbe[j]) > 0.0001)) {
+
+					System.err.println("ERROR DIFF LARGER THAN ACCEPTABLE");
+					System.exit(-1);;
+				}
+			}
+		}
+		
+
+		System.err.println("Done");
+
+	}
+	
+	private static String vecStr(String name, double scale, float v[]) {
+		return String.format("%s (%-8.5f, %-8.5f, %-8.5f)", name, scale*v[0], scale*v[1], scale*v[2]);
 	}
 
 	private static void scanCSVFile() {
@@ -827,6 +932,12 @@ public class MagTests {
 		final JMenuItem loadItem = new JMenuItem("Load ASCII Torus");
 		final JMenuItem gemcSolenoidItem = new JMenuItem("Compare GEMC Solenoid");
 		final JMenuItem gemcTorusItem = new JMenuItem("Compare GEMC Torus");
+		final JMenuItem solenoidProbeItem = new JMenuItem("Test Solenoid Probe");
+		final JMenuItem torusProbeItem = new JMenuItem("Test Torus Probe");
+		
+		final JMenuItem solenoidConvertItem = new JMenuItem("Convert in-memory solenoid to GEMC Format");
+		final JMenuItem torusConvertItem = new JMenuItem("Convert in-memory torus to GEMC Format");
+		
 
 
 		ActionListener al1 = new ActionListener() {
@@ -858,6 +969,21 @@ public class MagTests {
 				else if (e.getSource() == gemcTorusItem) {
 					compareGEMCTorus();
 				}
+				else if (e.getSource() == solenoidProbeItem) {
+					testSolenoidProbe();
+				}
+				else if (e.getSource() == torusProbeItem) {
+					testTorusProbe();
+				}
+				else if (e.getSource() == solenoidConvertItem) {
+					Converter.memoryToGEMCSolenoidConverter();
+				}
+				else if (e.getSource() == torusConvertItem) {
+					Converter.memoryToGEMCTorusConverter();
+				}
+
+
+
 
 			}
 
@@ -874,6 +1000,11 @@ public class MagTests {
 		loadItem.addActionListener(al1);
 		gemcSolenoidItem.addActionListener(al1);
 		gemcTorusItem.addActionListener(al1);
+		solenoidProbeItem.addActionListener(al1);
+		torusProbeItem.addActionListener(al1);
+		solenoidConvertItem.addActionListener(al1);
+		torusConvertItem.addActionListener(al1);
+
 		
 		testMenu.add(test0Item);
 		testMenu.add(test1Item);
@@ -885,10 +1016,20 @@ public class MagTests {
 		testMenu.add(asciiSolenoidItem);
 		testMenu.add(scanItem);
 		testMenu.add(loadItem);
+		testMenu.addSeparator();
 		testMenu.add(gemcSolenoidItem);
 		testMenu.add(gemcTorusItem);
 		testMenu.addSeparator();
 
+		testMenu.add(solenoidProbeItem);
+		testMenu.add(torusProbeItem);
+		testMenu.addSeparator();
+		
+		testMenu.add(solenoidConvertItem);
+		testMenu.add(torusConvertItem);
+		testMenu.addSeparator();
+
+		
 		// now for rectangular grids
 		final JMenuItem rotatedSectorItem = new JMenuItem("Check Sectors for Rotated Composite");
 		final JMenuItem sectorItem = new JMenuItem("Check Sectors for (Normal) Composite");
