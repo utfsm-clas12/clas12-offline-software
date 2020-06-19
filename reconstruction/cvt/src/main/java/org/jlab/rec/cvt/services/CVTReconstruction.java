@@ -110,8 +110,8 @@ public class CVTReconstruction extends ReconstructionEngine {
             if(Math.abs(SolenoidScale)<0.001)
             Constants.setCosmicsData(true);
             
-//            System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
-//            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
+            System.out.println(" LOADING BMT GEOMETRY...............................variation = "+variationName);
+            CCDBConstantsLoader.Load(new DatabaseConstantProvider(newRun, variationName));
 //            System.out.println("SVT LOADING WITH VARIATION "+variationName);
 //            DatabaseConstantProvider cp = new DatabaseConstantProvider(newRun, variationName);
 //            cp = SVTConstants.connect( cp );
@@ -455,9 +455,6 @@ public class CVTReconstruction extends ReconstructionEngine {
         CNDGeom =  GeometryFactory.getDetector(DetectorType.CND, 11, variationName);
         //
           
-        
-        System.out.println(" LOADING CVT GEOMETRY...............................variation = "+variationName);
-        CCDBConstantsLoader.Load(new DatabaseConstantProvider(11, variationName));
         System.out.println("SVT LOADING WITH VARIATION "+variationName);
         DatabaseConstantProvider cp = new DatabaseConstantProvider(11, variationName);
         cp = SVTConstants.connect( cp );
