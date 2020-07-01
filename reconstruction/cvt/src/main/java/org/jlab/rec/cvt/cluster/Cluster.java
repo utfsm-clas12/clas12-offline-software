@@ -181,7 +181,7 @@ public class Cluster extends ArrayList<FittedHit> implements Comparable<Cluster>
                     if (this.get_DetectorType()==0) { // C-detectors
                         strpNb = thehit.get_Strip().get_Strip();
                         // for C detector the Z of the centroid is calculated
-                        weightedZ += strpEn * thehit.get_Strip().get_Z();
+                        weightedZ += strpEn * thehit.get_Strip().get_Z(); 
                         weightedZErrSq += (thehit.get_Strip().get_ZErr()) * (thehit.get_Strip().get_ZErr());
                     }
                     if (this.get_DetectorType()==1) { // Z-detectors

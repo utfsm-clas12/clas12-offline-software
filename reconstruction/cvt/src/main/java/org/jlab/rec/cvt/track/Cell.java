@@ -78,14 +78,17 @@ public class Cell implements Comparable<Cell> {
 		}
 		if( vw.equalsIgnoreCase("ZR")){
 			double R = 0.;
+                        double Z=0;
 			if( cross.get_Detector().equalsIgnoreCase("SVT")){
+                                Z = cross.get_Point().z();
 				R = Math.sqrt(cross.get_Point().x()*cross.get_Point().x() + 
 						      cross.get_Point().y()*cross.get_Point().y() );
 			}
 			else {
+                                Z = cross.get_Point().z()-org.jlab.rec.cvt.bmt.Constants.getzBMT();
 				R = org.jlab.rec.cvt.bmt.Constants.getCRCRADIUS()[cross.get_Region()-1];
 			}
-			point.set( cross.get_Point().z(), R );
+			point.set( Z, R );
 		}		
 		return point;
 	}

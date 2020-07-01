@@ -146,8 +146,8 @@ public class CVTReconstruction extends ReconstructionEngine {
     public boolean processDataEvent(DataEvent event) {
         
         this.setRunConditionsParameters(event, FieldsConfig, Run, false, "");
-        double shift = org.jlab.rec.cvt.Constants.getZoffset();
-
+        double shift = 0;
+        
         this.FieldsConfig = this.getFieldsConfig();
         
         Swim swimmer = new Swim();
@@ -221,7 +221,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, null, null, shift);
             return true; 
          }
-         {//System.out.println(" FITTING SEED......................");
+//        System.out.println(" FITTING SEED......................");
            
             List<Seed> seeds = null;
             
@@ -294,7 +294,7 @@ public class CVTReconstruction extends ReconstructionEngine {
         for (int c = 0; c < trks.size(); c++) {
             trks.get(c).set_Id(c + 1);
             for (int ci = 0; ci < trks.get(c).size(); ci++) {
-
+                
                 if (crosses.get(0) != null && crosses.get(0).size() > 0) {
 //                    for (Cross crsSVT : crosses.get(0)) {
                 	for (int jj=0 ; jj < crosses.get(0).size(); jj++) {
@@ -371,7 +371,7 @@ public class CVTReconstruction extends ReconstructionEngine {
             rbc.appendCVTBanks(event, SVThits, BMThits, SVTclusters, BMTclusters, crosses, trks, shift);
         }
         //System.out.println("H");
-    } 
+     
     //event.show();
     return true;
 

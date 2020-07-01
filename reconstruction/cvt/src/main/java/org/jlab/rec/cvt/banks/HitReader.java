@@ -202,7 +202,7 @@ public class HitReader {
                 Point3D EP2 = geo.transformToFrame(sector[i], layer[i], X[1][0], 0, X[1][1], "lab", "");
                 Point3D MP = new Point3D((EP1.x() + EP2.x()) / 2., (EP1.y() + EP2.y()) / 2., (EP1.z() + EP2.z()) / 2.);
                 Vector3D Dir = new Vector3D((-EP1.x() + EP2.x()), (-EP1.y() + EP2.y()), (-EP1.z() + EP2.z()));
-                SvtStrip.set_ImplantPoint(EP1); 
+                SvtStrip.set_ImplantPoint(EP1);
                 // Geometry implementation using the geometry package:  Charles Platt
 //                Line3d shiftedStrip   = geo.getStrip(layer[i]-1, sector[i]-1, strip[i]-1);
 //

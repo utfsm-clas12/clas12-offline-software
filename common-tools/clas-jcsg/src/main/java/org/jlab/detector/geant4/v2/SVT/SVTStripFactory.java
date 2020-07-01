@@ -220,7 +220,7 @@ public class SVTStripFactory
 			//System.out.println("strip side");
 			//r = x0*Math.sin(a);
 		}
-		
+        
 		/*System.out.println();
 		System.out.printf("ACTIVESENWID    %8.3f\n", ACTIVESENWID );
 		System.out.printf("ACTIVESENLEN    %8.3f\n", ACTIVESENLEN );

@@ -451,9 +451,9 @@ public class StateVecs {
 
     }
 
-    private double shift = org.jlab.rec.cvt.Constants.getZoffset();
+    private double shift = 0;
     public class B {
-
+        
         final int k;
         double x;
         double y;

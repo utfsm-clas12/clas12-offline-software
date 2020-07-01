@@ -128,8 +128,8 @@ public class CCDBConstantsLoader {
             int region = (int) ((layer + 1) / 2);
 
             double radius = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Radius", i);
-            double Zmin = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmin", i);
-            double Zmax = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmax", i);
+            double Zmin = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmin", i)+ztarget*10;
+            double Zmax = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Zmax", i)+ztarget*10;
             double spacing = dbprovider.getDouble("/geometry/cvt/mvt/bmt_layer_noshim/Interstrip", i);
             int axis = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer_noshim/Axis", i);
             int Nstrips = dbprovider.getInteger("/geometry/cvt/mvt/bmt_layer_noshim/Nstrip", i);
@@ -264,7 +264,7 @@ public class CCDBConstantsLoader {
         
         // target position
         org.jlab.rec.cvt.Constants.setZoffset(ztarget);
-        
+        Constants.setzBMT(ztarget*10);
         Constants.setCRCRADIUS(CRCRADIUS);
         Constants.setCRZRADIUS(CRZRADIUS);
         Constants.setCRZNSTRIPS(CRZNSTRIPS);

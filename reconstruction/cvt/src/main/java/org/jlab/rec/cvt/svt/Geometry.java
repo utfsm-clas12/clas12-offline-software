@@ -294,7 +294,8 @@ public class Geometry {
         vals[0] = crPoint.x();
         vals[1] = crPoint.y();
         vals[2] = crPoint.z();
-
+//        System.out.println(LC_x + " " + LC_z + " " + crPoint.toString());
+        
         double[] LCErr = getLocCoordErrs(upperlayer - 1, upperlayer, s1, s2corr, zf);
         double LCErr_x = LCErr[0];
         double LCErr_z = LCErr[1];
@@ -718,7 +719,7 @@ public class Geometry {
 
             z1 = 0;
             x1 = m1 * z1 + b1;
-            z2 = SVTConstants.MODULELEN;
+            z2 = SVTConstants.STRIPLENMAX;
             x2 = m1 * z2 + b1;
 
             if (x2 < 0) {
@@ -737,7 +738,7 @@ public class Geometry {
 
             z1 = 0;
             x1 = m2 * z1 + b2;
-            z2 = SVTConstants.MODULELEN;
+            z2 = SVTConstants.STRIPLENMAX;
             x2 = m2 * z2 + b2;
 
             if (x2 > SVTConstants.ACTIVESENWID) {

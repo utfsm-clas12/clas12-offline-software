@@ -19,6 +19,8 @@ public class Constants {
     public static final int NREGIONS = 3;						// 3 regions of MM 
     //public static final int STARTINGLAYR = 5;						// current configuration is 3 SVT + 3BMT (outermost BST ring)
     public static double ETOTCUT = 0.0;
+    // BMT center in z
+    private static double zBMT = 0;
     //Z detector characteristics
     private static double[] CRZRADIUS = new double[NREGIONS]; 		// the radius of the Z detector in mm
     private static int[] CRZNSTRIPS = new int[NREGIONS]; 			// the number of strips
@@ -103,6 +105,14 @@ public class Constants {
         //}
         areConstantsLoaded = true;
 
+    }
+
+    public static double getzBMT() {
+        return zBMT;
+    }
+
+    public static void setzBMT(double zBMT) {
+        Constants.zBMT = zBMT;
     }
 
     public static double getThetaL() {

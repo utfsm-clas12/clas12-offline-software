@@ -67,6 +67,7 @@ public class Constants {
 
     public static void setZoffset(double _Zoffset) {
         Constants._Zoffset = _Zoffset;
+//        Constants._Zoffset = -3;
     }
 
     public static int getRmReg() {
