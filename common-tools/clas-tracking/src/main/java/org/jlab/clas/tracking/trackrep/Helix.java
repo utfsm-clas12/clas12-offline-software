@@ -77,20 +77,20 @@ public class Helix {
     }
     
     public double getPhi(double l) {
-        return _phi0 + _omega*l;
+        return getPhi0() + getOmega()*l;
     }
     
     public double getPt(double B) {
         return Constants.LIGHTVEL * _R * B;
     }
     public double getX(double l){
-        return getXc() + _turningSign*_R*Math.sin(getPhi(l));
+        return getXc() + getTurningSign()*_R*Math.sin(getPhi(l));
     }
     public double getY(double l){
-        return getYc() - _turningSign*_R*Math.cos(getPhi(l));
+        return getYc() - getTurningSign()*_R*Math.cos(getPhi(l));
     }
     public double getZ(double l){
-        return _z0 + _turningSign*l*_tanL;
+        return getZ0() + getTurningSign()*l*getTanL();
     }
     public double getPx(double B, double l) {
         return getPt(B) * Math.cos(getPhi(l));
@@ -99,31 +99,130 @@ public class Helix {
         return getPt(B) * Math.sin(getPhi(l));
     }
     public double getPz(double B) {
-        return getPt(B)*_tanL;
+        return getPt(B)*getTanL();
     }
+    
+    /**
+     * @return the _B
+     */
+    public double getB() {
+        return _B;
+    }
+
+    /**
+     * @param _B the _B to set
+     */
+    public void setB(double _B) {
+        this._B = _B;
+    }
+
+    /**
+     * @return the _d0
+     */
+    public double getD0() {
+        return _d0;
+    }
+
+    /**
+     * @param _d0 the _d0 to set
+     */
+    public void setD0(double _d0) {
+        this._d0 = _d0;
+    }
+
+    /**
+     * @return the _phi0
+     */
+    public double getPhi0() {
+        return _phi0;
+    }
+
+    /**
+     * @param _phi0 the _phi0 to set
+     */
+    public void setPhi0(double _phi0) {
+        this._phi0 = _phi0;
+    }
+
+    /**
+     * @return the _omega
+     */
+    public double getOmega() {
+        return _omega;
+    }
+
+    /**
+     * @param _omega the _omega to set
+     */
+    public void setOmega(double _omega) {
+        this._omega = _omega;
+    }
+
+    /**
+     * @return the _z0
+     */
+    public double getZ0() {
+        return _z0;
+    }
+
+    /**
+     * @param _z0 the _z0 to set
+     */
+    public void setZ0(double _z0) {
+        this._z0 = _z0;
+    }
+
+    /**
+     * @return the _tanL
+     */
+    public double getTanL() {
+        return _tanL;
+    }
+
+    /**
+     * @param _tanL the _tanL to set
+     */
+    public void setTanL(double _tanL) {
+        this._tanL = _tanL;
+    }
+
+    /**
+     * @return the _turningSign
+     */
+    public int getTurningSign() {
+        return _turningSign;
+    }
+
+    /**
+     * @param _turningSign the _turningSign to set
+     */
+    public void setTurningSign(int _turningSign) {
+        this._turningSign = _turningSign;
+    }
+
     public void Reset(double d0, double phi0, double omega, double z0, double tanL,
             double B){
-        _d0             = d0;
-        _phi0           = phi0;
-        _omega          = omega;
-        _z0             = z0;
-        _tanL           = tanL;
-        _B              = B;
+        setD0(d0);
+        setPhi0(phi0);
+        setOmega(omega);
+        setZ0(z0);
+        setTanL(tanL);
+        setB(B);
         
         this.Update();
     }
     public void Update() {
-        _R  = 1./Math.abs(_omega);
-        _xd = -_d0*Math.sin(_phi0);
-        _yd =  _d0*Math.cos(_phi0);
-        setXc(-(_turningSign*_R + _d0)*Math.sin(_phi0));
-        setYc((_turningSign*_R + _d0)*Math.cos(_phi0));
+        _R  = 1./Math.abs(getOmega());
+        _xd = -getD0()*Math.sin(getPhi0());
+        _yd =  getD0()*Math.cos(getPhi0());
+        setXc(-(_turningSign*_R + _d0)*Math.sin(getPhi0()));
+        setYc((getTurningSign()*_R + getD0())*Math.cos(getPhi0()));
         setX(getX(tFlightLen));
         setY(getY(tFlightLen));
         setZ(getZ(tFlightLen));
-        setPx(getPx(_B, tFlightLen));
-        setPy(getPy(_B, tFlightLen));
-        setPz(getPz(_B)); 
+        setPx(getPx(getB(), tFlightLen));
+        setPy(getPy(getB(), tFlightLen));
+        setPz(getPz(getB())); 
     }
     
     public double getLAtPlane(double X1, double Y1, double X2, double Y2, 
@@ -203,7 +302,7 @@ public class Helix {
             dphi += 2. * Math.PI;
         }
         
-        return dphi/_omega;
+        return dphi/getOmega();
     }
     
     
@@ -216,7 +315,7 @@ public class Helix {
     public Vector3D getMomentumAtPlane(double X1, double Y1, double X2, double Y2, 
             double tolerance) {
         double l = getLAtPlane(X1, Y1, X2, Y2, tolerance);
-        return new Vector3D(getPx(_B,l),getPy(_B,l),getPz(_B));
+        return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
     
     /**
@@ -240,8 +339,8 @@ public class Helix {
         double yp = a + b * xp;
         double ym = a + b * xm;
         
-        double Cp = new Vector3D(xp,yp,0).asUnit().dot(new Vector3D(Math.cos(_phi0), Math.sin(_phi0),0));
-        double Cm = new Vector3D(xm,ym,0).asUnit().dot(new Vector3D(Math.cos(_phi0), Math.sin(_phi0),0));
+        double Cp = new Vector3D(xp,yp,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
+        double Cm = new Vector3D(xm,ym,0).asUnit().dot(new Vector3D(Math.cos(getPhi0()), Math.sin(getPhi0()),0));
         
         if(Cp > Cm) {
             x = xp;
@@ -262,7 +361,7 @@ public class Helix {
             dphi += 2. * Math.PI;
         }
         
-        return dphi/_omega;
+        return dphi/getOmega();
     }
     public Point3D getHelixPointAtR(double r) {
         double l = getLAtR( r);
@@ -270,10 +369,10 @@ public class Helix {
     }
     public Vector3D getMomentumAtR(double r) {
         double l = getLAtR( r);
-        return new Vector3D(getPx(_B,l),getPy(_B,l),getPz(_B));
+        return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
     public double getLAtZ(double z) {
-        return (z - _z0)/_tanL;
+        return (z - getZ0())/getTanL();
     }
     public Point3D getHelixPointAtZ(double z) {
         double l = getLAtZ( z);
@@ -281,7 +380,7 @@ public class Helix {
     }
     public Vector3D getMomentumAtZ(double z) {
         double l = getLAtZ( z);
-        return new Vector3D(getPx(_B,l),getPy(_B,l),getPz(_B));
+        return new Vector3D(getPx(getB(),l),getPy(getB(),l),getPz(getB()));
     }
     /**
      * @return the _x
