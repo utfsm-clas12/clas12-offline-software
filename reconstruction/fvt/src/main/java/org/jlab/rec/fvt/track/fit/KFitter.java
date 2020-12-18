@@ -62,50 +62,90 @@ public class KFitter {
     }
 
     public void runFitter(int sector) {
+        // this.chi2 = 0;
+        // int svzLength = sv.Z.length;
+        //
+        // for (int i = 1; i <= totNumIter; i++) {
+        //     interNum = i;
+        //     this.chi2kf = 0;
+        //     if (i > 1) {
+        //         for (int k = svzLength - 1; k > 0; k--) {
+        //             if (k >= 1) {
+        //                 sv.transport(sector, k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k));
+        //                 this.filter(k - 1);
+        //             }
+        //         }
+        //     }
+        //     for (int k = 0; k < svzLength - 1; k++) {
+        //         sv.transport(sector, k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
+        //         this.filter(k + 1);
+        //     }
+        //     if (i > 1) {
+        //         if (this.setFitFailed) i = totNumIter;
+        //         if (!this.setFitFailed) {
+        //             this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+        //             this.finalCovMat = sv.trackCov.get(svzLength - 1);
+        //         } else {
+        //             this.ConvStatus = 1;
+        //         }
+        //     }
+        // }
+        // if (totNumIter == 1) {
+        //     this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+        //     this.finalCovMat = sv.trackCov.get(svzLength - 1);
+        // }
+        //
+        // // CENTROID RESIDUALS - METHOD 1
+        // // Do one final pass to get the final chi^2 and the corresponding centroid residuals.
+        // this.chi2kf = 0;
+        // for (int k = svzLength - 1; k > 0; --k) {
+        //     if (k >= 1) {
+        //         sv.transport(sector, k, k-1, sv.trackTraj.get(k), sv.trackCov.get(k));
+        //         this.filter(k - 1);
+        //     }
+        // }
+        // for (int k = 0; k < svzLength - 1; ++k) {
+        //     sv.transport(sector, k, k+1, sv.trackTraj.get(k), sv.trackCov.get(k));
+        // }
+        //
+        // for (int li = 1; li <= 6; ++li) {
+        //     // Get the state vector closest in z to the FMT layer.
+        //     // NOTE: A simple optimization would be to do this on another for loop with only the
+        //     //       state vectors, saving the ones closest to the FMT layers to use them later
+        //     //       instead of looping through them 6 times.
+        //     int closestSVID = -1;
+        //     double closestSVDistance = Double.POSITIVE_INFINITY;
+        //     for (int si = 0; si < sv.trackTraj.size(); ++si) {
+        //         double svDistance = Math.abs(sv.trackTraj.get(si).z - GeometryMethods.getLayerZ(li-1));
+        //         if (svDistance < closestSVDistance) {
+        //             closestSVID = si;
+        //             closestSVDistance = svDistance;
+        //         }
+        //     }
+        //
+        //     // Get the state vector's y position in the layer's local coordinates.
+        //     Point3D locPos = GeometryMethods.globalToLocalNoShift(
+        //             new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
+        //             li-1);
+        //
+        //     // Store the cluster's residual.
+        //     for (Cluster cl : this.clusters) {
+        //         if (cl.get_Layer() == li) {
+        //             cl.set_CentroidResidual(cl.get_Centroid() - locPos.y());
+        //         }
+        //     }
+        // }
+
+        // ONE KF PASS - NO FILTERING TEST.
         this.chi2 = 0;
         int svzLength = sv.Z.length;
 
-        for (int i = 1; i <= totNumIter; i++) {
-            interNum = i;
-            this.chi2kf = 0;
-            if (i > 1) {
-                for (int k = svzLength - 1; k > 0; k--) {
-                    if (k >= 1) {
-                        sv.transport(sector, k, k - 1, sv.trackTraj.get(k), sv.trackCov.get(k));
-                        this.filter(k - 1);
-                    }
-                }
-            }
-            for (int k = 0; k < svzLength - 1; k++) {
-                sv.transport(sector, k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
-                this.filter(k + 1);
-            }
-            if (i > 1) {
-                if (this.setFitFailed) i = totNumIter;
-                if (!this.setFitFailed) {
-                    this.finalStateVec = sv.trackTraj.get(svzLength - 1);
-                    this.finalCovMat = sv.trackCov.get(svzLength - 1);
-                } else {
-                    this.ConvStatus = 1;
-                }
-            }
-        }
-        if (totNumIter == 1) {
-            this.finalStateVec = sv.trackTraj.get(svzLength - 1);
-            this.finalCovMat = sv.trackCov.get(svzLength - 1);
+        for (int k = 0; k < svzLength - 1; k++) {
+            sv.transport(sector, k, k + 1, sv.trackTraj.get(k), sv.trackCov.get(k));
         }
 
-        // Do one final pass to get the final chi^2 and the corresponding centroid residuals.
-        this.chi2kf = 0;
-        for (int k = svzLength - 1; k > 0; --k) {
-            if (k >= 1) {
-                sv.transport(sector, k, k-1, sv.trackTraj.get(k), sv.trackCov.get(k));
-                this.filter(k - 1);
-            }
-        }
-        for (int k = 0; k < svzLength - 1; ++k) {
-            sv.transport(sector, k, k+1, sv.trackTraj.get(k), sv.trackCov.get(k));
-        }
+        this.finalStateVec = sv.trackTraj.get(svzLength - 1);
+        this.finalCovMat = sv.trackCov.get(svzLength - 1);
 
         for (int li = 1; li <= 6; ++li) {
             // Get the state vector closest in z to the FMT layer.
@@ -123,7 +163,7 @@ public class KFitter {
             }
 
             // Get the state vector's y position in the layer's local coordinates.
-            Point3D locPos = GeometryMethods.globalToLocal(
+            Point3D locPos = GeometryMethods.globalToLocalNoShift(
                     new Point3D(sv.trackTraj.get(closestSVID).x, sv.trackTraj.get(closestSVID).y, 0),
                     li-1);
 
